@@ -1,5 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_app/colors.dart';
+import 'dart:core';
+
+const List<String> weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+const List<String> months = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December'
+];
+int g_pos = 0;
+final key = new GlobalKey<_DateAndProfilePicState>();
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -7,13 +27,6 @@ class HomePage extends StatefulWidget {
   @override
   State<HomePage> createState() => _HomePageState();
 }
-
-Color lavender = const Color(0xFF9177E0);
-Color mint = const Color(0xFF77E08E);
-Color background = const Color(0xFFFCFCFF);
-Color text_info = const Color(0xFF595859);
-Color text_sub = const Color(0xFFADADAD);
-Color trans = Colors.transparent;
 
 class _HomePageState extends State<HomePage> {
   int currentPageIndex = 0;
@@ -40,7 +53,7 @@ class _HomePageState extends State<HomePage> {
               },
               iconSize: 25,
               backgroundColor: Colors.white,
-              selectedItemColor: lavender,
+              selectedItemColor: AppColors.lavender,
               unselectedItemColor: Colors.black,
               currentIndex: currentPageIndex,
               showSelectedLabels: false,
@@ -72,7 +85,7 @@ class _HomePageState extends State<HomePage> {
             )),
         body: <Widget>[
           Container(
-              color: background,
+              color: AppColors.background,
               child: Column(children: [TopPlashka(), SeePlot()])),
           Container(
               color: Colors.green,
@@ -94,7 +107,37 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-class DateAndProfilePic extends Container {
+class DateAndProfilePic extends StatefulWidget {
+  DateAndProfilePic({required Key key}) : super(key: key);
+
+  @override
+  State<DateAndProfilePic> createState() => _DateAndProfilePicState();
+}
+
+class _DateAndProfilePicState extends State<DateAndProfilePic> {
+  String tx = 'Today';
+
+  void getTx() {
+    setState(() {
+      int pos = g_pos;
+      if (pos != 0) {
+        DateTime this_date = DateTime.now();
+        if (pos > 0) {
+          this_date = this_date.subtract(Duration(days: pos));
+        } else {
+          this_date = this_date.add(Duration(days: -pos));
+        }
+        tx = this_date.day.toString() +
+            ' ' +
+            months[this_date.month - 1] +
+            ', ' +
+            weekdays[this_date.weekday - 1];
+      } else {
+        tx = 'Today';
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -103,7 +146,7 @@ class DateAndProfilePic extends Container {
       Container(
           child: Padding(
               padding: EdgeInsets.only(left: 29, right: 29),
-              child: Text('Today',
+              child: Text(tx,
                   style:
                       TextStyle(fontFamily: 'Inter-Regular', fontSize: 24)))),
       Align(
@@ -130,14 +173,12 @@ class CalendarScroll extends Container {
     return Container(
         padding: EdgeInsets.only(bottom: 18),
         alignment: Alignment.bottomCenter,
-        //decoration: BoxDecoration(
-        //  border: Border.all(
-        //    color: Colors.black, width: 1.0, style: BorderStyle.solid)),
         child: Week());
   }
 }
 
 class TopPlashka extends Container {
+  CalendarScroll ins = CalendarScroll();
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -146,15 +187,14 @@ class TopPlashka extends Container {
         //  minHeight: MediaQuery.of(context).size.height * 0.22),
         decoration: BoxDecoration(
             color: Colors.white,
-            //border: Border.all(width: 1.0, color: Colors.black),
             borderRadius: BorderRadius.only(
                 bottomRight: Radius.circular(24),
                 bottomLeft: Radius.circular(24))),
         child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              DateAndProfilePic(),
-              Align(alignment: Alignment.bottomCenter, child: CalendarScroll())
+              DateAndProfilePic(key: key),
+              Align(alignment: Alignment.bottomCenter, child: ins)
             ]));
   }
 }
@@ -178,7 +218,7 @@ class SeePlot extends Container {
                 Container(
                     padding:
                         EdgeInsets.only(left: 0, right: 10, top: 0, bottom: 0),
-                    child: Icon(Icons.info_outline, color: lavender)),
+                    child: Icon(Icons.info_outline, color: AppColors.lavender)),
                 Text('Log your data to see graph for today',
                     style: TextStyle(fontFamily: 'Inter-Regular', fontSize: 16))
               ]))
@@ -187,11 +227,32 @@ class SeePlot extends Container {
 }
 
 class DayCont extends Container {
-  String day = 'None';
-  String date = 'None';
-  Color ic = mint;
+  Color ic = AppColors.trans;
+  String date = 'Err';
+  String day_str = 'Err';
+  Color tx = Colors.black;
+  BoxDecoration dec = BoxDecoration();
 
-  DayCont(this.day, this.date, this.ic);
+  DayCont(int pos, bool isPoint) {
+    if (isPoint == false) {
+      if (isTick(pos) == true) {
+        ic = AppColors.mint;
+      }
+    } else {
+      tx = Colors.white;
+      dec = BoxDecoration(
+          color: AppColors.lavender,
+          borderRadius: BorderRadius.all(Radius.circular(14)));
+    }
+    DateTime this_date = DateTime.now();
+    if (pos >= 0) {
+      this_date = this_date.subtract(Duration(days: pos));
+    } else {
+      this_date = this_date.add(Duration(days: -pos));
+    }
+    date = this_date.day.toString();
+    day_str = weekdays[this_date.weekday - 1];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -205,83 +266,74 @@ class DayCont extends Container {
           Container(
               width: 50,
               height: 50,
+              decoration: dec,
               child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(day,
+                    Text(day_str,
                         style: TextStyle(
                             fontFamily: 'Inter-Regular',
                             fontSize: 12,
-                            color: Colors.black)),
+                            color: tx)),
                     Text(date,
                         style: TextStyle(
                             fontFamily: 'Inter-Regular',
                             fontSize: 20,
-                            color: Colors.black))
+                            color: tx))
                   ]))
         ]));
   }
 }
 
-class DayCurr extends Container {
-  String day = 'None';
-  String date = 'None';
-
-  DayCurr(this.day, this.date);
-
+class Week extends StatefulWidget {
   @override
-  Widget build(BuildContext context) {
-    return Container(
-        margin: EdgeInsets.only(right: 5, left: 5),
-        //decoration: BoxDecoration(
-        // border: Border.all(
-        //   color: Colors.black, width: 1.0, style: BorderStyle.solid)),
-        width: 50,
-        alignment: Alignment.center,
-        child: Column(children: [
-          Container(
-              padding: EdgeInsets.only(bottom: 10),
-              child: Icon(Icons.done_outline_rounded, color: trans)),
-          Container(
-              width: 50,
-              height: 50,
-              decoration: BoxDecoration(
-                  color: lavender,
-                  borderRadius: BorderRadius.all(Radius.circular(14))),
-              child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(day,
-                        style: TextStyle(
-                            fontFamily: 'Inter-Regular',
-                            fontSize: 12,
-                            color: Colors.white)),
-                    Text(date,
-                        style: TextStyle(
-                            fontFamily: 'Inter-Regular',
-                            fontSize: 20,
-                            color: Colors.white))
-                  ]))
-        ]));
-  }
+  State<Week> createState() => _WeekState();
 }
 
-class Week extends Container {
+class _WeekState extends State<Week> {
+  int pos = 0;
+
   @override
   Widget build(BuildContext context) {
     return Container(
         child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
       Container(
-          padding: EdgeInsets.only(left: 8), child: Icon(Icons.arrow_back_ios)),
-      DayCont('Wed', '7', mint),
-      DayCont('Ths', '8', mint),
-      DayCont('Fri', '9', mint),
-      DayCont('Sat', '10', trans),
-      DayCont('Sun', '11', mint),
-      DayCurr('Mon', '12'),
+          //padding: EdgeInsets.only(left: 8),
+          child: IconButton(
+              icon: Icon(Icons.arrow_back_ios),
+              onPressed: () {
+                setState(() {
+                  this.pos = this.pos + 1;
+                  g_pos = this.pos;
+                  key.currentState?.getTx();
+                });
+              })),
+      DayCont(pos + 5, false),
+      DayCont(pos + 4, false),
+      DayCont(pos + 3, false),
+      DayCont(pos + 2, false),
+      DayCont(pos + 1, false),
+      DayCont(pos, true),
       Container(
-          padding: EdgeInsets.only(left: 8, right: 3),
-          child: Icon(Icons.arrow_forward_ios)),
+          //padding: EdgeInsets.only(left: 8, right: 3),
+          child: IconButton(
+              icon: Icon(Icons.arrow_forward_ios),
+              onPressed: () {
+                setState(() {
+                  this.pos = this.pos - 1;
+                  g_pos = this.pos;
+                  key.currentState?.getTx();
+                  //key.currentState?.build(context);
+                });
+              })),
     ]));
+  }
+}
+
+bool isTick(int date) {
+  if (date % 2 == 0) {
+    return true;
+  } else {
+    return false;
   }
 }
