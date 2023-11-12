@@ -64,7 +64,7 @@ class _TopSetState extends State<TopSet> {
               child: Text('Settings',
                   style: TextStyle(
                       color: Colors.black,
-                      fontFamily: 'Inter-Regular',
+                      fontFamily: 'Inter-Medium',
                       fontSize: 16))),
           Container(
               //padding: EdgeInsets.only(left: 8, right: 3),
@@ -100,7 +100,7 @@ class _PicNameState extends State<PicName> {
               margin: EdgeInsets.only(top: 11),
               child: Text('Keanu',
                   style: TextStyle(
-                      fontFamily: 'Inter-Regular',
+                      fontFamily: 'Inter-Medium',
                       fontSize: 16,
                       color: AppColors.lavender)))
         ])));
@@ -157,7 +157,7 @@ class _SettingOneState extends State<SettingOne> {
             style: TextStyle(
               fontFamily: 'Inter-Regular',
               fontSize: 16,
-              color: AppColors.text_set,
+              color: Colors.black,
             ),
             textAlign: TextAlign.left,
           ),

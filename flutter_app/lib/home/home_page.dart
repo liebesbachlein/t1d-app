@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_app/colors.dart';
+import 'package:flutter_app/data%20log/data_log.dart';
 import 'dart:core';
 
 import 'package:flutter_app/profile_settings/profile.dart';
@@ -96,10 +97,7 @@ class _HomePageState extends State<HomePage> {
               color: Colors.green,
               alignment: Alignment.center,
               child: const Text('Page 2')),
-          Container(
-              color: Colors.red,
-              alignment: Alignment.center,
-              child: const Text('Page 3')),
+          DataLog(),
           Container(
               color: Colors.blue,
               alignment: Alignment.center,
@@ -132,11 +130,11 @@ class _DateAndProfilePicState extends State<DateAndProfilePic> {
         } else {
           this_date = this_date.add(Duration(days: -pos));
         }
-        tx = this_date.day.toString() +
+        tx = weekdays[this_date.weekday - 1] +
             ' ' +
-            months[this_date.month - 1] +
-            ', ' +
-            weekdays[this_date.weekday - 1];
+            this_date.day.toString() +
+            ' ' +
+            months[this_date.month - 1];
       } else {
         tx = 'Today';
       }

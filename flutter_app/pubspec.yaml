@@ -33,3 +33,6 @@ flutter:
     - family: Inter-Medium
       fonts:
         - asset: lib/assets/fonts/Inter-Medium.ttf
+    - family: Inter-Thin
+      fonts:
+        - asset: lib/assets/fonts/Inter-Thin.ttf
