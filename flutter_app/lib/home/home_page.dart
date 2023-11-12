@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_app/colors.dart';
 import 'dart:core';
 
+import 'package:flutter_app/profile_settings/profile.dart';
+
 const List<String> weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const List<String> months = [
   'January',
@@ -18,6 +20,7 @@ const List<String> months = [
   'November',
   'December'
 ];
+
 int g_pos = 0;
 final key = new GlobalKey<_DateAndProfilePicState>();
 
@@ -35,10 +38,11 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
+          foregroundColor: Colors.white,
           systemOverlayStyle: SystemUiOverlayStyle(
             statusBarColor: Colors.white,
-            statusBarIconBrightness: Brightness.dark, // Android dark???
-            statusBarBrightness: Brightness.light, // iOS dark???
+            //statusBarIconBrightness: Brightness.dark, // Android dark???
+            //statusBarBrightness: Brightness.light, // iOS dark???
           ),
           toolbarHeight: 0,
           elevation: 0,
@@ -59,6 +63,7 @@ class _HomePageState extends State<HomePage> {
               showSelectedLabels: false,
               selectedFontSize: 0.0,
               unselectedFontSize: 0.0,
+              elevation: 0,
               type: BottomNavigationBarType.fixed,
               items: const <BottomNavigationBarItem>[
                 BottomNavigationBarItem(
@@ -146,7 +151,14 @@ class _DateAndProfilePicState extends State<DateAndProfilePic> {
       Container(
           child: Padding(
               padding: EdgeInsets.only(left: 29, right: 29),
+              /*child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 300),
+                  transitionBuilder:
+                      (Widget child, Animation<double> animation) {
+                    return FadeTransition(opacity: animation, child: child);
+                  },*/
               child: Text(tx,
+                  key: ValueKey<String>(tx),
                   style:
                       TextStyle(fontFamily: 'Inter-Regular', fontSize: 24)))),
       Align(
@@ -162,7 +174,22 @@ class _DateAndProfilePicState extends State<DateAndProfilePic> {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(29),
                     color: Colors.black,
-                  ))))
+                  ),
+                  child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const ProfileSettings()),
+                          );
+                        });
+                      },
+                      child: CircleAvatar(
+                        backgroundColor: AppColors.lavender,
+                        backgroundImage: AssetImage(
+                            'lib/assets/images/profile_default1.png'),
+                      )))))
     ]));
   }
 }
@@ -178,7 +205,6 @@ class CalendarScroll extends Container {
 }
 
 class TopPlashka extends Container {
-  CalendarScroll ins = CalendarScroll();
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -194,7 +220,7 @@ class TopPlashka extends Container {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               DateAndProfilePic(key: key),
-              Align(alignment: Alignment.bottomCenter, child: ins)
+              Align(alignment: Alignment.bottomCenter, child: CalendarScroll())
             ]));
   }
 }
@@ -252,6 +278,14 @@ class DayCont extends Container {
     }
     date = this_date.day.toString();
     day_str = weekdays[this_date.weekday - 1];
+
+    /*if (this_date.day == DateTime.now().day &&
+        this_date.month == DateTime.now().month &&
+        isPoint != true) {
+      dec = BoxDecoration(
+          border: Border.all(color: AppColors.mint, width: 1.0),
+          borderRadius: BorderRadius.all(Radius.circular(14)));
+    }*/
   }
 
   @override

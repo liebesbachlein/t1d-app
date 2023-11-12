@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_app/home/home_page.dart';
-//import 'package:flutter_app/test.dart';
+import 'package:flutter_app/profile_settings/profile.dart';
+import 'package:flutter_app/test.dart';
 
 void main() {
   runApp(const MainApp());

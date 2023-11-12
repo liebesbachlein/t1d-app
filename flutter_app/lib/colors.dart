@@ -7,4 +7,5 @@ class AppColors {
   static final Color text_info = const Color(0xFF595859);
   static final Color text_sub = const Color(0xFFADADAD);
   static final Color trans = Colors.transparent;
+  static final Color text_set = const Color(0xFF2F2F2F);
 }
