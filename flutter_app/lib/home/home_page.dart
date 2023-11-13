@@ -42,8 +42,8 @@ class _HomePageState extends State<HomePage> {
           foregroundColor: Colors.white,
           systemOverlayStyle: SystemUiOverlayStyle(
             statusBarColor: Colors.white,
-            //statusBarIconBrightness: Brightness.dark, // Android dark???
-            //statusBarBrightness: Brightness.light, // iOS dark???
+            statusBarIconBrightness: Brightness.dark, // Android dark???
+            statusBarBrightness: Brightness.light, // iOS dark???
           ),
           toolbarHeight: 0,
           elevation: 0,

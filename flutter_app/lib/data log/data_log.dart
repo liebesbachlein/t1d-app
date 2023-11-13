@@ -42,9 +42,94 @@ class DataLog extends StatefulWidget {
 class _DataLogState extends State<DataLog> {
   @override
   Widget build(BuildContext context) {
+    return Scaffold(
+        appBar: AppBar(
+            backgroundColor: Colors.white,
+            systemOverlayStyle: SystemUiOverlayStyle(
+              statusBarColor: Colors.white,
+              statusBarIconBrightness: Brightness.dark, // Android dark???
+              statusBarBrightness: Brightness.light, // iOS dark???
+            ),
+            toolbarHeight: 100,
+            elevation: 0,
+            title: Column(children: [TopSetDL(), Scale1()])),
+        body: DataField());
+  }
+}
+
+class DataField extends Container {
+  List<DataletGV> gvCol = [];
+  List<DataletTm> tmCol = [];
+  DataField() {
+    int t = 24;
+    gvCol.add(DataletGV(0, false, 35));
+    tmCol.add(DataletTm(0, false));
+    gvCol.add(DataletGV(0, true, 0));
+    tmCol.add(DataletTm(0, true));
+    for (int i = 1; i < t; i++) {
+      gvCol.add(DataletGV(i, false, 0));
+      tmCol.add(DataletTm(i, false));
+      gvCol.add(DataletGV(i, true, 0));
+      tmCol.add(DataletTm(i, true));
+    }
+  }
+  @override
+  Widget build(BuildContext context) {
     return Container(
-        color: AppColors.background,
-        child: Column(children: [TopSetDL(), Scale1()]));
+        margin: EdgeInsets.only(right: 10),
+        color: Colors.white,
+        child: SingleChildScrollView(
+            child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [Column(children: tmCol), Column(children: gvCol)])));
+  }
+}
+
+class DataletTm extends Container {
+  String tx = '';
+
+  DataletTm(int time, bool half) {
+    if (half) {
+      tx = time.toString() + ':' + '30';
+    } else {
+      tx = time.toString() + ':' + '00';
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+        margin: EdgeInsets.only(bottom: 5),
+        alignment: Alignment.center,
+        height: 30,
+        width: MediaQuery.of(context).size.width * 0.15,
+        child: Text(tx,
+            style: TextStyle(
+                fontFamily: 'Inter-Thin', fontSize: 16, color: Colors.black)));
+  }
+}
+
+class DataletGV extends Container {
+  String tx = '';
+  double offset = 0;
+
+  DataletGV(int time, bool half, double offset) {
+    if (half) {
+      tx = time.toString() + ':' + '30';
+    } else {
+      tx = time.toString() + ':' + '00';
+    }
+    this.offset = offset;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+        margin: EdgeInsets.only(bottom: 5, top: offset),
+        height: 30,
+        width: MediaQuery.of(context).size.width * 0.8,
+        decoration: BoxDecoration(
+            border: Border.all(width: 1, color: AppColors.lavender)));
   }
 }
 
@@ -191,13 +276,16 @@ class ColoredCircle1 extends Container {
         alignmentOffset: Offset(0, 20),
         menuChildren: scale2.getScale2(),
         style: MenuStyle(
+            alignment: Alignment.bottomLeft,
             backgroundColor: MaterialStateProperty.resolveWith((states) {
-          return Colors.white;
-        }), elevation: MaterialStateProperty.resolveWith((states) {
-          return 0;
-        }), padding: MaterialStateProperty.resolveWith((states) {
-          return EdgeInsets.all(0);
-        })));
+              return Colors.white;
+            }),
+            elevation: MaterialStateProperty.resolveWith((states) {
+              return 0;
+            }),
+            padding: MaterialStateProperty.resolveWith((states) {
+              return EdgeInsets.all(0);
+            })));
   }
 }
 
@@ -262,7 +350,10 @@ class _GluVal1State extends State<GluVal1> {
               ColoredCircle1(col, gv),
               Container(
                   child: Text(gv.toString(),
-                      style: TextStyle(fontFamily: 'Inter-Thin', fontSize: 12)))
+                      style: TextStyle(
+                          fontFamily: 'Inter-Thin',
+                          fontSize: 12,
+                          color: Colors.black)))
             ])));
   }
 }
