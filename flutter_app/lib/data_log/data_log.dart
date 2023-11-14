@@ -92,7 +92,16 @@ class _DataLogState extends State<DataLog> {
             toolbarHeight: 100,
             elevation: 0,
             title: Column(children: [TopSetDL(), Scale1()])),
-        body: DataField(key: dkey));
+        body: DataField(key: dkey),
+        floatingActionButton: FloatingActionButton.small(
+            onPressed: () {
+              setState(() {
+                print('Helo');
+                dkey.currentState?.pushVals();
+              });
+            },
+            backgroundColor: AppColors.mint,
+            child: const Icon(Icons.add)));
   }
 }
 
@@ -109,6 +118,9 @@ class _DataFieldState extends State<DataField> {
   DatabaseHelper databaseHelper = DatabaseHelper();
 
   _DataFieldState() {
+    //databaseHelper.init();
+    //databaseHelper.deleteDatabase();
+    databaseHelper.init();
     tmgvs = getTMGVArr();
     gvCol.add(DataletGV(tmgvs.elementAt(0), 50, false, false));
     for (int i = 1; i < tmgvs.length; i++) {
@@ -116,28 +128,52 @@ class _DataFieldState extends State<DataField> {
     }
   }
 
-  void change(int pos) {
+  void change(int pos) async {
+    DateTime time = DateTime.now();
+    DateTime this_date =
+        DateTime(time.year, time.month, time.day, 0, 0, 0, 0, 0);
+    if (pos != 0) {
+      if (pos > 0) {
+        this_date = this_date.subtract(Duration(days: pos));
+      } else {
+        this_date = this_date.add(Duration(days: -pos));
+      }
+    }
+    List<Map<String, dynamic>> listmaps =
+        await databaseHelper.selectGV(this_date.toIso8601String());
     setState(() {
-      DateTime this_date = DateTime.now();
-      if (pos != 0) {
-        DateTime this_date = DateTime.now();
-        if (pos > 0) {
-          this_date = this_date.subtract(Duration(days: pos));
-        } else {
-          this_date = this_date.add(Duration(days: -pos));
+      if (listmaps.length != 0) {
+        if (listmaps.length != tmgvs.length) {
+          print(listmaps.length);
+          print('ПРИКИНЬ ЧЕЕЕЕ');
+        }
+      } else {
+        for (int i = 0; i < tmgvs.length; i++) {
+          tmgvs[i].nulled();
+        }
+
+        for (int i = 0; i < listmaps.length; i++) {
+          TrackTmGV s = TrackTmGV.fromMapObject(listmaps[i]);
+          tmgvs[i] = s;
         }
       }
+    });
+  }
 
+  void pushVals() {
+    setState(() {
       for (int i = 0; i < tmgvs.length; i++) {
-        tmgvs[i].nulled();
+        databaseHelper.insert(tmgvs[i]);
       }
+
+      print(databaseHelper.queryAllRowsGV().toString());
     });
   }
 
   List<TrackTmGV> getTMGVArr() {
     List<TrackTmGV> col = [];
-    DateTime time =
-        DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+    DateTime time = DateTime(DateTime.now().year, DateTime.now().month,
+        DateTime.now().day, 0, 0, 0, 0, 0);
 
     col.add(TrackTmGV(time));
     time = time.add(Duration(minutes: 30));
@@ -288,7 +324,8 @@ class DataletGV extends StatelessWidget {
                 maintainState: true,
                 maintainAnimation: true,
                 maintainSize: true,
-                child: SizedBox(
+                child: Container(
+                    alignment: Alignment.centerLeft,
                     height: 50,
                     child: Text(
                       hasItems ? trackTmGV.listOfGV[0].toString() : '',
@@ -313,7 +350,9 @@ class _TopSetDLState extends State<TopSetDL> {
 
   String getTx() {
     if (pos != 0) {
-      DateTime this_date = DateTime.now();
+      DateTime time = DateTime.now();
+      DateTime this_date =
+          DateTime(time.year, time.month, time.day, 0, 0, 0, 0, 0);
       if (pos > 0) {
         this_date = this_date.subtract(Duration(days: pos));
       } else {
@@ -519,7 +558,8 @@ class TrackGV {
 
   TrackGV(this.GV) {
     GV1 = GV.floor();
-    GV2 = ((GV - GV1) * 10).truncate();
+    double g = ((GV - GV1.toDouble()) * 10);
+    GV2 = g.round();
   }
 
   String toString() {
@@ -540,14 +580,21 @@ class TrackTmGV {
   DateTime time = DateTime.now();
 
   TrackTmGV(this.time) {
-    date = DateTime(time.year, time.month, time.day).toIso8601String();
+    date = DateTime(time.year, time.month, time.day, 0, 0, 0, 0, 0)
+        .toIso8601String();
     month = time.month;
+    hour = time.hour;
+    minute = time.minute;
   }
 
   List<TrackGV> listOfGV = [];
 
   void nulled() {
     listOfGV = [];
+  }
+
+  String toString() {
+    return '$id||$date||$hour||$minute||$listOfGV';
   }
 
   void replace(TrackGV newgV) {
@@ -561,36 +608,27 @@ class TrackTmGV {
   }
 
   Map<String, dynamic> toMap() {
-    var map = Map<String, dynamic>();
-    if (id != -1) {
-      map['id'] = id;
-    }
-    map['date'] = date;
-    if (month != -1) {
-      map['month'] = month;
-    }
-    if (hour != -1) {
-      map['hour'] = hour;
-    }
-    if (minute != -1) {
-      map['minute'] = minute;
-    }
-    map['gluval'] = gluval;
-
-    return map;
+    return {
+      'date': date,
+      'month': month,
+      'hour': hour,
+      'minute': minute,
+      'glucose_val': gluval
+    };
   }
 
   TrackTmGV.fromMapObject(Map<String, dynamic> map) {
+    print(map.toString());
     id = map['id'];
     date = map['date'];
     month = map['month'];
     hour = map['hour'];
     minute = map['minute'];
-    gluval = map['gluval'];
+    gluval = map['glucose_val'];
 
     DateTime time_ini = DateTime.parse(date);
-    time =
-        DateTime(time_ini.year, time_ini.month, time_ini.day, hour, minute, 0);
+    time = DateTime(
+        time_ini.year, time_ini.month, time_ini.day, hour, minute, 0, 0, 0);
     replace(TrackGV(gluval));
   }
 }

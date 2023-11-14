@@ -8,7 +8,7 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 
 class DatabaseHelper {
-  late Database _database;
+  late Database database;
 
   String trackTmGVTable = 'tmgv_table';
   String colId = 'id';
@@ -17,80 +17,67 @@ class DatabaseHelper {
   String colHour = 'hour';
   String colMinute = 'minute';
   String colGV = 'glucose_val';
+  late String Path;
 
   DatabaseHelper() {}
 
-  Future<Database> get database async {
-    if (_database == null) {
-      _database = await init();
-    }
-    return _database;
-  }
-
-  Future<Database> init() async {
+  Future<void> init() async {
     Directory directory = await getApplicationDocumentsDirectory();
     String path = directory.path + 'gvtm.db';
-
-    var trackGVTmDatabase =
-        await openDatabase(path, version: 1, onCreate: _createDb);
-    return trackGVTmDatabase;
+    Path = path;
+    database = await openDatabase(path, version: 1, onCreate: _createDb);
   }
 
-  void _createDb(Database db, int newVersion) async {
+  Future<void> deleteDatabase() => databaseFactory.deleteDatabase(Path);
+
+  void _createDb(Database db, int version) async {
     await db.execute(
-        'CREATE TABLE $trackTmGVTable($colId INTEGER PRIMARY KEY AUTOINCREMENT, $colDate TEXT, '
-        '$colMonth INTEGER, $colHour INTEGER), $colMinute INTEGER, $colGV REAL');
+        'CREATE TABLE $trackTmGVTable($colId INTEGER PRIMARY KEY, $colDate TEXT, $colMonth INTEGER, $colHour INTEGER, $colMinute INTEGER, $colGV REAL)');
   }
 
-  Future<List<Map<String, dynamic>>> gettrackTmGVTableMapList() async {
-    Database db = await this.database;
-
-    var result = await db.query(trackTmGVTable,
-        orderBy: '$colDate DESC, $colHour DESC, $colMinute DESC,');
-    return result;
+  Future<List<Map<String, dynamic>>> queryAllRowsMap() async {
+    var a = await database.query(trackTmGVTable);
+    print(a.toString());
+    print(a.length.toString());
+    return a;
   }
 
-  Future<int> insertTmGV(TrackTmGV trackTmGV) async {
-    Database db = await this.database;
-    var result = await db.insert(trackTmGVTable, trackTmGV.toMap());
-    return result;
+  Future<List<Map<String, dynamic>>> selectGV(String text) async {
+    return await database
+        .rawQuery('SELECT * FROM $trackTmGVTable WHERE $colDate == ?', [text]);
+  }
+
+  Future<int> insert(TrackTmGV trackTmGV) async {
+    return await database.insert(trackTmGVTable, trackTmGV.toMap());
   }
 
   Future<int> updateTmGV(TrackTmGV trackTmGV) async {
-    var db = await this.database;
-    var result = await db.update(trackTmGVTable, trackTmGV.toMap(),
+    var result = await database.update(trackTmGVTable, trackTmGV.toMap(),
         where: '$colId = ?', whereArgs: [trackTmGV.id]);
     return result;
   }
 
   Future<int> deleteTmGV(int id) async {
-    var db = await this.database;
-    int result =
-        await db.rawDelete('DELETE FROM $trackTmGVTable WHERE $colId = $id');
-    return result;
+    return await database
+        .rawDelete('DELETE FROM $trackTmGVTable WHERE $colId = $id');
+    ;
   }
 
-  Future<int> getCount() async {
-    Database db = await this.database;
-    List<Map<String, dynamic>> x =
-        await db.rawQuery('SELECT COUNT (*) from $trackTmGVTable');
-    int? result = Sqflite.firstIntValue(x);
-    if (result != null) {
-      return result;
-    } else {
-      return -1;
-    }
+  Future<int> queryRowCount() async {
+    final results =
+        await database.rawQuery('SELECT COUNT(*) FROM $trackTmGVTable');
+    return Sqflite.firstIntValue(results) ?? 0;
   }
 
-  Future<List<TrackTmGV>> getTmGV() async {
-    var todoMapList = await gettrackTmGVTableMapList();
-    int count = todoMapList.length;
+  Future<List<TrackTmGV>> queryAllRowsGV() async {
+    var list = await queryAllRowsMap();
+    int count = list.length;
 
-    List<TrackTmGV> todoList = [];
+    List<TrackTmGV> allRows = [];
     for (int i = 0; i < count; i++) {
-      todoList.add(TrackTmGV.fromMapObject(todoMapList[i]));
+      allRows.add(TrackTmGV.fromMapObject(list[i]));
     }
 
-    return todoList;
+    return allRows;
   }
 }
