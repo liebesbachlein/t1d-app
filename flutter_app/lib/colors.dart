@@ -45,6 +45,7 @@ class AppColors {
     0xFFff008a,
     0xFFff00b2,
     0xFFce11d7,
-    0xFF7542f5
+    0xFF7542f5,
+    0xFF754255
   ];
 }

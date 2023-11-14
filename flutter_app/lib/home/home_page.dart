@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_app/colors.dart';
-import 'package:flutter_app/data%20log/data_log.dart';
+import 'package:flutter_app/data_log/data_log.dart';
 import 'dart:core';
 
 import 'package:flutter_app/profile_settings/profile.dart';
+import 'package:flutter_app/test.dart';
 
 const List<String> weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const List<String> months = [
@@ -102,10 +103,7 @@ class _HomePageState extends State<HomePage> {
               color: Colors.blue,
               alignment: Alignment.center,
               child: const Text('Page 4')),
-          Container(
-              color: Colors.purple,
-              alignment: Alignment.center,
-              child: const Text('Page 3'))
+          ExampleDragAndDrop()
         ][currentPageIndex]);
   }
 }
