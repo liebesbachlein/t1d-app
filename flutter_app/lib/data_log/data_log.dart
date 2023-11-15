@@ -138,23 +138,25 @@ class _DataFieldState extends State<DataField> {
       } else {
         this_date = this_date.add(Duration(days: -pos));
       }
+      print(this_date.toIso8601String());
+    }
+
+    for (int i = 0; i < tmgvs.length; i++) {
+      tmgvs[i].nulled();
+      tmgvs[i].setDate(this_date);
     }
     List<Map<String, dynamic>> listmaps =
         await databaseHelper.selectGV(this_date.toIso8601String());
     setState(() {
+      print(listmaps.toString());
       if (listmaps.length != 0) {
-        if (listmaps.length != tmgvs.length) {
-          print(listmaps.length);
-          print('ПРИКИНЬ ЧЕЕЕЕ');
-        }
-      } else {
-        for (int i = 0; i < tmgvs.length; i++) {
-          tmgvs[i].nulled();
-        }
-
         for (int i = 0; i < listmaps.length; i++) {
           TrackTmGV s = TrackTmGV.fromMapObject(listmaps[i]);
-          tmgvs[i] = s;
+          int add = 0;
+          if (s.minute == 30) {
+            add = s.minute;
+          }
+          tmgvs[s.hour * 2 + add] = s;
         }
       }
     });
@@ -163,7 +165,9 @@ class _DataFieldState extends State<DataField> {
   void pushVals() {
     setState(() {
       for (int i = 0; i < tmgvs.length; i++) {
-        databaseHelper.insert(tmgvs[i]);
+        if (tmgvs[i].gluval != -1) {
+          databaseHelper.insert(tmgvs[i]);
+        }
       }
 
       print(databaseHelper.queryAllRowsGV().toString());
@@ -587,10 +591,17 @@ class TrackTmGV {
     minute = time.minute;
   }
 
+  void setDate(DateTime d) {
+    time = d;
+    date = DateTime(d.year, d.month, d.day, 0, 0, 0, 0, 0).toIso8601String();
+    month = d.month;
+  }
+
   List<TrackGV> listOfGV = [];
 
   void nulled() {
     listOfGV = [];
+    gluval = -1;
   }
 
   String toString() {

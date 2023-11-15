@@ -18,12 +18,13 @@ class DatabaseHelper {
   String colMinute = 'minute';
   String colGV = 'glucose_val';
   late String Path;
+  String name = 'gvtm0.db';
 
   DatabaseHelper() {}
 
   Future<void> init() async {
     Directory directory = await getApplicationDocumentsDirectory();
-    String path = directory.path + 'gvtm.db';
+    String path = directory.path + name;
     Path = path;
     database = await openDatabase(path, version: 1, onCreate: _createDb);
   }
