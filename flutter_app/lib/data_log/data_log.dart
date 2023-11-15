@@ -3,11 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_app/colors.dart';
 import 'package:flutter_app/data_log/data_types.dart';
 import 'dart:core';
-
 import 'package:flutter_app/db.dart';
 
 final dkey = new GlobalKey<_DataFieldState>();
-
 final AppColors ac = AppColors();
 List<Color> pallete1 = getColArr(ac.hex_arr);
 List<Color> pallete2 = getColArr(ac.hex_arr2);
@@ -80,6 +78,19 @@ class DataLog extends StatefulWidget {
 class _DataLogState extends State<DataLog> {
   TopSetDL top = TopSetDL();
 
+  bool checkIfChanged() {
+    bool res = false;
+    setState(() {
+      var s = dkey.currentState;
+      if (s == null) {
+        res = false;
+      } else {
+        res = s.isChanged;
+      }
+    });
+    return res;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -90,19 +101,39 @@ class _DataLogState extends State<DataLog> {
               statusBarIconBrightness: Brightness.dark, // Android dark???
               statusBarBrightness: Brightness.light, // iOS dark???
             ),
-            toolbarHeight: 100,
-            elevation: 0,
-            title: Column(children: [TopSetDL(), Scale1()])),
-        body: DataField(key: dkey),
+            toolbarHeight: 0,
+            elevation: 0),
+        body: Column(children: [
+          Container(
+              height: 110,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.all(Radius.circular(12)),
+                boxShadow: [
+                  BoxShadow(
+                      color: Color.fromRGBO(149, 157, 165, 0.1),
+                      offset: Offset.zero,
+                      spreadRadius: 4,
+                      blurRadius: 10)
+                ],
+              ),
+              child: Column(children: [TopSetDL(), Scale1()])),
+          DataField(key: dkey)
+        ]),
         floatingActionButton: FloatingActionButton.small(
+            elevation: 1,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            backgroundColor:
+                checkIfChanged() ? AppColors.mint : AppColors.lavender,
             onPressed: () {
               setState(() {
                 print('Helo');
                 dkey.currentState?.pushVals();
               });
             },
-            backgroundColor: AppColors.mint,
-            child: const Icon(Icons.add)));
+            child: checkIfChanged() ? Icon(Icons.check) : Icon(Icons.add)));
   }
 }
 
@@ -120,6 +151,8 @@ class _DataFieldState extends State<DataField> {
   List<TrackTmGV> tmgvs = [];
   List<DragTarget<TrackGV>> dragt = [];
   DatabaseHelper databaseHelper = DatabaseHelper();
+  int position = 0;
+  bool isChanged = false;
 
   bool load = false;
 
@@ -170,7 +203,6 @@ class _DataFieldState extends State<DataField> {
       } else {
         this_date = this_date.add(Duration(days: -pos));
       }
-      print(this_date.toIso8601String());
     }
 
     for (int i = 0; i < tmgvs.length; i++) {
@@ -180,6 +212,7 @@ class _DataFieldState extends State<DataField> {
     List<Map<String, dynamic>> listmaps =
         await databaseHelper.selectGV(this_date.toIso8601String());
     setState(() {
+      position = pos;
       print(listmaps.toString());
       if (listmaps.length != 0) {
         for (int i = 0; i < listmaps.length; i++) {
@@ -194,16 +227,33 @@ class _DataFieldState extends State<DataField> {
     });
   }
 
-  void pushVals() {
-    setState(() {
-      for (int i = 0; i < tmgvs.length; i++) {
-        if (tmgvs[i].gluval != -1) {
-          databaseHelper.insert(tmgvs[i]);
+  void pushVals() async {
+    if (isChanged) {
+      DateTime time = DateTime.now();
+      DateTime this_date =
+          DateTime(time.year, time.month, time.day, 0, 0, 0, 0, 0);
+      if (position != 0) {
+        if (position > 0) {
+          this_date = this_date.subtract(Duration(days: position));
+        } else {
+          this_date = this_date.add(Duration(days: -position));
         }
       }
-
-      print(databaseHelper.queryAllRowsGV().toString());
-    });
+      List<Map<String, dynamic>> listmaps =
+          await databaseHelper.selectGV(this_date.toIso8601String());
+      for (int j = 0; j < listmaps.length; j++) {
+        databaseHelper.deleteTmGV(listmaps[j]['id']);
+      }
+      setState(() {
+        for (int i = 0; i < tmgvs.length; i++) {
+          if (tmgvs[i].gluval != -1) {
+            databaseHelper.insert(tmgvs[i]);
+          }
+        }
+        print(databaseHelper.queryAllRowsGV().toString());
+        isChanged = false;
+      });
+    }
   }
 
   List<TrackTmGV> getTMGVArr() {
@@ -225,22 +275,31 @@ class _DataFieldState extends State<DataField> {
 
   void dropGV(TrackGV gv, TrackTmGV tmgv) {
     setState(() {
+      isChanged = true;
       tmgv.replace(gv);
     });
   }
 
+  Widget buildRow(BuildContext context, int index) {
+    if (index == 0) {
+      return Container(height: 80);
+    } else {
+      return Row(children: [tmCol[index], tmgvs.map(DropZone).toList()[index]]);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-        margin: EdgeInsets.only(right: 10),
-        color: Colors.white,
-        child: SingleChildScrollView(
-            child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-              Column(children: tmCol),
-              Column(children: tmgvs.map(DropZone).toList())
-            ])));
+    return Expanded(
+        child: Container(
+            color: isChanged ? AppColors.mint : AppColors.lavender,
+            height: 100,
+            padding: EdgeInsets.only(top: 0),
+            child: ListView.builder(
+                itemCount: 49,
+                itemBuilder: (BuildContext context, int index) {
+                  return buildRow(context, index);
+                })));
   }
 
   Widget DropZone(TrackTmGV trackC) {
@@ -296,8 +355,8 @@ class _TopSetDLState extends State<TopSetDL> {
   @override
   Widget build(BuildContext context) {
     return Container(
-        color: Colors.white,
         height: 50,
+        decoration: BoxDecoration(color: Colors.white),
         child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
           Container(
               child: IconButton(
@@ -341,20 +400,7 @@ List<Widget> Scale2(List<TrackGV> gvs) {
     scale2.add(buildGV(pallete2[i], gvs[i]));
   }
 
-  scale.add(Container(
-      margin: EdgeInsets.only(right: 5, left: 5),
-      alignment: Alignment.center,
-      width: 385,
-      height: 45,
-      decoration: BoxDecoration(
-          color: Colors.white,
-          border: Border.all(color: AppColors.mint, width: 1.0),
-          borderRadius: BorderRadius.all(Radius.circular(5))),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: scale2,
-      )));
-  return scale;
+  return scale2;
 }
 
 Widget buildGV(Color color, TrackGV item) {
@@ -458,7 +504,7 @@ class Scale1 extends Container {
   @override
   Widget build(BuildContext context) {
     return Container(
-        height: 43,
+        height: 48,
         child: ListView(
           scrollDirection: Axis.horizontal,
           children: scale1,
@@ -479,8 +525,8 @@ class ColoredCircle1 extends Container {
     return Container(
         child: Container(
             alignment: Alignment.center,
-            width: 20,
-            height: 20,
+            width: 30,
+            height: 30,
             decoration: BoxDecoration(color: col, shape: BoxShape.circle)));
   }
 }
@@ -491,19 +537,21 @@ class ColoredCircle2 extends Container {
   String tx = '';
   bool isBorder = false;
 
-  ColoredCircle2(Color c, int t) {
+  ColoredCircle2(Color c, String t) {
     col = c;
-    tx = t.toString();
+    tx = t;
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
         alignment: Alignment.center,
-        width: 20,
-        height: 20,
+        width: 35,
+        height: 35,
         decoration: BoxDecoration(
-            border: Border.all(color: col, width: 1.5), shape: BoxShape.circle),
+          border: Border.all(color: col, width: 1.5),
+          shape: BoxShape.circle,
+        ),
         child:
             Text(tx, style: TextStyle(fontFamily: 'Inter-Thin', fontSize: 12)));
   }
@@ -532,21 +580,29 @@ class _GluVal1State extends State<GluVal1> {
   @override
   Widget build(BuildContext context) {
     return MenuAnchor(
+        onOpen: () {
+          setState(() {
+            bs = BorderSide(width: 1.5, color: AppColors.lavender);
+          });
+        },
+        onClose: () {
+          setState(() {
+            bs = BorderSide(width: 1.5, color: AppColors.trans);
+          });
+        },
         builder:
             (BuildContext context, MenuController controller, Widget? child) {
           return GestureDetector(
               onTap: () {
                 if (controller.isOpen) {
                   controller.close();
-                  bs = BorderSide(width: 1.5, color: AppColors.trans);
                 } else {
                   controller.open();
-                  bs = BorderSide(width: 1.5, color: AppColors.lavender);
                 }
               },
               child: Container(
                   decoration: BoxDecoration(border: Border(top: bs)),
-                  padding: EdgeInsets.only(right: 9, left: 9),
+                  margin: EdgeInsets.only(right: 11, left: 11),
                   alignment: Alignment.center,
                   child: Column(children: [
                     ColoredCircle1(col, gvs[0].GV1),
@@ -557,19 +613,33 @@ class _GluVal1State extends State<GluVal1> {
                             color: Colors.black))
                   ])));
         },
-        alignmentOffset: Offset(0, 20),
-        menuChildren: scale2,
+        alignmentOffset: Offset(0, 55),
+        menuChildren: [
+          Container(
+              height: 50,
+              padding: EdgeInsets.only(left: 8, right: 10),
+              width: MediaQuery.of(context).size.width * 0.9,
+              decoration: BoxDecoration(
+                  color: AppColors.lavender_light,
+                  borderRadius: BorderRadius.circular(8)),
+              child: ListView(
+                  //shrinkWrap: true,
+                  scrollDirection: Axis.horizontal,
+                  children: scale2))
+        ],
         style: MenuStyle(
-            alignment: Alignment.center,
-            backgroundColor: MaterialStateProperty.resolveWith((states) {
-              return Colors.white;
-            }),
-            elevation: MaterialStateProperty.resolveWith((states) {
-              return 0;
-            }),
-            padding: MaterialStateProperty.resolveWith((states) {
-              return EdgeInsets.all(0);
-            })));
+            elevation: MaterialStatePropertyAll<double>(0),
+            backgroundColor: MaterialStatePropertyAll<Color>(AppColors.trans),
+            shape: MaterialStatePropertyAll<OutlinedBorder>(
+                RoundedRectangleBorder()),
+            alignment: AlignmentDirectional.center,
+            //side:
+            padding:
+                MaterialStatePropertyAll<EdgeInsets>(EdgeInsets.only(left: 0)),
+            fixedSize: MaterialStatePropertyAll<Size>(
+                Size(MediaQuery.of(context).size.width * 2, 50)),
+            maximumSize: MaterialStatePropertyAll<Size>(
+                Size(MediaQuery.of(context).size.width * 2, 100))));
   }
 }
 
@@ -583,6 +653,6 @@ class GluVal2 extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
         padding: EdgeInsets.only(left: 8, right: 8),
-        child: ColoredCircle2(color, trackGV.GV2));
+        child: ColoredCircle2(color, '${trackGV.GV1}.${trackGV.GV2}'));
   }
 }

@@ -44,10 +44,18 @@ class _TopSetState extends State<TopSet> {
     return Container(
         height: 50,
         decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.only(
-                bottomRight: Radius.circular(24),
-                bottomLeft: Radius.circular(24))),
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+              bottomRight: Radius.circular(24),
+              bottomLeft: Radius.circular(24)),
+          boxShadow: [
+            BoxShadow(
+                color: Color.fromRGBO(149, 157, 165, 0.1),
+                offset: Offset.zero,
+                spreadRadius: 4,
+                blurRadius: 10)
+          ],
+        ),
         child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
           Container(
               child: IconButton(
@@ -116,8 +124,16 @@ class SettingsCont extends Container {
         width: MediaQuery.of(context).size.width,
         height: 260,
         decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.all(Radius.circular(12))),
+          color: Colors.white,
+          borderRadius: BorderRadius.all(Radius.circular(12)),
+          boxShadow: [
+            BoxShadow(
+                color: Color.fromRGBO(149, 157, 165, 0.1),
+                offset: Offset.zero,
+                spreadRadius: 4,
+                blurRadius: 10)
+          ],
+        ),
         child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [

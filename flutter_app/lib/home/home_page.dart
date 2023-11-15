@@ -49,8 +49,15 @@ class _HomePageState extends State<HomePage> {
           toolbarHeight: 0,
           elevation: 0,
         ),
-        bottomNavigationBar: SizedBox(
+        bottomNavigationBar: Container(
             height: 60,
+            decoration: BoxDecoration(boxShadow: [
+              BoxShadow(
+                  color: Color.fromRGBO(149, 157, 165, 0.1),
+                  offset: Offset.zero,
+                  spreadRadius: 4,
+                  blurRadius: 10)
+            ]),
             child: BottomNavigationBar(
               onTap: (int index) {
                 setState(() {
@@ -208,6 +215,13 @@ class TopPlashka extends Container {
         //constraints: BoxConstraints(
         //  minHeight: MediaQuery.of(context).size.height * 0.22),
         decoration: BoxDecoration(
+            boxShadow: [
+              BoxShadow(
+                  color: Color.fromRGBO(149, 157, 165, 0.1),
+                  offset: Offset.zero,
+                  spreadRadius: 4,
+                  blurRadius: 10)
+            ],
             color: Colors.white,
             borderRadius: BorderRadius.only(
                 bottomRight: Radius.circular(24),
@@ -230,7 +244,16 @@ class SeePlot extends Container {
         constraints:
             BoxConstraints(minHeight: MediaQuery.of(context).size.height * 0.3),
         decoration: BoxDecoration(
-            color: Colors.white, borderRadius: BorderRadius.circular(24)),
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+                color: Color.fromRGBO(149, 157, 165, 0.1),
+                offset: Offset.zero,
+                spreadRadius: 4,
+                blurRadius: 10)
+          ],
+        ),
         child: Column(children: [
           Container(
               padding:
