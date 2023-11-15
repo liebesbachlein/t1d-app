@@ -1,9 +1,9 @@
 import 'dart:async';
 
-import 'package:flutter/widgets.dart';
-import 'package:path/path.dart';
+//import 'package:flutter/widgets.dart';
+import 'package:flutter_app/data_log/data_types.dart';
+//import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:flutter_app/data_log/data_log.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 
@@ -26,6 +26,7 @@ class DatabaseHelper {
     Directory directory = await getApplicationDocumentsDirectory();
     String path = directory.path + name;
     Path = path;
+    print('INI');
     database = await openDatabase(path, version: 1, onCreate: _createDb);
   }
 

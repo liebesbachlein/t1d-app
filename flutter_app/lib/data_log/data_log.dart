@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_app/colors.dart';
+import 'package:flutter_app/data_log/data_types.dart';
 import 'dart:core';
 
 import 'package:flutter_app/db.dart';
@@ -106,9 +107,12 @@ class _DataLogState extends State<DataLog> {
 }
 
 class DataField extends StatefulWidget {
-  DataField({required Key key}) : super(key: key);
+  DatabaseHelper databaseHelper = DatabaseHelper();
+
+  DataField({required Key key}) : super(key: key) {}
+
   @override
-  State<DataField> createState() => _DataFieldState();
+  State<DataField> createState() => _DataFieldState(true, databaseHelper);
 }
 
 class _DataFieldState extends State<DataField> {
@@ -117,15 +121,43 @@ class _DataFieldState extends State<DataField> {
   List<DragTarget<TrackGV>> dragt = [];
   DatabaseHelper databaseHelper = DatabaseHelper();
 
-  _DataFieldState() {
-    //databaseHelper.init();
-    //databaseHelper.deleteDatabase();
-    databaseHelper.init();
+  bool load = false;
+
+  _DataFieldState(this.load, this.databaseHelper) {
     tmgvs = getTMGVArr();
     gvCol.add(DataletGV(tmgvs.elementAt(0), 50, false, false));
     for (int i = 1; i < tmgvs.length; i++) {
       gvCol.add(DataletGV(tmgvs.elementAt(i), 0, false, false));
     }
+
+    if (load) {
+      load = false;
+      getLoad();
+    }
+  }
+
+  void getLoad() async {
+    await databaseHelper.init();
+    DateTime time = DateTime.now();
+    DateTime this_date =
+        DateTime(time.year, time.month, time.day, 0, 0, 0, 0, 0);
+
+    List<Map<String, dynamic>> listmaps =
+        await databaseHelper.selectGV(this_date.toIso8601String());
+
+    setState(() {
+      print(listmaps.toString());
+      if (listmaps.length != 0) {
+        for (int i = 0; i < listmaps.length; i++) {
+          TrackTmGV s = TrackTmGV.fromMapObject(listmaps[i]);
+          int add = 0;
+          if (s.minute == 30) {
+            add = 1;
+          }
+          tmgvs[s.hour * 2 + add] = s;
+        }
+      }
+    });
   }
 
   void change(int pos) async {
@@ -154,7 +186,7 @@ class _DataFieldState extends State<DataField> {
           TrackTmGV s = TrackTmGV.fromMapObject(listmaps[i]);
           int add = 0;
           if (s.minute == 30) {
-            add = s.minute;
+            add = 1;
           }
           tmgvs[s.hour * 2 + add] = s;
         }
@@ -226,6 +258,77 @@ class _DataFieldState extends State<DataField> {
         trackC,
       );
     });
+  }
+}
+
+class TopSetDL extends StatefulWidget {
+  const TopSetDL({super.key});
+
+  @override
+  State<TopSetDL> createState() => _TopSetDLState();
+}
+
+class _TopSetDLState extends State<TopSetDL> {
+  int pos = 0;
+  String tx = 'Today';
+
+  String getTx() {
+    if (pos != 0) {
+      DateTime time = DateTime.now();
+      DateTime this_date =
+          DateTime(time.year, time.month, time.day, 0, 0, 0, 0, 0);
+      if (pos > 0) {
+        this_date = this_date.subtract(Duration(days: pos));
+      } else {
+        this_date = this_date.add(Duration(days: -pos));
+      }
+      tx = weekdays[this_date.weekday - 1] +
+          ' ' +
+          this_date.day.toString() +
+          ' ' +
+          months[this_date.month - 1];
+    } else {
+      tx = 'Today';
+    }
+    return tx;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+        color: Colors.white,
+        height: 50,
+        child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+          Container(
+              child: IconButton(
+                  icon: Icon(Icons.arrow_back_ios),
+                  color: Colors.black,
+                  onPressed: () {
+                    setState(() {
+                      pos = pos + 1;
+                      dkey.currentState?.change(pos);
+                    });
+                  })),
+          Container(
+              alignment: Alignment.center,
+              width: MediaQuery.of(context).size.width * 0.5,
+              child: Text(getTx(),
+                  style: TextStyle(
+                      color: Colors.black,
+                      fontFamily: 'Inter-Medium',
+                      fontSize: 16))),
+          Container(
+              //padding: EdgeInsets.only(left: 8, right: 3),
+              child: IconButton(
+                  icon: Icon(Icons.arrow_forward_ios),
+                  color: Colors.black,
+                  onPressed: () {
+                    setState(() {
+                      pos = pos - 1;
+                      dkey.currentState?.change(pos);
+                    });
+                  })),
+        ]));
   }
 }
 
@@ -338,77 +441,6 @@ class DataletGV extends StatelessWidget {
                           fontSize: 16,
                           fontFamily: 'Inter-Thin'),
                     )))));
-  }
-}
-
-class TopSetDL extends StatefulWidget {
-  const TopSetDL({super.key});
-
-  @override
-  State<TopSetDL> createState() => _TopSetDLState();
-}
-
-class _TopSetDLState extends State<TopSetDL> {
-  int pos = 0;
-  String tx = 'Today';
-
-  String getTx() {
-    if (pos != 0) {
-      DateTime time = DateTime.now();
-      DateTime this_date =
-          DateTime(time.year, time.month, time.day, 0, 0, 0, 0, 0);
-      if (pos > 0) {
-        this_date = this_date.subtract(Duration(days: pos));
-      } else {
-        this_date = this_date.add(Duration(days: -pos));
-      }
-      tx = weekdays[this_date.weekday - 1] +
-          ' ' +
-          this_date.day.toString() +
-          ' ' +
-          months[this_date.month - 1];
-    } else {
-      tx = 'Today';
-    }
-    return tx;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-        color: Colors.white,
-        height: 50,
-        child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-          Container(
-              child: IconButton(
-                  icon: Icon(Icons.arrow_back_ios),
-                  color: Colors.black,
-                  onPressed: () {
-                    setState(() {
-                      pos = pos + 1;
-                      dkey.currentState?.change(pos);
-                    });
-                  })),
-          Container(
-              alignment: Alignment.center,
-              width: MediaQuery.of(context).size.width * 0.5,
-              child: Text(getTx(),
-                  style: TextStyle(
-                      color: Colors.black,
-                      fontFamily: 'Inter-Medium',
-                      fontSize: 16))),
-          Container(
-              //padding: EdgeInsets.only(left: 8, right: 3),
-              child: IconButton(
-                  icon: Icon(Icons.arrow_forward_ios),
-                  color: Colors.black,
-                  onPressed: () {
-                    setState(() {
-                      pos = pos - 1;
-                      dkey.currentState?.change(pos);
-                    });
-                  })),
-        ]));
   }
 }
 
@@ -552,94 +584,5 @@ class GluVal2 extends StatelessWidget {
     return Container(
         padding: EdgeInsets.only(left: 8, right: 8),
         child: ColoredCircle2(color, trackGV.GV2));
-  }
-}
-
-class TrackGV {
-  double GV = 0.0;
-  int GV1 = 0;
-  int GV2 = 0;
-
-  TrackGV(this.GV) {
-    GV1 = GV.floor();
-    double g = ((GV - GV1.toDouble()) * 10);
-    GV2 = g.round();
-  }
-
-  String toString() {
-    return GV.toString();
-  }
-}
-
-class TrackTmGV {
-  int id = -1;
-
-  int month = -1;
-  String date = '';
-  int hour = -1;
-  int minute = -1;
-
-  double gluval = -1;
-
-  DateTime time = DateTime.now();
-
-  TrackTmGV(this.time) {
-    date = DateTime(time.year, time.month, time.day, 0, 0, 0, 0, 0)
-        .toIso8601String();
-    month = time.month;
-    hour = time.hour;
-    minute = time.minute;
-  }
-
-  void setDate(DateTime d) {
-    time = d;
-    date = DateTime(d.year, d.month, d.day, 0, 0, 0, 0, 0).toIso8601String();
-    month = d.month;
-  }
-
-  List<TrackGV> listOfGV = [];
-
-  void nulled() {
-    listOfGV = [];
-    gluval = -1;
-  }
-
-  String toString() {
-    return '$id||$date||$hour||$minute||$listOfGV';
-  }
-
-  void replace(TrackGV newgV) {
-    if (listOfGV.isEmpty) {
-      listOfGV.add(newgV);
-      gluval = newgV.GV;
-    } else {
-      listOfGV[0] = newgV;
-      gluval = newgV.GV;
-    }
-  }
-
-  Map<String, dynamic> toMap() {
-    return {
-      'date': date,
-      'month': month,
-      'hour': hour,
-      'minute': minute,
-      'glucose_val': gluval
-    };
-  }
-
-  TrackTmGV.fromMapObject(Map<String, dynamic> map) {
-    print(map.toString());
-    id = map['id'];
-    date = map['date'];
-    month = map['month'];
-    hour = map['hour'];
-    minute = map['minute'];
-    gluval = map['glucose_val'];
-
-    DateTime time_ini = DateTime.parse(date);
-    time = DateTime(
-        time_ini.year, time_ini.month, time_ini.day, hour, minute, 0, 0, 0);
-    replace(TrackGV(gluval));
   }
 }
