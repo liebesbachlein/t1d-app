@@ -83,10 +83,6 @@ class _DataLogState extends State<DataLog> {
   TopSetDL top = TopSetDL();
   bool isChanged = false;
 
-  void printCh() {
-    print(isChanged.toString());
-  }
-
   void setIsChanged(bool newChanged) {
     setState(() {
       isChanged = newChanged;
@@ -105,7 +101,8 @@ class _DataLogState extends State<DataLog> {
             ),
             toolbarHeight: 0,
             elevation: 0),
-        body: Column(children: [
+        body: Stack(children: <Widget>[
+          DataField(key: dkey),
           Container(
               height: 110,
               decoration: BoxDecoration(
@@ -119,8 +116,7 @@ class _DataLogState extends State<DataLog> {
                       blurRadius: 10)
                 ],
               ),
-              child: Column(children: [TopSetDL(), Scale1()])),
-          DataField(key: dkey)
+              child: Column(children: [TopSetDL(), Scale1()]))
         ]),
         floatingActionButton: FloatingActionButton(
             elevation: 2,
@@ -130,7 +126,6 @@ class _DataLogState extends State<DataLog> {
             backgroundColor: isChanged ? AppColors.mint : AppColors.text_sub,
             onPressed: () {
               setState(() {
-                print('Helo');
                 dkey.currentState?.pushVals();
               });
             },
@@ -179,7 +174,7 @@ class _DataFieldState extends State<DataField> {
         await databaseHelper.selectGV(this_date.toIso8601String());
 
     setState(() {
-      print(listmaps.toString());
+      //print(listmaps.toString());
       if (listmaps.length != 0) {
         for (int i = 0; i < listmaps.length; i++) {
           TrackTmGV s = TrackTmGV.fromMapObject(listmaps[i]);
@@ -257,7 +252,7 @@ class _DataFieldState extends State<DataField> {
             databaseHelper.insert(tmgvs[i]);
           }
         }
-        print(databaseHelper.queryAllRowsGV().toString());
+        databaseHelper.queryAllRowsGV();
         isChanged = false;
         lkey.currentState?.setIsChanged(false);
       });
@@ -305,7 +300,7 @@ class _DataFieldState extends State<DataField> {
 
   Widget buildRow(BuildContext context, int index) {
     if (index == -1) {
-      return Container(height: 80);
+      return Container(height: 179);
     } else {
       return Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -315,19 +310,18 @@ class _DataFieldState extends State<DataField> {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-        child: Container(
-            color: AppColors.background,
-            child: ListView.builder(
-              controller: ScrollController(
-                initialScrollOffset: 900.0,
-                keepScrollOffset: false,
-              ),
-              itemCount: 49,
-              itemBuilder: (BuildContext context, int index) {
-                return buildRow(context, index - 1);
-              },
-            )));
+    return Container(
+        color: AppColors.background,
+        child: ListView.builder(
+          controller: ScrollController(
+            initialScrollOffset: 900.0,
+            keepScrollOffset: false,
+          ),
+          itemCount: 49,
+          itemBuilder: (BuildContext context, int index) {
+            return buildRow(context, index - 1);
+          },
+        ));
   }
 
   Widget DropZone(TrackTmGV trackC) {
@@ -513,7 +507,7 @@ class DataletGV extends StatelessWidget {
             height: 60,
             width: 50,
             decoration: BoxDecoration(
-                color: AppColors.lavender_light,
+                color: Colors.white, //AppColors.lavender_light,
                 border: Border(
                     left: BorderSide(
                         width: highlighted ? 2.0 : 1.0,
@@ -726,8 +720,9 @@ class _GluVal1State extends State<GluVal1> {
               padding: EdgeInsets.only(left: 8, right: 10),
               width: MediaQuery.of(context).size.width * 0.9,
               decoration: BoxDecoration(
-                  color: AppColors.lavender_light,
-                  borderRadius: BorderRadius.circular(8)),
+                color: AppColors.lavender_light,
+                borderRadius: BorderRadius.circular(8),
+              ),
               child: ListView(
                   controller: ScrollController(
                     initialScrollOffset: 100.0,
@@ -737,7 +732,9 @@ class _GluVal1State extends State<GluVal1> {
                   children: scale2))
         ],
         style: MenuStyle(
-            elevation: MaterialStatePropertyAll<double>(0),
+            elevation: MaterialStatePropertyAll<double>(8),
+            shadowColor: MaterialStatePropertyAll<Color>(
+                Color.fromRGBO(149, 157, 165, 0.2)),
             backgroundColor: MaterialStatePropertyAll<Color>(AppColors.trans),
             shape: MaterialStatePropertyAll<OutlinedBorder>(
                 RoundedRectangleBorder()),

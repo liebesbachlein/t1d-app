@@ -26,7 +26,7 @@ class DatabaseHelper {
     Directory directory = await getApplicationDocumentsDirectory();
     String path = directory.path + name;
     Path = path;
-    print('INI');
+    print('Database initialized');
     database = await openDatabase(path, version: 1, onCreate: _createDb);
   }
 
@@ -39,8 +39,6 @@ class DatabaseHelper {
 
   Future<List<Map<String, dynamic>>> queryAllRowsMap() async {
     var a = await database.query(trackTmGVTable);
-    print(a.toString());
-    print(a.length.toString());
     return a;
   }
 
@@ -50,6 +48,7 @@ class DatabaseHelper {
   }
 
   Future<int> insert(TrackTmGV trackTmGV) async {
+    print('insertion: $trackTmGV');
     return await database.insert(trackTmGVTable, trackTmGV.toMap());
   }
 
@@ -60,6 +59,7 @@ class DatabaseHelper {
   }
 
   Future<int> deleteTmGV(int id) async {
+    print('deletion: id$id');
     return await database
         .rawDelete('DELETE FROM $trackTmGVTable WHERE $colId = $id');
     ;
@@ -80,6 +80,7 @@ class DatabaseHelper {
       allRows.add(TrackTmGV.fromMapObject(list[i]));
     }
 
+    print('${allRows.length} rows');
     return allRows;
   }
 }

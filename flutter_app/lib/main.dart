@@ -9,29 +9,18 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   var c = await MainApp.create();
   runApp(c);
-  print("done");
 }
 
 class MainApp extends StatelessWidget {
   MainApp();
 
-  MainApp._create() {
-    print("_create() (private constructor)");
-
-    // Do most of your initialization here, that's what a constructor is for
-    //...
-  }
+  MainApp._create() {}
 
   static Future<MainApp> create() async {
-    print("create() (public factory)");
-
-    // Call the private constructor
     var component = MainApp._create();
 
-    // Do initialization that requires async
     await databaseHelper.init();
 
-    // Return the fully initialized object
     return component;
   }
 
