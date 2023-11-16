@@ -21,6 +21,8 @@ List<Color> getColArr(List<int> arr) {
   return col;
 }
 
+DatabaseHelper databaseHelper = DatabaseHelper();
+
 const List<String> weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const List<String> months = [
   'January',
@@ -71,7 +73,7 @@ GlobalKey draggableKey = GlobalKey();
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class DataLog extends StatefulWidget {
-  DataLog({required Key key}) : super(key: key) {}
+  DataLog({required Key key}) : super(key: key);
 
   @override
   State<DataLog> createState() => _DataLogState();
@@ -125,37 +127,36 @@ class _DataLogState extends State<DataLog> {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(30),
             ),
-            backgroundColor: isChanged ? AppColors.mint : AppColors.lavender,
+            backgroundColor: isChanged ? AppColors.mint : AppColors.text_sub,
             onPressed: () {
               setState(() {
                 print('Helo');
                 dkey.currentState?.pushVals();
               });
             },
-            child: isChanged ? Icon(Icons.check) : Icon(Icons.add)));
+            child: isChanged
+                ? Icon(Icons.add_task_outlined)
+                : Icon(Icons.task_alt)));
   }
 }
 
 class DataField extends StatefulWidget {
-  DatabaseHelper databaseHelper = DatabaseHelper();
-
   DataField({required Key key}) : super(key: key) {}
 
   @override
-  State<DataField> createState() => _DataFieldState(true, databaseHelper);
+  State<DataField> createState() => _DataFieldState(true);
 }
 
 class _DataFieldState extends State<DataField> {
   List<DataletGV> gvCol = [];
   List<TrackTmGV> tmgvs = [];
   List<DragTarget<TrackGV>> dragt = [];
-  DatabaseHelper databaseHelper = DatabaseHelper();
   int position = 0;
   bool isChanged = false;
 
   bool load = false;
 
-  _DataFieldState(this.load, this.databaseHelper) {
+  _DataFieldState(this.load) {
     tmgvs = getTMGVArr();
     gvCol.add(DataletGV(tmgvs.elementAt(0), 50, false, false));
     for (int i = 1; i < tmgvs.length; i++) {
@@ -169,7 +170,7 @@ class _DataFieldState extends State<DataField> {
   }
 
   void getLoad() async {
-    await databaseHelper.init();
+    //await databaseHelper.init();
     DateTime time = DateTime.now();
     DateTime this_date =
         DateTime(time.year, time.month, time.day, 0, 0, 0, 0, 0);
@@ -189,7 +190,14 @@ class _DataFieldState extends State<DataField> {
           tmgvs[s.hour * 2 + add] = s;
         }
       }
+
+      gvCol = [];
+      gvCol.add(DataletGV(tmgvs.elementAt(0), 50, false, false));
+      for (int i = 1; i < tmgvs.length; i++) {
+        gvCol.add(DataletGV(tmgvs.elementAt(i), 0, false, false));
+      }
     });
+    load = false;
   }
 
   void change(int pos) async {
@@ -281,11 +289,27 @@ class _DataFieldState extends State<DataField> {
     });
   }
 
+  void deleteGV(TrackTmGV tmgv) {
+    setState(() {
+      isChanged = true;
+      lkey.currentState?.setIsChanged(true);
+      int index = tmgv.hour * 2;
+      if (tmgv.minute > 0) {
+        index = index + 1;
+      }
+      print(gvCol[index].trackTmGV.listOfGV.toString());
+      gvCol[index].trackTmGV.nulled();
+      print(gvCol[index].trackTmGV.listOfGV.toString());
+    });
+  }
+
   Widget buildRow(BuildContext context, int index) {
     if (index == -1) {
       return Container(height: 80);
     } else {
-      return Row(children: [tmCol[index], tmgvs.map(DropZone).toList()[index]]);
+      return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [tmCol[index], tmgvs.map(DropZone).toList()[index]]);
     }
   }
 
@@ -295,6 +319,10 @@ class _DataFieldState extends State<DataField> {
         child: Container(
             color: AppColors.background,
             child: ListView.builder(
+              controller: ScrollController(
+                initialScrollOffset: 900.0,
+                keepScrollOffset: false,
+              ),
               itemCount: 49,
               itemBuilder: (BuildContext context, int index) {
                 return buildRow(context, index - 1);
@@ -471,11 +499,12 @@ class DataletGV extends StatelessWidget {
   bool highlighted = false;
   bool hasItems = false;
   DataletGV(this.trackTmGV, this.offset, this.highlighted, this.hasItems);
+  //Widget child = Widget();
 
   @override
   Widget build(BuildContext context) {
     Color textColor = highlighted ? Colors.white : Colors.black;
-
+    MenuController controller1 = MenuController();
     return Transform.scale(
         scale: highlighted ? 1.0 : 1.0,
         child: Container(
@@ -484,28 +513,84 @@ class DataletGV extends StatelessWidget {
             height: 60,
             width: 50,
             decoration: BoxDecoration(
+                color: AppColors.lavender_light,
                 border: Border(
                     left: BorderSide(
                         width: highlighted ? 2.0 : 1.0,
                         color: highlighted
                             ? const Color(0xFFF64209)
-                            : Colors.green),
+                            : AppColors.lavender_light),
                     right: BorderSide(
                         width: highlighted ? 2.0 : 1.0,
                         color: highlighted
                             ? const Color(0xFFF64209)
-                            : Colors.green))),
+                            : AppColors.lavender_light))),
             child: Visibility(
                 visible: hasItems,
                 maintainState: true,
                 maintainAnimation: true,
                 maintainSize: true,
                 child: Stack(alignment: Alignment.center, children: [
-                  ColoredCircle2(
-                      hasItems
-                          ? pallete2[trackTmGV.listOfGV[0].GV2]
-                          : AppColors.trans,
-                      hasItems ? trackTmGV.listOfGV[0].toString() : '')
+                  MenuAnchor(
+                      onOpen: () {
+                        //setState(() {});
+                      },
+                      onClose: () {
+                        //setState(() {});
+                      },
+                      builder: (BuildContext context, MenuController controller,
+                          Widget? child) {
+                        controller1 = controller;
+                        return GestureDetector(
+                            onLongPress: () {
+                              print('long press!');
+                              if (controller.isOpen) {
+                                controller.close();
+                              } else {
+                                controller.open();
+                              }
+                            },
+                            child: ColoredCircle2(
+                                hasItems
+                                    ? pallete2[trackTmGV.listOfGV[0].GV2]
+                                    : AppColors.trans,
+                                hasItems
+                                    ? trackTmGV.listOfGV[0].toString()
+                                    : ''));
+                      },
+                      alignmentOffset: Offset(-18, -18),
+                      menuChildren: [
+                        GestureDetector(
+                            onTap: () {
+                              if (controller1.isOpen) {
+                                print('delete!');
+                                dkey.currentState?.deleteGV(trackTmGV);
+                                controller1.close();
+                              }
+                            },
+                            child: Container(
+                                width: 35,
+                                height: 35,
+                                decoration: BoxDecoration(
+                                    color: Colors.red,
+                                    borderRadius: BorderRadius.circular(25)),
+                                alignment: Alignment.center,
+                                child: Icon(Icons.close, color: Colors.white)))
+                      ],
+                      style: MenuStyle(
+                          elevation: MaterialStatePropertyAll<double>(0),
+                          backgroundColor:
+                              MaterialStatePropertyAll<Color>(AppColors.trans),
+                          shape: MaterialStatePropertyAll<OutlinedBorder>(
+                              RoundedRectangleBorder()),
+                          alignment: AlignmentDirectional.center,
+                          //side:
+                          padding: MaterialStatePropertyAll<EdgeInsets>(
+                              EdgeInsets.only(left: 0)),
+                          fixedSize:
+                              MaterialStatePropertyAll<Size>(Size(50, 50)),
+                          maximumSize:
+                              MaterialStatePropertyAll<Size>(Size(50, 100))))
                 ]))));
   }
 }
@@ -526,6 +611,10 @@ class Scale1 extends Container {
     return Container(
         height: 48,
         child: ListView(
+          controller: ScrollController(
+            initialScrollOffset: 160.0,
+            keepScrollOffset: false,
+          ),
           scrollDirection: Axis.horizontal,
           children: scale1,
         ));
@@ -557,10 +646,7 @@ class ColoredCircle2 extends Container {
   String tx = '';
   bool isBorder = false;
 
-  ColoredCircle2(Color c, String t) {
-    col = c;
-    tx = t;
-  }
+  ColoredCircle2(this.col, this.tx);
 
   @override
   Widget build(BuildContext context) {
@@ -643,7 +729,10 @@ class _GluVal1State extends State<GluVal1> {
                   color: AppColors.lavender_light,
                   borderRadius: BorderRadius.circular(8)),
               child: ListView(
-                  //shrinkWrap: true,
+                  controller: ScrollController(
+                    initialScrollOffset: 100.0,
+                    keepScrollOffset: false,
+                  ),
                   scrollDirection: Axis.horizontal,
                   children: scale2))
         ],

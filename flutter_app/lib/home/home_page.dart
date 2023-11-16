@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_app/colors.dart';
 import 'package:flutter_app/data_log/data_log.dart';
+import 'package:flutter_app/db.dart';
 import 'dart:core';
 
 import 'package:flutter_app/profile_settings/profile.dart';
@@ -28,8 +29,6 @@ final key = new GlobalKey<_DateAndProfilePicState>();
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
-
-  @override
   State<HomePage> createState() => _HomePageState();
 }
 
@@ -271,19 +270,53 @@ class SeePlot extends Container {
   }
 }
 
-class DayCont extends Container {
+class DayCont extends StatefulWidget {
+  int pos = 0;
+  bool isPoint = false;
+
+  DayCont(this.pos, this.isPoint);
+
+  @override
+  State<DayCont> createState() => _DayContState(this.pos, this.isPoint);
+}
+
+class _DayContState extends State<DayCont> {
   Color ic = AppColors.trans;
   String date = 'Err';
   String day_str = 'Err';
   Color tx = Colors.black;
   BoxDecoration dec = BoxDecoration();
+  bool tick = false;
 
-  DayCont(int pos, bool isPoint) {
-    if (isPoint == false) {
-      if (isTick(pos) == true) {
-        ic = AppColors.mint;
+  Future<void> isTickA(int pos) async {
+    DateTime time = DateTime.now();
+    DateTime this_date =
+        DateTime(time.year, time.month, time.day, 0, 0, 0, 0, 0);
+    if (pos != 0) {
+      if (pos > 0) {
+        this_date = this_date.subtract(Duration(days: pos));
+      } else {
+        this_date = this_date.add(Duration(days: -pos));
       }
+    }
+
+    List<Map<String, dynamic>> listmaps =
+        await databaseHelper.selectGV(this_date.toIso8601String());
+
+    if (listmaps.length != 0) {
+      setState(() {
+        tick = true;
+      });
     } else {
+      setState(() {
+        tick = false;
+      });
+    }
+  }
+
+  _DayContState(int pos, bool isPoint) {
+    isTickA(pos);
+    if (isPoint == true) {
       tx = Colors.white;
       dec = BoxDecoration(
           color: AppColors.lavender,
@@ -315,7 +348,8 @@ class DayCont extends Container {
         child: Column(children: [
           Container(
               padding: EdgeInsets.only(bottom: 10),
-              child: Icon(Icons.done_outline_rounded, color: ic)),
+              child: Icon(Icons.done_outline_rounded,
+                  color: tick ? AppColors.mint : AppColors.trans)),
           Container(
               width: 50,
               height: 50,
@@ -380,13 +414,5 @@ class _WeekState extends State<Week> {
                 });
               })),
     ]));
-  }
-}
-
-bool isTick(int date) {
-  if (date % 2 == 0) {
-    return true;
-  } else {
-    return false;
   }
 }
