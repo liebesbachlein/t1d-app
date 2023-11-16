@@ -105,7 +105,7 @@ class _HomePageState extends State<HomePage> {
               color: Colors.green,
               alignment: Alignment.center,
               child: const Text('Page 2')),
-          DataLog(),
+          DataLog(key: lkey),
           Container(
               color: Colors.blue,
               alignment: Alignment.center,

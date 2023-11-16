@@ -5,7 +5,9 @@ import 'package:flutter_app/data_log/data_types.dart';
 import 'dart:core';
 import 'package:flutter_app/db.dart';
 
-final dkey = new GlobalKey<_DataFieldState>();
+GlobalKey<_DataFieldState> dkey = GlobalKey<_DataFieldState>();
+GlobalKey<_DataLogState> lkey = GlobalKey<_DataLogState>();
+
 final AppColors ac = AppColors();
 List<Color> pallete1 = getColArr(ac.hex_arr);
 List<Color> pallete2 = getColArr(ac.hex_arr2);
@@ -69,7 +71,7 @@ GlobalKey draggableKey = GlobalKey();
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class DataLog extends StatefulWidget {
-  const DataLog({super.key});
+  DataLog({required Key key}) : super(key: key) {}
 
   @override
   State<DataLog> createState() => _DataLogState();
@@ -77,18 +79,16 @@ class DataLog extends StatefulWidget {
 
 class _DataLogState extends State<DataLog> {
   TopSetDL top = TopSetDL();
+  bool isChanged = false;
 
-  bool checkIfChanged() {
-    bool res = false;
+  void printCh() {
+    print(isChanged.toString());
+  }
+
+  void setIsChanged(bool newChanged) {
     setState(() {
-      var s = dkey.currentState;
-      if (s == null) {
-        res = false;
-      } else {
-        res = s.isChanged;
-      }
+      isChanged = newChanged;
     });
-    return res;
   }
 
   @override
@@ -120,20 +120,19 @@ class _DataLogState extends State<DataLog> {
               child: Column(children: [TopSetDL(), Scale1()])),
           DataField(key: dkey)
         ]),
-        floatingActionButton: FloatingActionButton.small(
-            elevation: 1,
+        floatingActionButton: FloatingActionButton(
+            elevation: 2,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(30),
             ),
-            backgroundColor:
-                checkIfChanged() ? AppColors.mint : AppColors.lavender,
+            backgroundColor: isChanged ? AppColors.mint : AppColors.lavender,
             onPressed: () {
               setState(() {
                 print('Helo');
                 dkey.currentState?.pushVals();
               });
             },
-            child: checkIfChanged() ? Icon(Icons.check) : Icon(Icons.add)));
+            child: isChanged ? Icon(Icons.check) : Icon(Icons.add)));
   }
 }
 
@@ -252,6 +251,7 @@ class _DataFieldState extends State<DataField> {
         }
         print(databaseHelper.queryAllRowsGV().toString());
         isChanged = false;
+        lkey.currentState?.setIsChanged(false);
       });
     }
   }
@@ -276,12 +276,13 @@ class _DataFieldState extends State<DataField> {
   void dropGV(TrackGV gv, TrackTmGV tmgv) {
     setState(() {
       isChanged = true;
+      lkey.currentState?.setIsChanged(true);
       tmgv.replace(gv);
     });
   }
 
   Widget buildRow(BuildContext context, int index) {
-    if (index == 0) {
+    if (index == -1) {
       return Container(height: 80);
     } else {
       return Row(children: [tmCol[index], tmgvs.map(DropZone).toList()[index]]);
@@ -292,22 +293,25 @@ class _DataFieldState extends State<DataField> {
   Widget build(BuildContext context) {
     return Expanded(
         child: Container(
-            color: isChanged ? AppColors.mint : AppColors.lavender,
-            height: 100,
-            padding: EdgeInsets.only(top: 0),
+            color: AppColors.background,
             child: ListView.builder(
-                itemCount: 49,
-                itemBuilder: (BuildContext context, int index) {
-                  return buildRow(context, index);
-                })));
+              itemCount: 49,
+              itemBuilder: (BuildContext context, int index) {
+                return buildRow(context, index - 1);
+              },
+            )));
   }
 
   Widget DropZone(TrackTmGV trackC) {
     return DragTarget<TrackGV>(
         builder: (context, candidateItems, rejectedItems) {
+      double offset = 0;
+      if (trackC.hour == 0 && trackC.minute == 0) {
+        offset = 0;
+      }
       return DataletGV(
         trackC,
-        0,
+        offset,
         candidateItems.isNotEmpty,
         trackC.listOfGV.isNotEmpty,
       );
@@ -407,26 +411,38 @@ Widget buildGV(Color color, TrackGV item) {
   return LongPressDraggable<TrackGV>(
     data: item,
     dragAnchorStrategy: pointerDragAnchorStrategy,
-    feedback: DraggingGV(draggableKey),
+    feedback: DraggingGV(draggableKey, '${item.GV1}.${item.GV2}', color),
     child: GluVal2(color, item),
   );
 }
 
 class DraggingGV extends StatelessWidget {
   GlobalKey dragKey = GlobalKey();
+  String GV = '';
+  Color color = Colors.red;
 
-  DraggingGV(this.dragKey);
+  DraggingGV(this.dragKey, this.GV, this.color);
 
   @override
   Widget build(BuildContext context) {
     return FractionalTranslation(
-      translation: const Offset(-1, -1),
-      child: ClipRRect(
-        key: dragKey,
-        borderRadius: BorderRadius.circular(20),
-        child: Container(width: 40, height: 40, color: Colors.red),
-      ),
-    );
+        translation: const Offset(-1, -1),
+        child: Container(
+            key: dragKey,
+            alignment: Alignment.center,
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border.all(color: color, width: 3),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: DefaultTextStyle(
+                child: Text(GV),
+                style: const TextStyle(
+                    color: Colors.black,
+                    fontFamily: 'Inter-Thin',
+                    fontSize: 14))));
   }
 }
 
@@ -440,9 +456,8 @@ class DataletTm extends Container {
   @override
   Widget build(BuildContext context) {
     return Container(
-        margin: EdgeInsets.only(bottom: 5),
         alignment: Alignment.center,
-        height: 50,
+        height: 60,
         width: MediaQuery.of(context).size.width * 0.15,
         child: Text(tx,
             style: TextStyle(
@@ -462,31 +477,36 @@ class DataletGV extends StatelessWidget {
     Color textColor = highlighted ? Colors.white : Colors.black;
 
     return Transform.scale(
-        scale: highlighted ? 1.075 : 1.0,
+        scale: highlighted ? 1.0 : 1.0,
         child: Container(
-            margin: EdgeInsets.only(bottom: 5, top: offset),
-            height: 50,
-            width: MediaQuery.of(context).size.width * 0.6,
+            alignment: Alignment.center,
+            margin: EdgeInsets.only(top: offset),
+            height: 60,
+            width: 50,
             decoration: BoxDecoration(
-                border: Border.all(
-                    width: 1,
-                    color:
-                        highlighted ? const Color(0xFFF64209) : Colors.green)),
+                border: Border(
+                    left: BorderSide(
+                        width: highlighted ? 2.0 : 1.0,
+                        color: highlighted
+                            ? const Color(0xFFF64209)
+                            : Colors.green),
+                    right: BorderSide(
+                        width: highlighted ? 2.0 : 1.0,
+                        color: highlighted
+                            ? const Color(0xFFF64209)
+                            : Colors.green))),
             child: Visibility(
                 visible: hasItems,
                 maintainState: true,
                 maintainAnimation: true,
                 maintainSize: true,
-                child: Container(
-                    alignment: Alignment.centerLeft,
-                    height: 50,
-                    child: Text(
-                      hasItems ? trackTmGV.listOfGV[0].toString() : '',
-                      style: TextStyle(
-                          color: textColor,
-                          fontSize: 16,
-                          fontFamily: 'Inter-Thin'),
-                    )))));
+                child: Stack(alignment: Alignment.center, children: [
+                  ColoredCircle2(
+                      hasItems
+                          ? pallete2[trackTmGV.listOfGV[0].GV2]
+                          : AppColors.trans,
+                      hasItems ? trackTmGV.listOfGV[0].toString() : '')
+                ]))));
   }
 }
 
