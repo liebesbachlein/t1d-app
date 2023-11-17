@@ -2,6 +2,7 @@ import 'dart:async';
 
 //import 'package:flutter/widgets.dart';
 import 'package:flutter_app/data_log/data_types.dart';
+import 'package:flutter_app/main.dart';
 //import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'dart:io';
@@ -18,7 +19,7 @@ class DatabaseHelper {
   String colMinute = 'minute';
   String colGV = 'glucose_val';
   late String Path;
-  String name = 'gvtm0.db';
+  String name = '${EMAIL}.db';
 
   DatabaseHelper() {}
 
@@ -26,7 +27,7 @@ class DatabaseHelper {
     Directory directory = await getApplicationDocumentsDirectory();
     String path = directory.path + name;
     Path = path;
-    print('Database initialized');
+    print('Database initialized $name');
     database = await openDatabase(path, version: 1, onCreate: _createDb);
   }
 
