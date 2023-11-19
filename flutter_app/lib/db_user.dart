@@ -9,18 +9,24 @@ import 'package:path_provider/path_provider.dart';
 
 class UserModel {
   int id = -1;
+  String name = '';
   String email = '';
   String password = '';
 
-  UserModel(this.id, this.email, this.password);
+  UserModel(this.id, this.name, this.email, this.password);
 
   Map<String, dynamic> toMap() {
-    var map = <String, dynamic>{'email': email, 'password': password};
+    var map = <String, dynamic>{
+      'name': name,
+      'email': email,
+      'password': password
+    };
     return map;
   }
 
   UserModel.fromMap(Map<String, dynamic> map) {
     id = map['user_id'];
+    name = map['name'];
     email = map['email'];
     password = map['password'];
   }
@@ -31,16 +37,17 @@ class DatabaseHelperUser {
 
   String userTable = 'user_table';
   String colId = 'user_id';
+  String colName = 'name';
   String colEmail = 'email';
   String colPassword = 'password';
   late String Path;
-  String name = 'dataUsers.db';
+  String dbName = 'dataUsers.db';
 
   DatabaseHelperUser() {}
 
   Future<void> init() async {
     Directory directory = await getApplicationDocumentsDirectory();
-    String path = directory.path + name;
+    String path = directory.path + dbName;
     Path = path;
     print('DatabaseUSER initialized');
     database = await openDatabase(path, version: 1, onCreate: _createDb);
@@ -50,7 +57,7 @@ class DatabaseHelperUser {
 
   void _createDb(Database db, int version) async {
     await db.execute(
-        'CREATE TABLE $userTable($colId INTEGER PRIMARY KEY, $colEmail TEXT, $colPassword TEXT)');
+        'CREATE TABLE $userTable($colId INTEGER PRIMARY KEY, $colName TEXT, $colEmail TEXT, $colPassword TEXT)');
   }
 
   Future<List<Map<String, dynamic>>> queryAllRowsMap() async {

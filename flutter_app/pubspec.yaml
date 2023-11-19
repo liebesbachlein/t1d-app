@@ -16,6 +16,7 @@ dependencies:
   google_sign_in: ^6.1.6
   flutter_svg: ^2.0.9
   form_field_validator: ^1.1.0
+  dotted_border: ^2.1.0
 
 dev_dependencies:
   flutter_test:
@@ -27,6 +28,8 @@ flutter:
   assets:
     - lib/assets/images/profile_default0.png
     - lib/assets/images/profile_default1.png
+    - lib/assets/images/google_icon.png
+    - lib/assets/images/ryan_gosling.jpg
   fonts:
     - family: SovMod
       fonts:

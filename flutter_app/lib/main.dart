@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_app/Login/welcome_screen.dart';
-import 'package:flutter_app/colors.dart';
+import 'package:flutter_app/authentification/welcome_screen.dart';
 import 'package:flutter_app/home/home_page.dart';
-import 'package:flutter_app/profile_settings/profile.dart';
 import 'package:flutter_app/test.dart';
 import 'package:flutter_app/data_log/data_log.dart';
 import 'dart:async';

@@ -2,13 +2,17 @@ import 'package:flutter/material.dart';
 
 class AppColors {
   static final Color lavender = const Color(0xFF9177E0);
-  static final Color lavender_light = Color.fromARGB(255, 229, 222, 255);
+  static final Color lavender_light_dark = const Color(0xFFCAB4EE);
+  static final Color lavender_light = const Color(0xFFE1D4F6);
+  static final Color lavender_light_old = Color.fromARGB(255, 229, 222, 255);
   static final Color mint = const Color(0xFF77E08E);
   static final Color background = const Color(0xFFFCFCFF);
   static final Color text_info = const Color(0xFF595859);
   static final Color text_sub = const Color(0xFFADADAD);
   static final Color trans = Colors.transparent;
   static final Color text_set = const Color(0xFF2F2F2F);
+  static final Color text_dark = const Color(0xFF282828);
+
   List<int> hex_arr = [
     0xFFec6767,
     0xFFdf8d4b,
