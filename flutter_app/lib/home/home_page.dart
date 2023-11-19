@@ -267,7 +267,7 @@ class _SeePlotState extends State<SeePlot> {
   List<Map<String, dynamic>> dat = [];
 
   Future<bool> doPlot() async {
-    print('Doing initialozation plot');
+    print('Doing initialization plot');
     int poss = g_pos;
     DateTime time = DateTime.now();
     DateTime this_date =

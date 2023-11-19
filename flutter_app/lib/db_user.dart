@@ -43,14 +43,14 @@ class DatabaseHelperUser {
   late String Path;
   String dbName = 'dataUsers.db';
 
-  DatabaseHelperUser() {}
+  DatabaseHelperUser();
 
-  Future<void> init() async {
+  Future<Database> init() async {
     Directory directory = await getApplicationDocumentsDirectory();
     String path = directory.path + dbName;
     Path = path;
-    print('DatabaseUSER initialized');
     database = await openDatabase(path, version: 1, onCreate: _createDb);
+    return database;
   }
 
   Future<void> deleteDatabase() => databaseFactory.deleteDatabase(Path);

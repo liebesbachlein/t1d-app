@@ -373,7 +373,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               onPressed: () {
                 if (_formkey.currentState!.validate()) {
                   _formkey.currentState?.save();
-                  processDataSignUp(name, email, password);
+                  processDataSignUp(context, name, email, password);
                 }
               },
               child: Text('Sign up',
@@ -388,8 +388,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   onPressed: () {
                     showDialog(
                         context: context,
-                        builder: (BuildContext context) =>
-                            popUpNoSuchFeature(context));
+                        builder: (BuildContext context) => popUpNoSuchFeature(
+                            context, 'the feature will be here soon'));
                   },
                   child: Column(children: [
                     Text('or sign up with',
@@ -432,12 +432,16 @@ class _TopBackState extends State<TopBack> {
   }
 }
 
-void processDataSignUp(String name, String email, String password) async {
+void processDataSignUp(
+    BuildContext context, String name, String email, String password) async {
   List<Map<String, dynamic>> listmaps =
       await databaseHelperUser.selectEmail(email);
 
   if (listmaps.length != 0) {
-    print('account exists');
+    showDialog(
+        context: context,
+        builder: (BuildContext context) =>
+            popUpNoSuchFeature(context, 'the account already exists'));
   } else {
     EMAIL = email;
     UserModel us = UserModel(-1, name, email, password);
@@ -468,7 +472,7 @@ class SignUp extends StatelessWidget {
   }
 }
 
-Widget popUpNoSuchFeature(BuildContext context) {
+Widget popUpNoSuchFeature(BuildContext context, String text) {
   return AlertDialog(
       contentPadding: EdgeInsets.all(0),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
@@ -487,7 +491,7 @@ Widget popUpNoSuchFeature(BuildContext context) {
                         height: 20,
                         alignment: Alignment.centerRight,
                         child: Icon(Icons.close, color: Colors.black)))),
-            Text('No such feature yet!',
+            Text(text,
                 style: TextStyle(
                     fontFamily: 'Inter-Regular',
                     fontSize: 16,

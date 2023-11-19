@@ -23,12 +23,13 @@ class DatabaseHelper {
 
   DatabaseHelper() {}
 
-  Future<void> init() async {
+  Future<Database> init() async {
     Directory directory = await getApplicationDocumentsDirectory();
     String path = directory.path + name;
     Path = path;
     print('Database initialized $name');
     database = await openDatabase(path, version: 1, onCreate: _createDb);
+    return database;
   }
 
   Future<void> deleteDatabase() => databaseFactory.deleteDatabase(Path);

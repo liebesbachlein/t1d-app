@@ -312,7 +312,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         showDialog(
                             context: context,
                             builder: (BuildContext context) =>
-                                popUpNoSuchFeature(context));
+                                popUpNoSuchFeature(
+                                    context, 'the feature will be here soon'));
                       },
                       child: Text('Forgot password?',
                           style: TextStyle(
@@ -338,7 +339,7 @@ class _LoginScreenState extends State<LoginScreen> {
               onPressed: () {
                 if (_formkey.currentState!.validate()) {
                   _formkey.currentState?.save();
-                  processDataLogin(email, password);
+                  processDataLogin(context, email, password);
                 }
               },
               child: Text('Login',
@@ -353,8 +354,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   onPressed: () {
                     showDialog(
                         context: context,
-                        builder: (BuildContext context) =>
-                            popUpNoSuchFeature(context));
+                        builder: (BuildContext context) => popUpNoSuchFeature(
+                            context, 'the feature will be here soon'));
                   },
                   child: Column(children: [
                     Text('or login with',
@@ -397,15 +398,22 @@ class _TopBackState extends State<TopBack> {
   }
 }
 
-void processDataLogin(String email, String password) async {
+void processDataLogin(
+    BuildContext context, String email, String password) async {
   List<Map<String, dynamic>> listmaps =
       await databaseHelperUser.selectEmail(email);
 
   if (listmaps.length == 0) {
-    print('no such account');
+    showDialog(
+        context: context,
+        builder: (BuildContext context) =>
+            popUpNoSuchFeature(context, 'no such account'));
   } else {
     if (listmaps[0]['password'] != password) {
-      print('incorrent password');
+      showDialog(
+          context: context,
+          builder: (BuildContext context) =>
+              popUpNoSuchFeature(context, 'incorrent password'));
     } else {
       EMAIL = email;
       main2();
@@ -435,7 +443,7 @@ class LogTop extends StatelessWidget {
   }
 }
 
-Widget popUpNoSuchFeature(BuildContext context) {
+Widget popUpNoSuchFeature(BuildContext context, String text) {
   return AlertDialog(
       contentPadding: EdgeInsets.all(0),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
@@ -454,7 +462,7 @@ Widget popUpNoSuchFeature(BuildContext context) {
                         height: 20,
                         alignment: Alignment.centerRight,
                         child: Icon(Icons.close, color: Colors.black)))),
-            Text('No such feature yet!',
+            Text(text,
                 style: TextStyle(
                     fontFamily: 'Inter-Regular',
                     fontSize: 16,
