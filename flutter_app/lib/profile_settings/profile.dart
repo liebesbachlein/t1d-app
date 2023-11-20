@@ -5,6 +5,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_app/colors.dart';
 import 'dart:core';
 
+import 'package:flutter_app/profile_settings/backup.dart';
+
 class ProfileSettings extends StatefulWidget {
   const ProfileSettings({super.key});
 
@@ -184,7 +186,11 @@ class _SettingOneState extends State<SettingOne> {
                   color: AppColors.text_set,
                   onPressed: () {
                     setState(() {
-                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const BackUpSetting()),
+                      );
                     });
                   }))
         ]));

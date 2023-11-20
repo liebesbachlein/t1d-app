@@ -6,10 +6,10 @@ import 'package:flutter_app/test.dart';
 import 'package:flutter_app/data_log/data_log.dart';
 import 'dart:async';
 
-late String EMAIL;
+String EMAIL = 'gerardinearmstrong@gmail.com';
 
 void main() {
-  runApp(const MainWelcome());
+  runApp(const MainHome());
 }
 
 class MainWelcome extends StatelessWidget {

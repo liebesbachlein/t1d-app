@@ -7,6 +7,7 @@ import 'package:fl_chart/fl_chart.dart';
 
 import 'package:flutter_app/profile_settings/profile.dart';
 import 'package:flutter_app/test.dart';
+import 'dart:math';
 
 const List<String> weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const List<String> months = [
@@ -23,6 +24,30 @@ const List<String> months = [
   'November',
   'December'
 ];
+
+List<double> listY = funcY();
+//List<String> listY3 = ['0', '5', '9', '', '9', '11', '13'];
+List<String> listY2 = ['0', '4', '7', '10', '13', '16', '19'];
+List<String> listY1 = ['0', '3', '5', '7', '9', '11', '13'];
+
+List<double> funcY() {
+  List<double> jj = [];
+  for (int i = 0; i < 24; i++) {
+    jj.add(i.toDouble());
+    jj.add(i.toDouble() + 0.5);
+  }
+  return jj;
+}
+
+List<String> funcX() {
+  List<String> ii = [];
+  for (int i = 0; i < 26; i++) {
+    for (int j = 0; j < 10; j++) {
+      //ii.add('${i}.');
+    }
+  }
+  return ii;
+}
 
 int g_pos = 0;
 final dpKey = new GlobalKey<_DateAndProfilePicState>();
@@ -261,12 +286,10 @@ class SeePlot extends StatefulWidget {
   State<SeePlot> createState() => _SeePlotState();
 }
 
-class _SeePlotState extends State<SeePlot> {
-  bool isThereInfo = false;
-  String tx = '';
-  List<Map<String, dynamic>> dat = [];
+bool isThereInfo = false;
 
-  Future<bool> doPlot() async {
+class _SeePlotState extends State<SeePlot> {
+  Future<List<Map<String, dynamic>>> doPlot() async {
     print('Doing initialization plot');
     int poss = g_pos;
     DateTime time = DateTime.now();
@@ -281,14 +304,7 @@ class _SeePlotState extends State<SeePlot> {
     }
     List<Map<String, dynamic>> dat =
         await databaseHelper.selectGV(this_date.toIso8601String());
-    if (dat.length != 0) {
-      isThereInfo = true;
-      tx = dat.toString();
-    } else {
-      isThereInfo = false;
-      tx = '';
-    }
-    return isThereInfo;
+    return dat;
   }
 
   Future<bool> doPlotSecond() async {
@@ -309,10 +325,8 @@ class _SeePlotState extends State<SeePlot> {
     setState(() {
       if (dat.length != 0) {
         isThereInfo = true;
-        tx = dat.toString();
       } else {
         isThereInfo = false;
-        tx = '';
       }
     });
 
@@ -332,12 +346,12 @@ class _SeePlotState extends State<SeePlot> {
                 ),
               );
             } else if (snapshot.hasData) {
-              final isIt = snapshot.data as bool;
+              final isIt = snapshot.data as List<Map<String, dynamic>>;
               return Container(
                   width: MediaQuery.of(context).size.width,
                   margin: EdgeInsets.only(left: 17, right: 17, top: 37),
                   constraints: BoxConstraints(
-                      minHeight: MediaQuery.of(context).size.height * 0.3),
+                      minHeight: MediaQuery.of(context).size.height * 0.45),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(24),
@@ -354,14 +368,15 @@ class _SeePlotState extends State<SeePlot> {
                         padding: EdgeInsets.only(
                             left: 10, right: 10, top: 26, bottom: 26),
                         alignment: Alignment.topLeft,
-                        child: isIt
-                            ? Container(
+                        child: (isIt.length != 0)
+                            ? LineChartSample5(
+                                isIt) /*Container(
                                 padding: EdgeInsets.only(
                                     left: 0, right: 10, top: 0, bottom: 0),
                                 child: Text(tx,
                                     style: TextStyle(
                                         fontFamily: 'Inter-Regular',
-                                        fontSize: 16)))
+                                        fontSize: 16)))*/
                             : Row(children: [
                                 Container(
                                     padding: EdgeInsets.only(
@@ -645,4 +660,258 @@ class _WeekState extends State<Week> {
         },
         future: isTicks(pos));
   }
+}
+
+class LineChartSample5 extends StatefulWidget {
+  List<Map<String, dynamic>> listofmaps = [];
+
+  LineChartSample5(this.listofmaps);
+
+  @override
+  State<LineChartSample5> createState() => _LineChartSample5State(listofmaps);
+}
+
+class _LineChartSample5State extends State<LineChartSample5> {
+  late List<int> showingTooltipOnSpots;
+  late List<FlSpot> allSpots;
+  late List<double> listY;
+  late List<double> listX;
+  double minX = 0;
+  double maxX = 0;
+  double minY = 0;
+  double maxY = 0;
+
+  _LineChartSample5State(List<Map<String, dynamic>> listofmaps) {
+    int j = 0;
+    showingTooltipOnSpots = [];
+    allSpots = [];
+    listY = [];
+    listX = [];
+    for (Map<String, dynamic> i in listofmaps) {
+      double tt = 0;
+      if (i['"minute'] == 0) {
+        tt = i['hour'];
+      } else {
+        tt = i['hour'].toDouble();
+        tt = tt + 0.5;
+      }
+
+      listX.add(tt);
+      listY.add(i['glucose_val']);
+      allSpots.add(FlSpot(tt, i['glucose_val']));
+      showingTooltipOnSpots.add(j);
+      j++;
+    }
+
+    double MinX = listX.reduce(min);
+    if (MinX < 6) {
+      if (MinX % 2 == 0) {
+        minX = MinX;
+      } else {
+        minX = MinX - 1;
+      }
+    } else {
+      minX = 6;
+    }
+
+    maxX = 24;
+
+    double minY = 0;
+    double MaxY = listY.reduce(max);
+    if (MaxY > 14) {
+      if (MaxY % 2 == 0) {
+        maxY = MaxY;
+      } else {
+        maxY = MaxY + 1;
+      }
+    } else {
+      maxY = 14;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    print([minX, maxX, minY, maxY].toString());
+    final lineBarsData = [
+      LineChartBarData(
+        showingIndicators: showingTooltipOnSpots,
+        spots: allSpots,
+        isCurved: true,
+        barWidth: 2,
+        belowBarData: BarAreaData(
+          show: true,
+          gradient: LinearGradient(
+            begin: Alignment.center,
+            end: Alignment.bottomCenter,
+            colors: [
+              AppColors.lavender.withOpacity(0.2),
+              AppColors.lavender.withOpacity(0),
+            ],
+            //stops: const [0.1, 0.4, 0.9],
+          ),
+        ),
+        dotData: const FlDotData(show: false),
+        color: AppColors.lavender,
+      )
+    ];
+
+    final tooltipsOnBar = lineBarsData[0];
+
+    return AspectRatio(
+        aspectRatio: 1.2,
+        child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 0,
+              vertical: 30,
+            ),
+            child: LayoutBuilder(builder: (context, constraints) {
+              return LineChart(LineChartData(
+                  extraLinesData: ExtraLinesData(horizontalLines: [
+                    HorizontalLine(
+                      y: listY.reduce((a, b) => a + b) / listY.length,
+                      color: AppColors.mint,
+                      strokeWidth: 3,
+                    )
+                  ]),
+                  minX: minX,
+                  maxX: maxX,
+                  minY: minY,
+                  maxY: maxY,
+                  showingTooltipIndicators: showingTooltipOnSpots.map((index) {
+                    return ShowingTooltipIndicators([
+                      LineBarSpot(
+                        tooltipsOnBar,
+                        lineBarsData.indexOf(tooltipsOnBar),
+                        tooltipsOnBar.spots[index],
+                      ),
+                    ]);
+                  }).toList(),
+                  lineTouchData: LineTouchData(
+                      enabled: true,
+                      handleBuiltInTouches: false,
+                      getTouchedSpotIndicator:
+                          (LineChartBarData barData, List<int> spotIndexes) {
+                        return spotIndexes.map((index) {
+                          return TouchedSpotIndicatorData(
+                              FlLine(
+                                color: AppColors.trans,
+                              ),
+                              FlDotData(
+                                  show: true,
+                                  getDotPainter:
+                                      (spot, percent, barData, index) =>
+                                          FlDotCirclePainter(
+                                            radius: 5,
+                                            color: Colors.white,
+                                            strokeWidth: 2,
+                                            strokeColor: AppColors.lavender,
+                                          )));
+                        }).toList();
+                      },
+                      touchTooltipData: LineTouchTooltipData(
+                          tooltipBgColor: AppColors.lavender_light,
+                          tooltipRoundedRadius: 12,
+                          //tooltipMargin: 12,
+                          tooltipPadding:
+                              EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                          getTooltipItems: (List<LineBarSpot> lineBarsSpot) {
+                            return lineBarsSpot.map((lineBarSpot) {
+                              return LineTooltipItem(
+                                  lineBarSpot.y.toString(),
+                                  TextStyle(
+                                    color: AppColors.text_info,
+                                    fontFamily: 'Inter-Regular',
+                                    fontSize: 12,
+                                  ));
+                            }).toList();
+                          })),
+                  lineBarsData: lineBarsData,
+                  titlesData: FlTitlesData(
+                      leftTitles: AxisTitles(
+                          axisNameSize: 0,
+                          sideTitles: SideTitles(
+                              showTitles: true,
+                              interval: 2,
+                              getTitlesWidget: (value, meta) {
+                                String s;
+                                if (value == 0) {
+                                  s = '';
+                                } else {
+                                  s = value.round().toString();
+                                }
+
+                                return SideTitleWidget(
+                                    axisSide: meta.axisSide,
+                                    child: Text(s.toString(),
+                                        style: TextStyle(
+                                            color: AppColors.text_info,
+                                            fontFamily: 'Inter-Regular',
+                                            fontSize: 12)));
+                              },
+                              reservedSize: 25)),
+                      bottomTitles: AxisTitles(
+                          sideTitles: SideTitles(
+                        showTitles: true,
+                        interval: 2,
+                        getTitlesWidget: (value, meta) {
+                          String s;
+                          if (value == 24) {
+                            s = '';
+                          } else {
+                            s = value.round().toString();
+                          }
+
+                          return SideTitleWidget(
+                              axisSide: meta.axisSide,
+                              child: Text(s,
+                                  style: TextStyle(
+                                      color: AppColors.text_info,
+                                      fontFamily: 'Inter-Regular',
+                                      fontSize: 12)));
+                        },
+                        reservedSize: 30,
+                      )),
+                      rightTitles: const AxisTitles(),
+                      topTitles: const AxisTitles()),
+                  gridData: const FlGridData(show: true),
+                  borderData: FlBorderData(
+                      show: true,
+                      border: Border.all(
+                        color: AppColors.trans,
+                      ))));
+            })));
+  }
+}
+
+/// Lerps between a [LinearGradient] colors, based on [t]
+Color lerpGradient(List<Color> colors, List<double> stops, double t) {
+  if (colors.isEmpty) {
+    throw ArgumentError('"colors" is empty.');
+  } else if (colors.length == 1) {
+    return colors[0];
+  }
+
+  if (stops.length != colors.length) {
+    stops = [];
+
+    /// provided gradientColorStops is invalid and we calculate it here
+    colors.asMap().forEach((index, color) {
+      final percent = 1.0 / (colors.length - 1);
+      stops.add(percent * index);
+    });
+  }
+
+  for (var s = 0; s < stops.length - 1; s++) {
+    final leftStop = stops[s];
+    final rightStop = stops[s + 1];
+    final leftColor = colors[s];
+    final rightColor = colors[s + 1];
+    if (t <= leftStop) {
+      return leftColor;
+    } else if (t < rightStop) {
+      final sectionT = (t - leftStop) / (rightStop - leftStop);
+      return Color.lerp(leftColor, rightColor, sectionT)!;
+    }
+  }
+  return colors.last;
 }
