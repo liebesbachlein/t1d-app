@@ -416,7 +416,7 @@ void processDataLogin(
               popUpNoSuchFeature(context, 'incorrent password'));
     } else {
       EMAIL = email;
-      main2();
+      main();
     }
   }
 }

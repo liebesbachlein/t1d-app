@@ -446,7 +446,7 @@ void processDataSignUp(
     EMAIL = email;
     UserModel us = UserModel(-1, name, email, password);
     databaseHelperUser.insert(us);
-    main2();
+    main();
   }
 }
 

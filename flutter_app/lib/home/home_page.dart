@@ -64,6 +64,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      //why to add  an appbar when it is not used at all
         appBar: AppBar(
           foregroundColor: Colors.white,
           systemOverlayStyle: SystemUiOverlayStyle(
@@ -75,7 +76,7 @@ class _HomePageState extends State<HomePage> {
           elevation: 0,
         ),
         bottomNavigationBar: Container(
-            height: 60,
+            height: 80,
             decoration: BoxDecoration(boxShadow: [
               BoxShadow(
                   color: Color.fromRGBO(149, 157, 165, 0.1),
@@ -89,7 +90,7 @@ class _HomePageState extends State<HomePage> {
                   currentPageIndex = index;
                 });
               },
-              iconSize: 25,
+              iconSize: 32,
               backgroundColor: Colors.white,
               selectedItemColor: AppColors.lavender,
               unselectedItemColor: Colors.black,
@@ -194,20 +195,21 @@ class _DateAndProfilePicState extends State<DateAndProfilePic> {
   Widget build(BuildContext context) {
     return Container(
         child:
-            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-      Container(
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween, 
+            children: [
+        Container(
           child: Padding(
-              padding: EdgeInsets.only(left: 29, right: 29),
-              /*child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 300),
-                  transitionBuilder:
-                      (Widget child, Animation<double> animation) {
-                    return FadeTransition(opacity: animation, child: child);
-                  },*/
-              child: Text(tx,
-                  key: ValueKey<String>(tx),
-                  style:
-                      TextStyle(fontFamily: 'Inter-Regular', fontSize: 24)))),
+            padding: EdgeInsets.only(left: 29, right: 29),
+          child: Text(
+            tx,
+            key: ValueKey<String>(tx),
+            style: TextStyle(fontFamily: 'Inter-Regular', fontSize: 24),
+            textAlign: TextAlign.left,
+          ),
+
+      ),
+    ),
       Align(
           alignment: Alignment.centerRight,
           child: Container(
@@ -650,7 +652,7 @@ class _WeekState extends State<Week> {
                               updateDC(pos);
                             });
                           })
-                    ]),
+              ]),
               );
             }
           }
