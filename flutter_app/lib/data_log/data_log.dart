@@ -84,23 +84,16 @@ class _DataLogState extends State<DataLog> {
   bool isChanged = false;
 
   void setIsChanged(bool newChanged) {
-    setState(() {
-      isChanged = newChanged;
-    });
+    if (isChanged != newChanged) {
+      setState(() {
+        isChanged = newChanged;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-            backgroundColor: Colors.white,
-            systemOverlayStyle: SystemUiOverlayStyle(
-              statusBarColor: Colors.white,
-              statusBarIconBrightness: Brightness.dark, // Android dark???
-              statusBarBrightness: Brightness.light, // iOS dark???
-            ),
-            toolbarHeight: 0,
-            elevation: 0),
         body: Stack(children: <Widget>[
           DataField(key: dkey),
           Container(
@@ -124,16 +117,13 @@ class _DataLogState extends State<DataLog> {
               borderRadius: BorderRadius.circular(30),
             ),
             backgroundColor: isChanged ? AppColors.mint : AppColors.text_sub,
-            onPressed: () {
-              setState(() {
-                dkey.currentState?.pushVals();
-              });
-            },
+            onPressed: () => dkey.currentState?.pushVals(),
             child: isChanged
                 ? Icon(Icons.add_task_outlined)
                 : Icon(Icons.task_alt)));
   }
 }
+
 
 class DataField extends StatefulWidget {
   DataField({required Key key}) : super(key: key) {}

@@ -152,42 +152,27 @@ class _DateAndProfilePicState extends State<DateAndProfilePic> {
   String tx = 'Today';
 
   _DateAndProfilePicState() {
+    calculateTx();
+  }
+  void calculateTx(){
     int pos = g_pos;
     if (pos != 0) {
-      DateTime this_date = DateTime.now();
+      DateTime thisDate = DateTime.now();
       if (pos > 0) {
-        this_date = this_date.subtract(Duration(days: pos));
+        thisDate = thisDate.subtract(Duration(days: pos));
       } else {
-        this_date = this_date.add(Duration(days: -pos));
+        thisDate = thisDate.add(Duration(days: -pos));
       }
-      tx = weekdays[this_date.weekday - 1] +
-          ' ' +
-          this_date.day.toString() +
-          ' ' +
-          months[this_date.month - 1];
+      tx = weekdays[thisDate.weekday - 1] +
+            ' ' + thisDate.day.toString() +
+            ' ' + months[thisDate.month - 1];
     } else {
       tx = 'Today';
-    }
-  }
+    }}
 
   void getTx() {
     setState(() {
-      int pos = g_pos;
-      if (pos != 0) {
-        DateTime this_date = DateTime.now();
-        if (pos > 0) {
-          this_date = this_date.subtract(Duration(days: pos));
-        } else {
-          this_date = this_date.add(Duration(days: -pos));
-        }
-        tx = weekdays[this_date.weekday - 1] +
-            ' ' +
-            this_date.day.toString() +
-            ' ' +
-            months[this_date.month - 1];
-      } else {
-        tx = 'Today';
-      }
+      calculateTx();
     });
   }
 
@@ -226,13 +211,10 @@ class _DateAndProfilePicState extends State<DateAndProfilePic> {
                   ),
                   child: GestureDetector(
                       onTap: () {
-                        setState(() {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(
-                                builder: (context) => const ProfileSettings()),
+                            MaterialPageRoute(builder: (context) => const ProfileSettings()),
                           );
-                        });
                       },
                       child: CircleAvatar(
                         backgroundColor: AppColors.lavender,
@@ -259,7 +241,7 @@ class TopPlashka extends Container {
     return Container(
         height: 200,
         //constraints: BoxConstraints(
-        //  minHeight: MediaQuery.of(context).size.height * 0.22),
+        //minHeight: MediaQuery.of(context).size.height * 0.22),
         decoration: BoxDecoration(
             boxShadow: [
               BoxShadow(
@@ -289,21 +271,25 @@ class SeePlot extends StatefulWidget {
 }
 
 bool isThereInfo = false;
+DateTime calculateAdjustedDate(int positionOffset) {
+  DateTime now = DateTime.now();
+  DateTime adjustedDate = DateTime(now.year, now.month, now.day, 0, 0, 0, 0, 0);
+
+  if (positionOffset != 0) {
+    adjustedDate = positionOffset > 0 
+        ? adjustedDate.subtract(Duration(days: positionOffset))
+        : adjustedDate.add(Duration(days: -positionOffset));
+  }
+
+  return adjustedDate;
+}
 
 class _SeePlotState extends State<SeePlot> {
   Future<List<Map<String, dynamic>>> doPlot() async {
     print('Doing initialization plot');
     int poss = g_pos;
     DateTime time = DateTime.now();
-    DateTime this_date =
-        DateTime(time.year, time.month, time.day, 0, 0, 0, 0, 0);
-    if (poss != 0) {
-      if (poss > 0) {
-        this_date = this_date.subtract(Duration(days: poss));
-      } else {
-        this_date = this_date.add(Duration(days: -poss));
-      }
-    }
+    DateTime this_date = calculateAdjustedDate(poss);
     List<Map<String, dynamic>> dat =
         await databaseHelper.selectGV(this_date.toIso8601String());
     return dat;
@@ -312,16 +298,7 @@ class _SeePlotState extends State<SeePlot> {
   Future<bool> doPlotSecond() async {
     print('Doing secondary plot');
     int poss = g_pos;
-    DateTime time = DateTime.now();
-    DateTime this_date =
-        DateTime(time.year, time.month, time.day, 0, 0, 0, 0, 0);
-    if (poss != 0) {
-      if (poss > 0) {
-        this_date = this_date.subtract(Duration(days: poss));
-      } else {
-        this_date = this_date.add(Duration(days: -poss));
-      }
-    }
+    DateTime this_date = calculateAdjustedDate(poss);
     List<Map<String, dynamic>> dat =
         await databaseHelper.selectGV(this_date.toIso8601String());
     setState(() {
@@ -502,15 +479,7 @@ class _WeekState extends State<Week> {
     for (int i = 0; i < 6; i++) {
       int poss = g_pos + i;
       DateTime time = DateTime.now();
-      DateTime this_date =
-          DateTime(time.year, time.month, time.day, 0, 0, 0, 0, 0);
-      if (poss != 0) {
-        if (poss > 0) {
-          this_date = this_date.subtract(Duration(days: poss));
-        } else {
-          this_date = this_date.add(Duration(days: -poss));
-        }
-      }
+      DateTime this_date = calculateAdjustedDate(poss);
       List<Map<String, dynamic>> listmaps =
           await databaseHelper.selectGV(this_date.toIso8601String());
 
@@ -558,18 +527,25 @@ class _WeekState extends State<Week> {
                 child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      IconButton(
-                          icon: Icon(Icons.arrow_back_ios),
-                          onPressed: () {
-                            setState(() {
-                              this.pos = this.pos + 1;
-                              g_pos = this.pos;
-                              dpKey.currentState?.getTx();
-                              sKey.currentState?.doPlotSecond();
-                              updateDC(pos);
-                            });
-                          }),
-                      Container(
+                            Flexible(
+                                    flex: 0, // Adjust the flex factor as needed
+                                      child: IconButton(
+                                        icon: Icon(Icons.arrow_back_ios),
+                                        onPressed: () {
+                                          setState(() {
+                                            this.pos = this.pos + 1;
+                                            g_pos = this.pos;
+                                            dpKey.currentState?.getTx();
+                                            sKey.currentState?.doPlotSecond();
+                                            updateDC(pos);
+                                      }
+                                      );
+                                    },
+                                  ),
+                                ),
+                      Flexible(
+                        flex: 1,
+                        child: Container(
                           width: 50,
                           alignment: Alignment.center,
                           child: Column(children: [
@@ -580,8 +556,12 @@ class _WeekState extends State<Week> {
                                         ? AppColors.mint
                                         : AppColors.trans)),
                             getDC(0, g_pos)
-                          ])),
-                      Container(
+                          ],
+                        ),
+                      ),
+                    ),
+                    Flexible(
+                      child:Container(
                           width: 50,
                           alignment: Alignment.center,
                           child: Column(children: [
@@ -592,8 +572,13 @@ class _WeekState extends State<Week> {
                                         ? AppColors.mint
                                         : AppColors.trans)),
                             getDC(1, g_pos)
-                          ])),
-                      Container(
+                          ]
+                        ),
+                      ),
+                    ),
+                    Flexible(
+                      flex: 1,
+                      child:Container(
                           width: 50,
                           alignment: Alignment.center,
                           child: Column(children: [
@@ -604,8 +589,13 @@ class _WeekState extends State<Week> {
                                         ? AppColors.mint
                                         : AppColors.trans)),
                             getDC(2, g_pos)
-                          ])),
-                      Container(
+                          ]
+                        ),
+                      ),
+                    ),
+                    Flexible(
+                      flex: 1,
+                      child:Container(
                           width: 50,
                           alignment: Alignment.center,
                           child: Column(children: [
@@ -616,8 +606,13 @@ class _WeekState extends State<Week> {
                                         ? AppColors.mint
                                         : AppColors.trans)),
                             getDC(3, g_pos)
-                          ])),
-                      Container(
+                          ]
+                        ),
+                      ),
+                    ),
+                    Flexible(
+                      flex: 1,
+                      child: Container(
                           width: 50,
                           alignment: Alignment.center,
                           child: Column(children: [
@@ -628,8 +623,13 @@ class _WeekState extends State<Week> {
                                         ? AppColors.mint
                                         : AppColors.trans)),
                             getDC(4, g_pos)
-                          ])),
-                      Container(
+                          ]
+                        ),
+                      ),
+                    ),
+                    Flexible(
+                      flex: 1,
+                      child:Container(
                           width: 50,
                           alignment: Alignment.center,
                           child: Column(children: [
@@ -640,8 +640,13 @@ class _WeekState extends State<Week> {
                                         ? AppColors.mint
                                         : AppColors.trans)),
                             getDC(5, g_pos)
-                          ])),
-                      IconButton(
+                          ]
+                        ),
+                      ),
+                    ),
+                    Flexible(
+                      flex: 0,
+                      child:IconButton(
                           icon: Icon(Icons.arrow_forward_ios),
                           onPressed: () {
                             setState(() {
@@ -651,8 +656,11 @@ class _WeekState extends State<Week> {
                               sKey.currentState?.doPlotSecond();
                               updateDC(pos);
                             });
-                          })
-              ]),
+                          }
+                        ),
+                    ),
+                  ]
+                ),
               );
             }
           }
@@ -808,8 +816,9 @@ class _LineChartSample5State extends State<LineChartSample5> {
                                             strokeWidth: 2,
                                             strokeColor: AppColors.lavender,
                                           )));
-                        }).toList();
-                      },
+                        }
+                      ).toList();
+                    },
                       touchTooltipData: LineTouchTooltipData(
                           tooltipBgColor: AppColors.lavender_light,
                           tooltipRoundedRadius: 12,

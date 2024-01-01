@@ -216,13 +216,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           RequiredValidator(errorText: 'email?'),
                           EmailValidator(errorText: 'Fix the email'),
                         ]),
-                        onSaved: (e) {
-                          if (e == null) {
-                            email = '';
-                          } else {
-                            email = e;
-                          }
-                        },
+                        onSaved: (e) => email = e ?? '',
                         decoration: InputDecoration(
                             constraints: BoxConstraints(minHeight: 60),
                             hintText: "Email",
@@ -272,13 +266,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               errorText:
                                   'add a special character')*/
                         ]),
-                        onSaved: (e) {
-                          if (e == null) {
-                            password = '';
-                          } else {
-                            password = e;
-                          }
-                        },
+                        onSaved: (e) => password = e ?? '',
                         decoration: InputDecoration(
                             fillColor: AppColors.lavender,
                             focusColor: AppColors.lavender,

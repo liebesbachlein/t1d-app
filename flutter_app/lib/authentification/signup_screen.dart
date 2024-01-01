@@ -217,13 +217,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           RequiredValidator(errorText: 'name?'),
                           //EmailValidator(errorText: 'Fix the email'),
                         ]),
-                        onSaved: (e) {
-                          if (e == null) {
-                            name = '';
-                          } else {
-                            name = e;
-                          }
-                        },
+                        onSaved: (e) => name = e ?? '',
                         decoration: InputDecoration(
                             constraints: BoxConstraints(minHeight: 60),
                             hintText: "Name",
@@ -268,13 +262,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           RequiredValidator(errorText: 'email?'),
                           EmailValidator(errorText: 'Fix the email'),
                         ]),
-                        onSaved: (e) {
-                          if (e == null) {
-                            email = '';
-                          } else {
-                            email = e;
-                          }
-                        },
+                        onSaved: (e) => email = e ?? '',
                         decoration: InputDecoration(
                             constraints: BoxConstraints(minHeight: 60),
                             hintText: "Email",
@@ -324,13 +312,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               errorText:
                                   'add a special character')*/
                         ]),
-                        onSaved: (e) {
-                          if (e == null) {
-                            password = '';
-                          } else {
-                            password = e;
-                          }
-                        },
+                        onSaved: (e) => password = e ?? '',
                         decoration: InputDecoration(
                             fillColor: AppColors.lavender,
                             focusColor: AppColors.lavender,
@@ -431,6 +413,25 @@ class _TopBackState extends State<TopBack> {
             }));
   }
 }
+//possible reduced version ?
+// class TopBack extends StatelessWidget {
+//   const TopBack({Key? key}) : super(key: key);
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Container(
+//       alignment: Alignment.centerLeft,
+//       padding: EdgeInsets.only(left: 12),
+//       height: 50,
+//       width: MediaQuery.of(context).size.width,
+//       child: IconButton(
+//         icon: Icon(Icons.arrow_back_ios),
+//         color: Colors.white,
+//         onPressed: () => Navigator.pop(context),
+//       ),
+//     );
+//   }
+// }
 
 void processDataSignUp(
     BuildContext context, String name, String email, String password) async {
