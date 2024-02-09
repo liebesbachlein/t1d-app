@@ -9,7 +9,7 @@ import 'dart:async';
 String EMAIL = 'gerardinearmstrong@gmail.com';
 
 void main() {
-  runApp(const MainHome());
+  runApp(const MainWelcome());
 }
 
 class MainWelcome extends StatelessWidget {

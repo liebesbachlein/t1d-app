@@ -9,6 +9,7 @@ class TrackGV {
     GV2 = g.round();
   }
 
+  @override
   String toString() {
     return GV.toString();
   }
@@ -16,14 +17,11 @@ class TrackGV {
 
 class TrackTmGV {
   int id = -1;
-
   int month = -1;
   String date = '';
   int hour = -1;
   int minute = -1;
-
   double gluval = -1;
-
   DateTime time = DateTime.now();
 
   TrackTmGV(this.time) {
@@ -32,33 +30,6 @@ class TrackTmGV {
     month = time.month;
     hour = time.hour;
     minute = time.minute;
-  }
-
-  void setDate(DateTime d) {
-    time = d;
-    date = DateTime(d.year, d.month, d.day, 0, 0, 0, 0, 0).toIso8601String();
-    month = d.month;
-  }
-
-  List<TrackGV> listOfGV = [];
-
-  void nulled() {
-    listOfGV = [];
-    gluval = -1;
-  }
-
-  String toString() {
-    return '$id||$date||$hour||$minute||$listOfGV';
-  }
-
-  void replace(TrackGV newgV) {
-    if (listOfGV.isEmpty) {
-      listOfGV.add(newgV);
-      gluval = newgV.GV;
-    } else {
-      listOfGV[0] = newgV;
-      gluval = newgV.GV;
-    }
   }
 
   Map<String, dynamic> toMap() {
@@ -84,5 +55,33 @@ class TrackTmGV {
     time = DateTime(
         time_ini.year, time_ini.month, time_ini.day, hour, minute, 0, 0, 0);
     replace(TrackGV(gluval));
+  }
+
+  void setDate(DateTime d) {
+    time = d;
+    date = DateTime(d.year, d.month, d.day, 0, 0, 0, 0, 0).toIso8601String();
+    month = d.month;
+  }
+
+  List<TrackGV> listOfGV = [];
+
+  void nulled() {
+    listOfGV = [];
+    gluval = -1;
+  }
+
+  void replace(TrackGV newgV) {
+    if (listOfGV.isEmpty) {
+      listOfGV.add(newgV);
+      gluval = newgV.GV;
+    } else {
+      listOfGV[0] = newgV;
+      gluval = newgV.GV;
+    }
+  }
+
+  @override
+  String toString() {
+    return '$id||$date||$hour||$minute||$listOfGV';
   }
 }
