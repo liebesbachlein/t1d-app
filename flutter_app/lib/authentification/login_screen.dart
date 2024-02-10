@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_app/authentification/auth_services.dart';
 import 'package:flutter_app/authentification/welcome_screen.dart';
 import 'package:flutter_app/main.dart';
 import 'package:flutter_app/colors.dart';
 import 'package:form_field_validator/form_field_validator.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 //import 'package:google_sign_in/google_sign_in.dart';
 //import 'package:http/http.dart' as http;
 //import 'dart:convert' show json;
@@ -38,7 +40,22 @@ class _LoginScreenState extends State<LoginScreen> {
   //GoogleSignInAccount? _currentUser;
   //bool _isAuthorized = false;
   //String _contactText = '';
+  bool _isSignIning = false;
+
   final _formkey = GlobalKey<FormState>();
+
+  final FirebaseServices _auth = FirebaseServices();
+
+  TextEditingController _emailController = TextEditingController();
+  TextEditingController _passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
 /*
   @override
   void initState() {
@@ -164,11 +181,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   //alignment: Alignment.topCenter,
                   //color: AppColors.background,
                   alignment: Alignment.bottomCenter,
-                  child: LoginForm(context))
+                  child: LoginForm())
             ])));
   }
 
-  Widget LoginForm(BuildContext context) {
+  Widget LoginForm() {
     Map userData = {};
     String email = '';
     String password = '';
@@ -197,6 +214,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     margin: EdgeInsets.only(bottom: 20, top: 10),
                     height: 55,
                     child: TextFormField(
+                        controller: _emailController,
                         style: TextStyle(
                             fontFamily: 'Inter-Regular',
                             fontSize: 16,
@@ -248,6 +266,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     //margin: EdgeInsets.only(bottom: 5),
                     height: 55,
                     child: TextFormField(
+                        controller: _passwordController,
                         style: TextStyle(
                             fontFamily: 'Inter-Regular',
                             fontSize: 16,
@@ -262,7 +281,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             offsetForm = 0.52;
                           });
                         },*/
-                        obscuringCharacter: '☠',
+                        obscuringCharacter: '☭',
                         obscureText: true,
                         validator: MultiValidator([
                           RequiredValidator(errorText: 'password?'),
@@ -309,11 +328,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       EdgeInsets.only(top: 5, bottom: 8, left: 10, right: 10),
                   child: TextButton(
                       onPressed: () {
-                        showDialog(
-                            context: context,
-                            builder: (BuildContext context) =>
-                                popUpNoSuchFeature(
-                                    context, 'the feature will be here soon'));
+                        popUpNoSuchFeature("the feature will be here soon");
                       },
                       child: Text('Forgot password?',
                           style: TextStyle(
@@ -339,23 +354,22 @@ class _LoginScreenState extends State<LoginScreen> {
               onPressed: () {
                 if (_formkey.currentState!.validate()) {
                   _formkey.currentState?.save();
-                  processDataLogin(context, email, password);
+                  _signIn();
                 }
               },
-              child: Text('Login',
-                  style: TextStyle(
-                    fontFamily: 'Inter-Medium',
-                    fontSize: 16,
-                    color: Colors.white,
-                  ))),
+              child: _isSignIning
+                  ? CircularProgressIndicator(color: Colors.white)
+                  : Text('Login',
+                      style: TextStyle(
+                        fontFamily: 'Inter-Medium',
+                        fontSize: 16,
+                        color: Colors.white,
+                      ))),
           Padding(
               padding: EdgeInsets.only(top: 40),
               child: TextButton(
                   onPressed: () {
-                    showDialog(
-                        context: context,
-                        builder: (BuildContext context) => popUpNoSuchFeature(
-                            context, 'the feature will be here soon'));
+                    popUpNoSuchFeature("the feature will be here soon");
                   },
                   child: Column(children: [
                     Text('or login with',
@@ -370,6 +384,75 @@ class _LoginScreenState extends State<LoginScreen> {
                         child: Image.asset('lib/assets/images/google_icon.png'))
                   ])))
         ]));
+  }
+
+  void _signIn() async {
+    setState(() {
+      _isSignIning = true;
+    });
+
+    String email = _emailController.text;
+    String password = _passwordController.text;
+
+    User? user = await _auth.signInWithEmailAndPassword(email, password);
+    setState(() {
+      _isSignIning = false;
+    });
+    if (user != null) {
+      print('User successfully signed in');
+      main2(email);
+    } else {
+      popUpNoSuchFeature("Incorrect email/password");
+    }
+  }
+
+  Widget LogTop() {
+    return Container(
+        alignment: Alignment.topLeft,
+        //decoration: BoxDecoration(border: Border.all(color: Colors.black)),
+        width: MediaQuery.of(context).size.width * 0.92,
+        //constraints: BoxConstraints(minHeight: 100),
+        height: MediaQuery.of(context).size.height * 0.92,
+        padding: EdgeInsets.only(left: 12),
+        margin: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.08),
+        child: Text('Login',
+            style: TextStyle(
+              fontFamily: 'Inter-Medium',
+              fontSize: 32,
+              color: Colors.white,
+            )));
+  }
+
+  void popUpNoSuchFeature(String text) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) => AlertDialog(
+            contentPadding: EdgeInsets.all(0),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+            content: SizedBox(
+                width: 200,
+                height: 300,
+                child: Column(children: [
+                  Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          child: Container(
+                              width: 20,
+                              height: 20,
+                              alignment: Alignment.centerRight,
+                              child: Icon(Icons.close, color: Colors.black)))),
+                  Text(text,
+                      style: TextStyle(
+                          fontFamily: 'Inter-Regular',
+                          fontSize: 16,
+                          color: AppColors.mint)),
+                  Image.asset('lib/assets/images/ryan_gosling.jpg',
+                      width: 170, height: 170)
+                ]))));
   }
 }
 
@@ -396,78 +479,4 @@ class _TopBackState extends State<TopBack> {
               });
             }));
   }
-}
-
-void processDataLogin(
-    BuildContext context, String email, String password) async {
-  List<Map<String, dynamic>> listmaps =
-      await databaseHelperUser.selectEmail(email);
-
-  if (listmaps.length == 0) {
-    showDialog(
-        context: context,
-        builder: (BuildContext context) =>
-            popUpNoSuchFeature(context, 'no such account'));
-  } else {
-    if (listmaps[0]['password'] != password) {
-      showDialog(
-          context: context,
-          builder: (BuildContext context) =>
-              popUpNoSuchFeature(context, 'incorrent password'));
-    } else {
-      EMAIL = email;
-      main2();
-    }
-  }
-}
-
-class LogTop extends StatelessWidget {
-  const LogTop({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-        alignment: Alignment.topLeft,
-        //decoration: BoxDecoration(border: Border.all(color: Colors.black)),
-        width: MediaQuery.of(context).size.width * 0.92,
-        //constraints: BoxConstraints(minHeight: 100),
-        height: MediaQuery.of(context).size.height * 0.92,
-        padding: EdgeInsets.only(left: 12),
-        margin: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.08),
-        child: const Text('Login',
-            style: TextStyle(
-              fontFamily: 'Inter-Medium',
-              fontSize: 32,
-              color: Colors.white,
-            )));
-  }
-}
-
-Widget popUpNoSuchFeature(BuildContext context, String text) {
-  return AlertDialog(
-      contentPadding: EdgeInsets.all(0),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      content: SizedBox(
-          width: 200,
-          height: 300,
-          child: Column(children: [
-            Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: Container(
-                        width: 20,
-                        height: 20,
-                        alignment: Alignment.centerRight,
-                        child: Icon(Icons.close, color: Colors.black)))),
-            Text(text,
-                style: TextStyle(
-                    fontFamily: 'Inter-Regular',
-                    fontSize: 16,
-                    color: AppColors.mint)),
-            Image.asset('lib/assets/images/ryan_gosling.jpg',
-                width: 170, height: 170)
-          ])));
 }

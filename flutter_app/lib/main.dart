@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_app/authentification/welcome_screen.dart';
 import 'package:flutter_app/colors.dart';
 import 'package:flutter_app/home/home_page.dart';
-import 'package:flutter_app/test.dart';
 import 'package:flutter_app/data_log/data_log.dart';
 import 'dart:async';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 
-String EMAIL = 'gerardinearmstrong@gmail.com';
-
-void main() {
+Future main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(const MainWelcome());
 }
 
@@ -17,36 +18,19 @@ class MainWelcome extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-        builder: (ctx, snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) {
-            if (snapshot.hasError) {
-              return Center(
-                child: Text(
-                  '${snapshot.error} occurred',
-                  style: TextStyle(fontSize: 18),
-                ),
-              );
-            } else if (snapshot.hasData) {
-              print('DatabaseUSER initialization: Success');
-              return MaterialApp(
-                  debugShowCheckedModeBanner: false, home: WelcomeScreen());
-            }
-          }
-          return Center(
-            child: CircularProgressIndicator(color: AppColors.lavender),
-          );
-        },
-        future: databaseHelperUser.init());
+    return MaterialApp(
+        debugShowCheckedModeBanner: false, home: WelcomeScreen());
   }
 }
 
-void main2() {
-  runApp(const MainHome());
+void main2(String dbName) {
+  runApp(MainHome(dbName));
 }
 
 class MainHome extends StatelessWidget {
-  const MainHome({super.key});
+  String dbName;
+
+  MainHome(this.dbName);
 
   @override
   Widget build(BuildContext context) {
@@ -70,7 +54,7 @@ class MainHome extends StatelessWidget {
             child: CircularProgressIndicator(color: AppColors.lavender),
           );
         },
-        future: databaseHelper.init());
+        future: databaseHelper.init(dbName));
   }
 }
 

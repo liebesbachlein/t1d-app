@@ -93,7 +93,7 @@ class DatabaseHelperUser {
     return Sqflite.firstIntValue(results) ?? 0;
   }
 
-  Future<List<UserModel>> queryAllRowsGV() async {
+  Future<List<UserModel>> queryAllRowsUsers() async {
     var list = await queryAllRowsMap();
     int count = list.length;
 

@@ -1,8 +1,8 @@
 import 'dart:async';
-
 //import 'package:flutter/widgets.dart';
 import 'package:flutter_app/data_log/data_types.dart';
-import 'package:flutter_app/main.dart';
+import 'package:flutter_app/authentification/welcome_screen.dart';
+import 'package:flutter_app/db_user.dart';
 //import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'dart:io';
@@ -18,21 +18,24 @@ class DatabaseHelper {
   String colHour = 'hour';
   String colMinute = 'minute';
   String colGV = 'glucose_val';
-  late String Path;
-  String name = '${EMAIL}.db';
+  late String dbPath;
+  late String dbName;
 
   DatabaseHelper() {}
 
-  Future<Database> init() async {
+  Future<Database> init(String dbName) async {
+    //List<UserModel> users = await databaseHelperUser.queryAllRowsUsers();
+    //dbName = users.last.email;
+
+    this.dbName = dbName;
     Directory directory = await getApplicationDocumentsDirectory();
-    String path = directory.path + name;
-    Path = path;
-    print('Database initialized $name');
-    database = await openDatabase(path, version: 1, onCreate: _createDb);
+    dbPath = directory.path + dbName;
+    print('Local database [${dbName}] initialized: ');
+    database = await openDatabase(dbPath, version: 1, onCreate: _createDb);
     return database;
   }
 
-  Future<void> deleteDatabase() => databaseFactory.deleteDatabase(Path);
+  Future<void> deleteDatabase() => databaseFactory.deleteDatabase(dbPath);
 
   void _createDb(Database db, int version) async {
     await db.execute(
@@ -64,7 +67,6 @@ class DatabaseHelper {
     print('deletion: id$id');
     return await database
         .rawDelete('DELETE FROM $trackTmGVTable WHERE $colId = $id');
-    ;
   }
 
   Future<int> queryRowCount() async {

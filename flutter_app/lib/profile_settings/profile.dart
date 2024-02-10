@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 //import 'package:flutter/services.dart';
 import 'package:flutter_app/colors.dart';
+import 'package:flutter_app/profile_settings/account.dart';
 import 'dart:core';
 
 import 'package:flutter_app/profile_settings/backup.dart';
@@ -186,11 +187,18 @@ class _SettingOneState extends State<SettingOne> {
                   color: AppColors.text_set,
                   onPressed: () {
                     setState(() {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const BackUpSetting()),
-                      );
+                      Navigator.pushAndRemoveUntil(context,
+                          MaterialPageRoute(builder: (context) {
+                        if (tx == 'Account') {
+                          return const AccountSetting();
+                        } else if (tx == 'Display') {
+                          return const BackUpSetting();
+                        } else if (tx == 'Data logging') {
+                          return const BackUpSetting();
+                        } else {
+                          return const BackUpSetting();
+                        }
+                      }), (route) => false);
                     });
                   }))
         ]));

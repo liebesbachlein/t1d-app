@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_app/authentification/auth_services.dart';
 import 'package:flutter_app/authentification/welcome_screen.dart';
 import 'package:flutter_app/main.dart';
 import 'package:flutter_app/colors.dart';
 import 'package:flutter_app/db_user.dart';
 import 'package:form_field_validator/form_field_validator.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 //import 'package:google_sign_in/google_sign_in.dart';
 //import 'package:http/http.dart' as http;
 //import 'dart:convert' show json;
@@ -39,7 +42,24 @@ class _SignUpScreenState extends State<SignUpScreen> {
   //GoogleSignInAccount? _currentUser;
   //bool _isAuthorized = false;
   //String _contactText = '';
+  bool _isSignUping = false;
+
   final _formkey = GlobalKey<FormState>();
+
+  final FirebaseServices _auth = FirebaseServices();
+
+  TextEditingController _usernameController = TextEditingController();
+  TextEditingController _emailController = TextEditingController();
+  TextEditingController _passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
 /*
   @override
   void initState() {
@@ -158,7 +178,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
             height: MediaQuery.of(context).size.height,
             child: Stack(alignment: Alignment.topCenter, children: [
               TopBack(),
-              SignUp(),
+              SignUp(context),
               Container(
                   //padding: EdgeInsets.only(
                   //  top: MediaQuery.of(context).size.height * 0.2),
@@ -198,6 +218,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     margin: EdgeInsets.only(bottom: 20, top: 10),
                     height: 55,
                     child: TextFormField(
+                        controller: _usernameController,
                         style: TextStyle(
                             fontFamily: 'Inter-Regular',
                             fontSize: 16,
@@ -249,6 +270,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     margin: EdgeInsets.only(bottom: 20),
                     height: 55,
                     child: TextFormField(
+                        controller: _emailController,
                         style: TextStyle(
                             fontFamily: 'Inter-Regular',
                             fontSize: 16,
@@ -300,6 +322,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     margin: EdgeInsets.only(bottom: 25),
                     height: 55,
                     child: TextFormField(
+                        controller: _passwordController,
                         style: TextStyle(
                             fontFamily: 'Inter-Regular',
                             fontSize: 16,
@@ -314,7 +337,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             offsetForm = 0.52;
                           });
                         },*/
-                        obscuringCharacter: '☠',
+                        obscuringCharacter: '☭',
                         obscureText: true,
                         validator: MultiValidator([
                           RequiredValidator(errorText: 'password?'),
@@ -373,23 +396,22 @@ class _SignUpScreenState extends State<SignUpScreen> {
               onPressed: () {
                 if (_formkey.currentState!.validate()) {
                   _formkey.currentState?.save();
-                  processDataSignUp(context, name, email, password);
+                  _signUp();
                 }
               },
-              child: Text('Sign up',
-                  style: TextStyle(
-                    fontFamily: 'Inter-Medium',
-                    fontSize: 16,
-                    color: Colors.white,
-                  ))),
+              child: _isSignUping
+                  ? CircularProgressIndicator(color: Colors.white)
+                  : Text('Sign up',
+                      style: TextStyle(
+                        fontFamily: 'Inter-Medium',
+                        fontSize: 16,
+                        color: Colors.white,
+                      ))),
           Padding(
               padding: EdgeInsets.only(top: 40),
               child: TextButton(
                   onPressed: () {
-                    showDialog(
-                        context: context,
-                        builder: (BuildContext context) => popUpNoSuchFeature(
-                            context, 'the feature will be here soon'));
+                    popUpNoSuchFeature('the feature will be here soon');
                   },
                   child: Column(children: [
                     Text('or sign up with',
@@ -404,6 +426,77 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         child: Image.asset('lib/assets/images/google_icon.png'))
                   ])))
         ]));
+  }
+
+  void _signUp() async {
+    setState(() {
+      _isSignUping = true;
+    });
+
+    String username = _usernameController.text;
+    String email = _emailController.text;
+    String password = _passwordController.text;
+
+    User? user = await _auth.signUpWithEmailAndPassword(email, password);
+
+    setState(() {
+      _isSignUping = false;
+    });
+    if (user != null) {
+      print('User is successfully created');
+      main2(email);
+    } else {
+      popUpNoSuchFeature("Email already exists");
+    }
+  }
+
+  Widget SignUp(BuildContext context) {
+    return Container(
+        alignment: Alignment.topLeft,
+        //decoration: BoxDecoration(border: Border.all(color: Colors.black)),
+        width: MediaQuery.of(context).size.width * 0.92,
+        //constraints: BoxConstraints(minHeight: 100),
+        height: MediaQuery.of(context).size.height * 0.92,
+        padding: EdgeInsets.only(left: 12),
+        margin: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.08),
+        child: const Text('Sign up',
+            style: TextStyle(
+              fontFamily: 'Inter-Medium',
+              fontSize: 32,
+              color: Colors.white,
+            )));
+  }
+
+  void popUpNoSuchFeature(String text) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) => AlertDialog(
+            contentPadding: EdgeInsets.all(0),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+            content: SizedBox(
+                width: 200,
+                height: 300,
+                child: Column(children: [
+                  Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          child: Container(
+                              width: 20,
+                              height: 20,
+                              alignment: Alignment.centerRight,
+                              child: Icon(Icons.close, color: Colors.black)))),
+                  Text(text,
+                      style: TextStyle(
+                          fontFamily: 'Inter-Regular',
+                          fontSize: 16,
+                          color: AppColors.mint)),
+                  Image.asset('lib/assets/images/ryan_gosling.jpg',
+                      width: 170, height: 170)
+                ]))));
   }
 }
 
@@ -430,73 +523,4 @@ class _TopBackState extends State<TopBack> {
               });
             }));
   }
-}
-
-void processDataSignUp(
-    BuildContext context, String name, String email, String password) async {
-  List<Map<String, dynamic>> listmaps =
-      await databaseHelperUser.selectEmail(email);
-
-  if (listmaps.length != 0) {
-    showDialog(
-        context: context,
-        builder: (BuildContext context) =>
-            popUpNoSuchFeature(context, 'the account already exists'));
-  } else {
-    EMAIL = email;
-    UserModel us = UserModel(-1, name, email, password);
-    databaseHelperUser.insert(us);
-    main2();
-  }
-}
-
-class SignUp extends StatelessWidget {
-  const SignUp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-        alignment: Alignment.topLeft,
-        //decoration: BoxDecoration(border: Border.all(color: Colors.black)),
-        width: MediaQuery.of(context).size.width * 0.92,
-        //constraints: BoxConstraints(minHeight: 100),
-        height: MediaQuery.of(context).size.height * 0.92,
-        padding: EdgeInsets.only(left: 12),
-        margin: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.08),
-        child: const Text('Sign up',
-            style: TextStyle(
-              fontFamily: 'Inter-Medium',
-              fontSize: 32,
-              color: Colors.white,
-            )));
-  }
-}
-
-Widget popUpNoSuchFeature(BuildContext context, String text) {
-  return AlertDialog(
-      contentPadding: EdgeInsets.all(0),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      content: SizedBox(
-          width: 200,
-          height: 300,
-          child: Column(children: [
-            Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: Container(
-                        width: 20,
-                        height: 20,
-                        alignment: Alignment.centerRight,
-                        child: Icon(Icons.close, color: Colors.black)))),
-            Text(text,
-                style: TextStyle(
-                    fontFamily: 'Inter-Regular',
-                    fontSize: 16,
-                    color: AppColors.mint)),
-            Image.asset('lib/assets/images/ryan_gosling.jpg',
-                width: 170, height: 170)
-          ])));
 }
