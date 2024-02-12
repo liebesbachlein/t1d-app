@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_app/authentification/auth_services.dart';
-import 'package:flutter_app/authentification/welcome_screen.dart';
+import 'package:flutter_app/db_user.dart';
 import 'package:flutter_app/main.dart';
 import 'package:flutter_app/colors.dart';
 import 'package:form_field_validator/form_field_validator.dart';
@@ -400,7 +400,8 @@ class _LoginScreenState extends State<LoginScreen> {
     });
     if (user != null) {
       print('User successfully signed in');
-      main2(email);
+      UserModel resUser = await firebaseRemoteHelper.getUsername(email);
+      main2(username: resUser.username, email: email);
     } else {
       popUpNoSuchFeature("Incorrect email/password");
     }

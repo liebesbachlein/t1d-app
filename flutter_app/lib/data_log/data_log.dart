@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_app/colors.dart';
 import 'package:flutter_app/data_log/data_types.dart';
 import 'dart:core';
-import 'package:flutter_app/db.dart';
+import 'package:flutter_app/main.dart';
 
 GlobalKey<_DataFieldState> dkey = GlobalKey<_DataFieldState>();
 GlobalKey<_DataLogState> lkey = GlobalKey<_DataLogState>();
@@ -20,8 +20,6 @@ List<Color> getColArr(List<int> arr) {
   }
   return col;
 }
-
-DatabaseHelper databaseHelper = DatabaseHelper();
 
 const List<String> weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const List<String> months = [

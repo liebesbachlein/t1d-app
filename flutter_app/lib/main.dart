@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_app/authentification/welcome_screen.dart';
 import 'package:flutter_app/colors.dart';
+import 'package:flutter_app/db_user.dart';
+import 'package:flutter_app/db.dart';
 import 'package:flutter_app/home/home_page.dart';
-import 'package:flutter_app/data_log/data_log.dart';
 import 'dart:async';
-import 'package:firebase_auth/firebase_auth.dart';
+//import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_app/firebase/firebaseRemoteHelper.dart';
+
+DatabaseHelperUser databaseHelperUser = DatabaseHelperUser();
+DatabaseHelper databaseHelper = DatabaseHelper();
+FirebaseRemoteHelper firebaseRemoteHelper = FirebaseRemoteHelper();
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,14 +29,15 @@ class MainWelcome extends StatelessWidget {
   }
 }
 
-void main2(String dbName) {
-  runApp(MainHome(dbName));
+void main2({required String username, required String email}) {
+  runApp(MainHome(username, email));
 }
 
 class MainHome extends StatelessWidget {
-  String dbName;
+  String username;
+  String email;
 
-  MainHome(this.dbName);
+  MainHome(this.username, this.email);
 
   @override
   Widget build(BuildContext context) {
@@ -45,19 +52,70 @@ class MainHome extends StatelessWidget {
                 ),
               );
             } else if (snapshot.hasData) {
-              print('DatabaseGLUVAL initialization: Success');
+              print('DatabaseUSER initialization: Success');
+              return FutureBuilder(
+                  builder: (ctx, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.done) {
+                      if (snapshot.hasError) {
+                        return Center(
+                          child: Text(
+                            '${snapshot.error} occurred',
+                            style: TextStyle(fontSize: 18),
+                          ),
+                        );
+                      } else if (snapshot.hasData) {
+                        print('DatabaseGLUVAL initialization: Success');
+                        return MaterialApp(
+                            debugShowCheckedModeBanner: false,
+                            home: HomePage());
+                      }
+                    }
+                    return Center(
+                      child:
+                          CircularProgressIndicator(color: AppColors.lavender),
+                    );
+                  }, //builder
+                  future: databaseHelper.init(email));
+            }
+          }
+          return Center(
+            child: CircularProgressIndicator(color: AppColors.lavender),
+          );
+        }, //builder
+        future: databaseHelperUser.init(username: username, email: email));
+  }
+}
+
+/*
+class MainWelcome extends StatelessWidget {
+  const MainWelcome({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+        builder: (ctx, snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            if (snapshot.hasError) {
+              return Center(
+                child: Text(
+                  '${snapshot.error} occurred',
+                  style: TextStyle(fontSize: 18),
+                ),
+              );
+            } else if (snapshot.hasData) {
+              print('DatabaseUSER initialization: Success');
               return MaterialApp(
-                  debugShowCheckedModeBanner: false, home: HomePage());
+                  debugShowCheckedModeBanner: false, home: WelcomeScreen());
             }
           }
           return Center(
             child: CircularProgressIndicator(color: AppColors.lavender),
           );
         },
-        future: databaseHelper.init(dbName));
+        future: databaseHelperUser.init());
   }
 }
-
+*/
 /*
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

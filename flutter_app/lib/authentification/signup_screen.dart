@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_app/authentification/auth_services.dart';
-import 'package:flutter_app/authentification/welcome_screen.dart';
 import 'package:flutter_app/main.dart';
 import 'package:flutter_app/colors.dart';
-import 'package:flutter_app/db_user.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -444,7 +442,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
     });
     if (user != null) {
       print('User is successfully created');
-      main2(email);
+      firebaseRemoteHelper.addUser(username, email);
+      main2(username: username, email: email);
     } else {
       popUpNoSuchFeature("Email already exists");
     }

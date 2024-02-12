@@ -9,7 +9,7 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 
 class DatabaseHelper {
-  late Database database;
+  late Database database; //
 
   String trackTmGVTable = 'tmgv_table';
   String colId = 'id';
@@ -27,7 +27,7 @@ class DatabaseHelper {
     //List<UserModel> users = await databaseHelperUser.queryAllRowsUsers();
     //dbName = users.last.email;
 
-    this.dbName = dbName;
+    this.dbName = '$dbName.db';
     Directory directory = await getApplicationDocumentsDirectory();
     dbPath = directory.path + dbName;
     print('Local database [${dbName}] initialized: ');

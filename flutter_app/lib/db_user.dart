@@ -1,5 +1,6 @@
 import 'dart:async';
-
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_app/main.dart';
 //import 'package:flutter/widgets.dart';
 import 'package:flutter_app/data_log/data_types.dart';
 //import 'package:path/path.dart';
@@ -8,93 +9,102 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 
 class UserModel {
-  int id = -1;
-  String name = '';
-  String email = '';
-  String password = '';
+  String id = '-1';
+  String username = 'null';
+  String email = 'null@null.com';
 
-  UserModel(this.id, this.name, this.email, this.password);
+  UserModel(this.id, this.username, this.email);
 
   Map<String, dynamic> toMap() {
-    var map = <String, dynamic>{
-      'name': name,
-      'email': email,
-      'password': password
-    };
-    return map;
+    return {'id': id, 'username': username, 'email': email};
   }
 
   UserModel.fromMap(Map<String, dynamic> map) {
-    id = map['user_id'];
-    name = map['name'];
+    id = map['id'];
+    username = map['username'];
     email = map['email'];
-    password = map['password'];
+  }
+
+  static UserModel fromSnapshot(
+      DocumentSnapshot<Map<String, dynamic>> snapshot) {
+    return UserModel(snapshot['id'], snapshot['username'], snapshot['email']);
+  }
+
+  static UserModel fromQuerySnapshot(
+      QuerySnapshot<Map<String, dynamic>> snapshot) {
+    List<UserModel> list = [];
+    snapshot.docs.forEach(
+        (doc) => list.add(UserModel(doc['id'], doc['username'], doc['email'])));
+
+    return list.last;
   }
 }
 
 class DatabaseHelperUser {
-  late Database database;
+  late Database databaseUser;
 
   String userTable = 'user_table';
-  String colId = 'user_id';
-  String colName = 'name';
+  String colId = 'id';
+  String colUsername = 'username';
   String colEmail = 'email';
-  String colPassword = 'password';
   late String Path;
-  String dbName = 'dataUsers.db';
+  String dbName = 'dataUserLocal.db';
 
   DatabaseHelperUser();
 
-  Future<Database> init() async {
+  Future<Database> init(
+      {required String username, required String email}) async {
     Directory directory = await getApplicationDocumentsDirectory();
     String path = directory.path + dbName;
     Path = path;
-    database = await openDatabase(path, version: 1, onCreate: _createDb);
-    return database;
+    databaseUser = await openDatabase(path, version: 1, onCreate: _createDb);
+    UserModel user = UserModel(email, username, email);
+    databaseUser.insert(userTable, user.toMap());
+    return databaseUser;
   }
 
   Future<void> deleteDatabase() => databaseFactory.deleteDatabase(Path);
 
   void _createDb(Database db, int version) async {
     await db.execute(
-        'CREATE TABLE $userTable($colId INTEGER PRIMARY KEY, $colName TEXT, $colEmail TEXT, $colPassword TEXT)');
+        'CREATE TABLE $userTable($colId TEXT PRIMARY KEY, $colUsername TEXT, $colEmail TEXT)');
   }
 
   Future<List<Map<String, dynamic>>> queryAllRowsMap() async {
-    var a = await database.query(userTable);
-    return a;
+    return await databaseUser.query(userTable);
   }
 
   Future<List<Map<String, dynamic>>> selectEmail(String text) async {
-    return await database
+    return await databaseUser
         .rawQuery('SELECT * FROM $userTable WHERE $colEmail == ?', [text]);
   }
 
-  Future<int> insert(UserModel trackTmGV) async {
+  Future insert(UserModel trackTmGV) async {
     print('insertion: $trackTmGV');
-    return await database.insert(userTable, trackTmGV.toMap());
+    return await databaseUser.insert(userTable, trackTmGV.toMap());
   }
 
-  Future<int> updateUser(UserModel trackTmGV) async {
-    var result = await database.update(userTable, trackTmGV.toMap(),
+  Future updateUser(UserModel trackTmGV) async {
+    var result = await databaseUser.update(userTable, trackTmGV.toMap(),
         where: '$colId = ?', whereArgs: [trackTmGV.id]);
     return result;
   }
 
-  Future<int> deleteUser(int id) async {
-    print('deletion: id$id');
-    return await database
+  Future deleteUser(String id) async {
+    print('deletion: id $id');
+    return await databaseUser
         .rawDelete('DELETE FROM $userTable WHERE $colId = $id');
-    ;
   }
-
-  Future<int> queryRowCount() async {
-    final results = await database.rawQuery('SELECT COUNT(*) FROM $userTable');
+/*
+  Future queryRowCount() async {
+    final results =
+        await databaseUser.rawQuery('SELECT COUNT(*) FROM $userTable');
     return Sqflite.firstIntValue(results) ?? 0;
-  }
+  }*/
 
   Future<List<UserModel>> queryAllRowsUsers() async {
-    var list = await queryAllRowsMap();
+    List<Map<String, dynamic>> list = await queryAllRowsMap();
+    print(list);
     int count = list.length;
 
     List<UserModel> allRows = [];

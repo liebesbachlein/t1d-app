@@ -4,7 +4,7 @@ import 'package:flutter_app/colors.dart';
 import 'package:flutter_app/data_log/data_log.dart';
 import 'dart:core';
 import 'package:fl_chart/fl_chart.dart';
-
+import 'package:flutter_app/main.dart';
 import 'package:flutter_app/profile_settings/profile.dart';
 import 'package:flutter_app/test.dart';
 import 'dart:math';

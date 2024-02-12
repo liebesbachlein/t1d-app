@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_app/authentification/welcome_screen.dart';
 //import 'package:flutter/services.dart';
 import 'package:flutter_app/colors.dart';
+import 'package:flutter_app/db_user.dart';
 import 'dart:core';
 
 import 'package:flutter_app/main.dart';
@@ -135,6 +136,7 @@ class _SettingsContState extends State<SettingsCont> {
               onPressed: () {
                 FirebaseAuth.instance.signOut();
                 runApp(const MainWelcome());
+                deleteUserInfo();
               },
               child: Text('Sign out',
                   style: TextStyle(
@@ -148,5 +150,13 @@ class _SettingsContState extends State<SettingsCont> {
                   fontSize: 16,
                   color: Colors.black))
         ]));
+  }
+}
+
+deleteUserInfo() async {
+  List<UserModel> toDeleteUsers = await databaseHelperUser.queryAllRowsUsers();
+
+  for (UserModel user in toDeleteUsers) {
+    databaseHelperUser.deleteUser(user.id);
   }
 }

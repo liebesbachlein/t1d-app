@@ -3,9 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_app/authentification/login_screen.dart';
 import 'package:flutter_app/authentification/signup_screen.dart';
 import 'package:flutter_app/colors.dart';
-import 'package:flutter_app/db_user.dart';
-
-DatabaseHelperUser databaseHelperUser = DatabaseHelperUser();
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({Key? key}) : super(key: key);
