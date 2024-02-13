@@ -7,6 +7,13 @@ import 'package:flutter_app/data_log/data_types.dart';
 import 'package:sqflite/sqflite.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
+import 'dart:math';
+
+const _chars = 'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
+Random _rnd = Random();
+
+String getRandomString(int length) => String.fromCharCodes(Iterable.generate(
+    length, (_) => _chars.codeUnitAt(_rnd.nextInt(_chars.length))));
 
 class UserModel {
   String id = '-1';
@@ -58,7 +65,7 @@ class DatabaseHelperUser {
     String path = directory.path + dbName;
     Path = path;
     databaseUser = await openDatabase(path, version: 1, onCreate: _createDb);
-    UserModel user = UserModel(email, username, email);
+    UserModel user = UserModel(getRandomString(10), username, email);
     databaseUser.insert(userTable, user.toMap());
     return databaseUser;
   }

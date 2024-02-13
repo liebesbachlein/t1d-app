@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_app/calendar/calendar.dart';
 import 'package:flutter_app/colors.dart';
 import 'package:flutter_app/data_log/data_log.dart';
 import 'dart:core';
@@ -126,10 +127,7 @@ class _HomePageState extends State<HomePage> {
           Container(
               color: AppColors.background,
               child: Column(children: [TopPlashka(), SeePlot(key: sKey)])),
-          Container(
-              color: Colors.green,
-              alignment: Alignment.center,
-              child: const Text('Page 2')),
+          CalendarPage(),
           DataLog(key: lkey),
           Container(
               color: Colors.blue,

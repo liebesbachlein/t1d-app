@@ -28,10 +28,13 @@ class DatabaseHelper {
     //dbName = users.last.email;
 
     this.dbName = '$dbName.db';
+    print('1');
     Directory directory = await getApplicationDocumentsDirectory();
+    print('2');
     dbPath = directory.path + dbName;
     print('Local database [${dbName}] initialized: ');
     database = await openDatabase(dbPath, version: 1, onCreate: _createDb);
+    print('3');
     return database;
   }
 
@@ -50,6 +53,22 @@ class DatabaseHelper {
   Future<List<Map<String, dynamic>>> selectGV(String text) async {
     return await database
         .rawQuery('SELECT * FROM $trackTmGVTable WHERE $colDate == ?', [text]);
+  }
+
+  Future<List<Map<String, dynamic>>> selectMonth(int month) async {
+    return await database.rawQuery(
+        'SELECT * FROM $trackTmGVTable WHERE $colMonth == ?', [month]);
+  }
+
+  Future<List<TrackTmGV>> queryMonth(int month) async {
+    List<Map<String, dynamic>> list = await selectMonth(month);
+
+    List<TrackTmGV> allRows = [];
+    for (int i = 0; i < list.length; i++) {
+      allRows.add(TrackTmGV.fromMapObject(list[i]));
+    }
+
+    return allRows;
   }
 
   Future<int> insert(TrackTmGV trackTmGV) async {
