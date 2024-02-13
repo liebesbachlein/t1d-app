@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 //import 'package:flutter/services.dart';
 import 'package:flutter_app/colors.dart';
+import 'package:flutter_app/main.dart';
 import 'dart:core';
 
 class BackUpSetting extends StatefulWidget {
@@ -30,17 +31,8 @@ class _BackUpSettingState extends State<BackUpSetting> {
             color: AppColors.background,
             child: Column(children: [TopSet(), SettingsCont()])));
   }
-}
 
-class TopSet extends StatefulWidget {
-  const TopSet({super.key});
-  @override
-  State<TopSet> createState() => _TopSetState();
-}
-
-class _TopSetState extends State<TopSet> {
-  @override
-  Widget build(BuildContext context) {
+  Widget TopSet() {
     return Container(
         height: 50,
         decoration: BoxDecoration(
@@ -82,19 +74,9 @@ class _TopSetState extends State<TopSet> {
                   onPressed: () {})),
         ]));
   }
-}
 
-class SettingsCont extends StatefulWidget {
-  SettingsCont({super.key});
-
-  @override
-  State<SettingsCont> createState() => _SettingsContState();
-}
-
-class _SettingsContState extends State<SettingsCont> {
-  String tx = '';
-  @override
-  Widget build(BuildContext context) {
+  Widget SettingsCont() {
+    String tx = '';
     return Container(
         margin: EdgeInsets.only(right: 17, left: 17, top: 100),
         padding: EdgeInsets.all(10),
@@ -121,6 +103,46 @@ class _SettingsContState extends State<SettingsCont> {
                     Color.fromARGB(179, 233, 221, 233)),
                 alignment: AlignmentDirectional.center,
                 backgroundColor:
+                    MaterialStatePropertyAll<Color>(AppColors.lavender),
+                padding:
+                    MaterialStatePropertyAll<EdgeInsets>(EdgeInsets.all(0)),
+                shape: MaterialStatePropertyAll<OutlinedBorder>(
+                    RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(12)))),
+              ),
+              onPressed: () async {
+                bool res = await firebaseRemoteHelper.uploadGVdata();
+
+                if (res == true) {
+                  setState(() {
+                    tx = "Data was successfully sync";
+                  });
+                } else {
+                  setState(() {
+                    tx = "Error occured while sync";
+                  });
+                }
+              },
+              child: Text('Backup now',
+                  style: TextStyle(
+                    fontFamily: 'Inter-Medium',
+                    fontSize: 16,
+                    color: Colors.white,
+                  ))),
+          Text(tx,
+              style: TextStyle(
+                  fontFamily: 'Inter-Regular',
+                  fontSize: 16,
+                  color: Colors.black)),
+          ElevatedButton(
+              style: ButtonStyle(
+                fixedSize: MaterialStatePropertyAll<Size>(
+                    Size(MediaQuery.of(context).size.width * 0.85, 60)),
+                elevation: MaterialStatePropertyAll<double>(2),
+                shadowColor: MaterialStatePropertyAll<Color>(
+                    Color.fromARGB(179, 233, 221, 233)),
+                alignment: AlignmentDirectional.center,
+                backgroundColor:
                     MaterialStatePropertyAll<Color>(AppColors.mint),
                 padding:
                     MaterialStatePropertyAll<EdgeInsets>(EdgeInsets.all(0)),
@@ -128,12 +150,20 @@ class _SettingsContState extends State<SettingsCont> {
                     RoundedRectangleBorder(
                         borderRadius: BorderRadius.all(Radius.circular(12)))),
               ),
-              onPressed: () {
-                setState(() {
-                  tx = DateTime.now().toString();
-                });
+              onPressed: () async {
+                bool res = await firebaseRemoteHelper.downloadGVdata();
+
+                if (res == true) {
+                  setState(() {
+                    tx = "Data was successfully backed up";
+                  });
+                } else {
+                  setState(() {
+                    tx = "Error occured while backing up";
+                  });
+                }
               },
-              child: Text('Backup now',
+              child: Text('Upload data now',
                   style: TextStyle(
                     fontFamily: 'Inter-Medium',
                     fontSize: 16,

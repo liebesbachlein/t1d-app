@@ -35,71 +35,10 @@ class _AccountSettingState extends State<AccountSetting> {
             color: AppColors.background,
             child: Column(children: [TopSet(), SettingsCont()])));
   }
-}
 
-class TopSet extends StatefulWidget {
-  const TopSet({super.key});
-  @override
-  State<TopSet> createState() => _TopSetState();
-}
+  Widget SettingsCont() {
+    String tx = '';
 
-class _TopSetState extends State<TopSet> {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-        height: 50,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
-              bottomRight: Radius.circular(24),
-              bottomLeft: Radius.circular(24)),
-          boxShadow: [
-            BoxShadow(
-                color: Color.fromRGBO(149, 157, 165, 0.1),
-                offset: Offset.zero,
-                spreadRadius: 4,
-                blurRadius: 10)
-          ],
-        ),
-        child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-          Container(
-              child: IconButton(
-                  icon: Icon(Icons.arrow_back_ios),
-                  color: AppColors.lavender,
-                  onPressed: () {
-                    setState(() {
-                      Navigator.pop(context);
-                    });
-                  })),
-          Container(
-              alignment: Alignment.center,
-              width: MediaQuery.of(context).size.width * 0.5,
-              child: Text('Account settings',
-                  style: TextStyle(
-                      color: Colors.black,
-                      fontFamily: 'Inter-Medium',
-                      fontSize: 16))),
-          Container(
-              //padding: EdgeInsets.only(left: 8, right: 3),
-              child: IconButton(
-                  icon: Icon(Icons.arrow_forward_ios),
-                  color: AppColors.trans,
-                  onPressed: () {})),
-        ]));
-  }
-}
-
-class SettingsCont extends StatefulWidget {
-  SettingsCont({super.key});
-
-  @override
-  State<SettingsCont> createState() => _SettingsContState();
-}
-
-class _SettingsContState extends State<SettingsCont> {
-  String tx = '';
-  @override
-  Widget build(BuildContext context) {
     return Container(
         margin: EdgeInsets.only(right: 17, left: 17, top: 100),
         padding: EdgeInsets.all(10),
@@ -151,12 +90,51 @@ class _SettingsContState extends State<SettingsCont> {
                   color: Colors.black))
         ]));
   }
+
+  Widget TopSet() {
+    return Container(
+        height: 50,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+              bottomRight: Radius.circular(24),
+              bottomLeft: Radius.circular(24)),
+          boxShadow: [
+            BoxShadow(
+                color: Color.fromRGBO(149, 157, 165, 0.1),
+                offset: Offset.zero,
+                spreadRadius: 4,
+                blurRadius: 10)
+          ],
+        ),
+        child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+          Container(
+              child: IconButton(
+                  icon: Icon(Icons.arrow_back_ios),
+                  color: AppColors.lavender,
+                  onPressed: () {
+                    setState(() {
+                      Navigator.pop(context);
+                    });
+                  })),
+          Container(
+              alignment: Alignment.center,
+              width: MediaQuery.of(context).size.width * 0.5,
+              child: Text('Account settings',
+                  style: TextStyle(
+                      color: Colors.black,
+                      fontFamily: 'Inter-Medium',
+                      fontSize: 16))),
+          Container(
+              //padding: EdgeInsets.only(left: 8, right: 3),
+              child: IconButton(
+                  icon: Icon(Icons.arrow_forward_ios),
+                  color: AppColors.trans,
+                  onPressed: () {})),
+        ]));
+  }
 }
 
 deleteUserInfo() async {
-  List<UserModel> toDeleteUsers = await databaseHelperUser.queryAllRowsUsers();
-
-  for (UserModel user in toDeleteUsers) {
-    databaseHelperUser.deleteUser(user.id);
-  }
+  databaseHelperUser.deleteDatabase();
 }

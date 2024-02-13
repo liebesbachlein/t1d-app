@@ -288,7 +288,7 @@ class _DataFieldState extends State<DataField> {
       lkey.currentState?.setIsChanged(true);
       int index = tmgv.hour * 2;
       if (tmgv.minute > 0) {
-        index = index + 1;
+        index = index + 1; //подправь индекс для удаление прошлых записей
       }
       print(gvCol[index].trackTmGV.listOfGV.toString());
       gvCol[index].trackTmGV.nulled();
@@ -555,7 +555,8 @@ class DataletGV extends StatelessWidget {
                         GestureDetector(
                             onTap: () {
                               if (controller1.isOpen) {
-                                print('delete!');
+                                print('delete! NEW');
+                                print(trackTmGV.listOfGV);
                                 dkey.currentState?.deleteGV(trackTmGV);
                                 controller1.close();
                               }

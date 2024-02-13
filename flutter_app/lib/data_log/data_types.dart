@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class TrackGV {
   double GV = 0.0;
   int GV1 = 0;
@@ -32,6 +34,9 @@ class TrackTmGV {
     minute = time.minute;
   }
 
+  TrackTmGV.fromData(
+      this.id, this.month, this.date, this.hour, this.minute, this.gluval);
+
   Map<String, dynamic> toMap() {
     return {
       'date': date,
@@ -55,6 +60,19 @@ class TrackTmGV {
     time = DateTime(
         time_ini.year, time_ini.month, time_ini.day, hour, minute, 0, 0, 0);
     replace(TrackGV(gluval));
+  }
+
+  static List<TrackTmGV> fromQuerySnapshot(
+      QuerySnapshot<Map<String, dynamic>> snapshot) {
+    List<TrackTmGV> list = [];
+    int i = 1;
+    snapshot.docs.forEach((doc) {
+      list.add(TrackTmGV.fromData(i, doc['month'], doc['date'], doc['hour'],
+          doc['minute'], doc['glucose_val']));
+      i++;
+    });
+
+    return list;
   }
 
   void setDate(DateTime d) {

@@ -35,17 +35,8 @@ class _ProfileSettingsState extends State<ProfileSettings> {
             color: AppColors.background,
             child: Column(children: [TopSet(), PicName(), SettingsCont()])));
   }
-}
 
-class TopSet extends StatefulWidget {
-  const TopSet({super.key});
-  @override
-  State<TopSet> createState() => _TopSetState();
-}
-
-class _TopSetState extends State<TopSet> {
-  @override
-  Widget build(BuildContext context) {
+  Widget TopSet() {
     return Container(
         height: 50,
         decoration: BoxDecoration(
@@ -85,6 +76,72 @@ class _TopSetState extends State<TopSet> {
                   icon: Icon(Icons.arrow_forward_ios),
                   color: AppColors.trans,
                   onPressed: () {})),
+        ]));
+  }
+
+  Widget SettingsCont() {
+    return Container(
+        margin: EdgeInsets.only(right: 17, left: 17),
+        padding: EdgeInsets.all(10),
+        width: MediaQuery.of(context).size.width,
+        height: 260,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.all(Radius.circular(12)),
+          boxShadow: [
+            BoxShadow(
+                color: Color.fromRGBO(149, 157, 165, 0.1),
+                offset: Offset.zero,
+                spreadRadius: 4,
+                blurRadius: 10)
+          ],
+        ),
+        child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              SettingOne('Account'),
+              SettingOne('Display'),
+              SettingOne('Data logging'),
+              SettingOne('Backup & sync')
+            ]));
+  }
+
+  Widget SettingOne(String tx) {
+    return Container(
+        //margin: EdgeInsets.only(left: 25, right: 25),
+        height: 48,
+        child:
+            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+          Text(
+            tx,
+            style: TextStyle(
+              fontFamily: 'Inter-Regular',
+              fontSize: 16,
+              color: Colors.black,
+            ),
+            textAlign: TextAlign.left,
+          ),
+          Container(
+              alignment: Alignment.centerRight,
+              child: IconButton(
+                  icon: Icon(Icons.arrow_forward_ios),
+                  color: AppColors.text_set,
+                  onPressed: () {
+                    setState(() {
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) {
+                        if (tx == 'Account') {
+                          return const AccountSetting();
+                        } else if (tx == 'Display') {
+                          return const BackUpSetting();
+                        } else if (tx == 'Data logging') {
+                          return const BackUpSetting();
+                        } else {
+                          return const BackUpSetting();
+                        }
+                      }));
+                    });
+                  }))
         ]));
   }
 }
@@ -143,92 +200,5 @@ class _PicNameState extends State<PicName> {
     List<UserModel> listUsers = await databaseHelperUser.queryAllRowsUsers();
     username = listUsers.last.username;
     return username;
-  }
-}
-
-class SettingsCont extends Container {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-        margin: EdgeInsets.only(right: 17, left: 17),
-        padding: EdgeInsets.all(10),
-        width: MediaQuery.of(context).size.width,
-        height: 260,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.all(Radius.circular(12)),
-          boxShadow: [
-            BoxShadow(
-                color: Color.fromRGBO(149, 157, 165, 0.1),
-                offset: Offset.zero,
-                spreadRadius: 4,
-                blurRadius: 10)
-          ],
-        ),
-        child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              SettingOne('Account'),
-              SettingOne('Display'),
-              SettingOne('Data logging'),
-              SettingOne('Backup & sync')
-            ]));
-  }
-}
-
-class SettingOne extends StatefulWidget {
-  String tx = 'Err';
-  SettingOne(String settingStr, {super.key}) {
-    tx = settingStr;
-  }
-  @override
-  State<SettingOne> createState() => _SettingOneState(tx);
-}
-
-class _SettingOneState extends State<SettingOne> {
-  String tx = 'Err';
-
-  _SettingOneState(String settingStr) {
-    tx = settingStr;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-        //margin: EdgeInsets.only(left: 25, right: 25),
-        height: 48,
-        child:
-            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-          Text(
-            tx,
-            style: TextStyle(
-              fontFamily: 'Inter-Regular',
-              fontSize: 16,
-              color: Colors.black,
-            ),
-            textAlign: TextAlign.left,
-          ),
-          Container(
-              alignment: Alignment.centerRight,
-              child: IconButton(
-                  icon: Icon(Icons.arrow_forward_ios),
-                  color: AppColors.text_set,
-                  onPressed: () {
-                    setState(() {
-                      Navigator.pushAndRemoveUntil(context,
-                          MaterialPageRoute(builder: (context) {
-                        if (tx == 'Account') {
-                          return const AccountSetting();
-                        } else if (tx == 'Display') {
-                          return const BackUpSetting();
-                        } else if (tx == 'Data logging') {
-                          return const BackUpSetting();
-                        } else {
-                          return const BackUpSetting();
-                        }
-                      }), (route) => false);
-                    });
-                  }))
-        ]));
   }
 }
