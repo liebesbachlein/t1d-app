@@ -41,9 +41,6 @@ class _ProfileSettingsState extends State<ProfileSettings> {
         height: 50,
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.only(
-              bottomRight: Radius.circular(24),
-              bottomLeft: Radius.circular(24)),
           boxShadow: [
             BoxShadow(
                 color: Color.fromRGBO(149, 157, 165, 0.1),

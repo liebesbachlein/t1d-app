@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_app/calendar/calendar.dart';
+import 'package:flutter_app/chatbot_dialogbox/chatbot.dart';
 import 'package:flutter_app/colors.dart';
 import 'package:flutter_app/data_log/data_log.dart';
 import 'dart:core';
@@ -77,13 +78,13 @@ class _HomePageState extends State<HomePage> {
         ),
         bottomNavigationBar: Container(
             height: 60,
-            decoration: BoxDecoration(boxShadow: [
+            /*decoration: BoxDecoration(boxShadow: [
               BoxShadow(
                   color: Color.fromRGBO(149, 157, 165, 0.1),
                   offset: Offset.zero,
                   spreadRadius: 4,
                   blurRadius: 10)
-            ]),
+            ]),*/
             child: BottomNavigationBar(
               onTap: (int index) {
                 setState(() {
@@ -129,10 +130,7 @@ class _HomePageState extends State<HomePage> {
               child: Column(children: [TopPlashka(), SeePlot(key: sKey)])),
           CalendarPage(),
           DataLog(key: lkey),
-          Container(
-              color: Colors.blue,
-              alignment: Alignment.center,
-              child: const Text('Page 4')),
+          ChatbotPage(),
           ExampleDragAndDrop()
         ][currentPageIndex]);
   }
