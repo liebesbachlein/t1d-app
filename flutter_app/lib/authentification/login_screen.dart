@@ -6,6 +6,8 @@ import 'package:flutter_app/main.dart';
 import 'package:flutter_app/colors.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:math';
 //import 'package:google_sign_in/google_sign_in.dart';
 //import 'package:http/http.dart' as http;
 //import 'dart:convert' show json;
@@ -401,6 +403,13 @@ class _LoginScreenState extends State<LoginScreen> {
     if (user != null) {
       print('User successfully signed in');
       UserModel resUser = await firebaseRemoteHelper.getUsername(email);
+      Random random = new Random();
+      int randomNumber = random.nextInt(1000) + 1000;
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt('authToken', randomNumber);
+      await prefs.setString('email', email);
+      await prefs.setString('username', resUser.username);
+      firebaseRemoteHelper.changeToken(email, randomNumber);
       main2(username: resUser.username, email: email);
     } else {
       popUpNoSuchFeature("Incorrect email/password");

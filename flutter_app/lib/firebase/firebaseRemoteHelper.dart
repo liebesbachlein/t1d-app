@@ -13,6 +13,13 @@ class FirebaseRemoteHelper {
     userCollection.doc(id).set(newUser.toMap());
   }
 
+  void changeToken(String email, int authToken) {
+    final userCollection = firestore.collection("authTokens");
+    userCollection
+        .doc(email)
+        .set({"email": email, "authToken": authToken}, SetOptions(merge: true));
+  }
+
   Future<UserModel> getUsername(String email) async {
     final userCollection = firestore.collection("userPublicData");
     UserModel user = await userCollection

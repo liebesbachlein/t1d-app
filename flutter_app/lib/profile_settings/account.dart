@@ -9,6 +9,7 @@ import 'package:flutter_app/db_user.dart';
 import 'dart:core';
 
 import 'package:flutter_app/main.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AccountSetting extends StatefulWidget {
   const AccountSetting({super.key});
@@ -137,4 +138,6 @@ class _AccountSettingState extends State<AccountSetting> {
 
 deleteUserInfo() async {
   databaseHelperUser.deleteDatabase();
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setInt('authToken', 0);
 }

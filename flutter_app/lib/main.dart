@@ -8,6 +8,7 @@ import 'dart:async';
 //import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_app/firebase/firebaseRemoteHelper.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 DatabaseHelperUser databaseHelperUser = DatabaseHelperUser();
 DatabaseHelper databaseHelper = DatabaseHelper();
@@ -16,7 +17,13 @@ FirebaseRemoteHelper firebaseRemoteHelper = FirebaseRemoteHelper();
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  runApp(const MainWelcome());
+  checkAuthToken().then((isToken) {
+    if (isToken.length == 0) {
+      runApp(const MainWelcome());
+    } else {
+      runApp(MainHome(isToken[0], isToken[1]));
+    }
+  });
 }
 
 class MainWelcome extends StatelessWidget {
@@ -31,6 +38,22 @@ class MainWelcome extends StatelessWidget {
 
 void main2({required String username, required String email}) {
   runApp(MainHome(username, email));
+}
+
+Future<List<String>> checkAuthToken() async {
+  final prefs = await SharedPreferences.getInstance();
+  final authToken = prefs.getInt('authToken');
+  if (authToken == null || authToken == 0) {
+    return [];
+  } else {
+    final email = prefs.getString('email');
+    final username = prefs.getString('username');
+    if (email == null || username == null) {
+      return [];
+    } else {
+      return [username, email];
+    }
+  }
 }
 
 class MainHome extends StatelessWidget {

@@ -5,6 +5,9 @@ import 'package:flutter_app/main.dart';
 import 'package:flutter_app/colors.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:math';
+
+import 'package:shared_preferences/shared_preferences.dart';
 
 //import 'package:google_sign_in/google_sign_in.dart';
 //import 'package:http/http.dart' as http;
@@ -443,6 +446,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
     if (user != null) {
       print('User is successfully created');
       firebaseRemoteHelper.addUser(username, email);
+      Random random = new Random();
+      int randomNumber = random.nextInt(1000) + 1000;
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt('authToken', randomNumber);
+      await prefs.setString('email', email);
+      await prefs.setString('username', username);
       main2(username: username, email: email);
     } else {
       popUpNoSuchFeature("Email already exists");
