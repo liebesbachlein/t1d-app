@@ -5,6 +5,7 @@ class AppColors {
   static final Color lavender_light_dark = const Color(0xFFCAB4EE);
   static final Color lavender_light = const Color(0xFFE1D4F6);
   static final Color lavender_light_old = Color.fromARGB(255, 229, 222, 255);
+  static final Color mint_light = Color.fromARGB(93, 119, 224, 142);
   static final Color mint = const Color(0xFF77E08E);
   static final Color background = const Color(0xFFFCFCFF);
   static final Color text_info = const Color(0xFF595859);

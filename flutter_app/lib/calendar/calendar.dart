@@ -20,7 +20,11 @@ class _CalendarPageState extends State<CalendarPage> {
     return Scaffold(
         appBar: AppBar(
             foregroundColor: AppColors.background,
+            surfaceTintColor: AppColors.background,
+            backgroundColor: AppColors.background,
             systemOverlayStyle: SystemUiOverlayStyle(
+              systemNavigationBarColor: AppColors.background,
+              systemNavigationBarDividerColor: AppColors.background,
               statusBarColor: AppColors.background,
               statusBarIconBrightness: Brightness.dark, // Android dark???
               statusBarBrightness: Brightness.light, // iOS dark???
@@ -282,7 +286,7 @@ class _CalendarPageState extends State<CalendarPage> {
         }
 
         if (monthMap[idx]["tick"] == true) {
-          backColor = AppColors.mint;
+          backColor = AppColors.mint_light;
 
           if (idx != 0 && idx != monthMap.length - 1) {
             if (monthMap[idx - 1]["tick"] == false &&
@@ -295,9 +299,9 @@ class _CalendarPageState extends State<CalendarPage> {
                 color: backColor,
               );
             } else if (monthMap[idx - 1]["tick"] == false) {
-              width = 50;
+              width = 45;
               height = 40;
-              margin = EdgeInsets.symmetric(vertical: rad);
+              margin = EdgeInsets.only(top: rad, bottom: rad, left: rad);
               dec = BoxDecoration(
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(rad),
@@ -306,9 +310,10 @@ class _CalendarPageState extends State<CalendarPage> {
                 color: backColor,
               );
             } else if (monthMap[idx + 1]["tick"] == false) {
-              width = 50;
+              width = 45;
               height = 40;
-              margin = EdgeInsets.symmetric(vertical: rad);
+              margin = EdgeInsets.only(top: rad, bottom: rad, right: rad);
+              ;
               dec = BoxDecoration(
                 borderRadius: BorderRadius.only(
                   topRight: Radius.circular(rad),
@@ -328,9 +333,9 @@ class _CalendarPageState extends State<CalendarPage> {
           } else {
             if (idx == 0) {
               if (prev == true && monthMap[idx + 1]["tick"] == false) {
-                width = 50;
+                width = 45;
                 height = 40;
-                margin = EdgeInsets.symmetric(vertical: rad);
+                margin = EdgeInsets.only(top: rad, bottom: rad, right: rad);
                 dec = BoxDecoration(
                   borderRadius: BorderRadius.only(
                     topRight: Radius.circular(rad),
@@ -339,9 +344,9 @@ class _CalendarPageState extends State<CalendarPage> {
                   color: backColor,
                 );
               } else if (prev == false && monthMap[idx + 1]["tick"] == true) {
-                width = 50;
+                width = 45;
                 height = 40;
-                margin = EdgeInsets.symmetric(vertical: rad);
+                margin = EdgeInsets.only(top: rad, bottom: rad, left: rad);
                 dec = BoxDecoration(
                   borderRadius: BorderRadius.only(
                     topLeft: Radius.circular(rad),
@@ -368,9 +373,9 @@ class _CalendarPageState extends State<CalendarPage> {
               }
             } else if (idx == 6) {
               if (next == true && monthMap[idx - 1]["tick"] == false) {
-                width = 50;
+                width = 45;
                 height = 40;
-                margin = EdgeInsets.symmetric(vertical: rad);
+                margin = EdgeInsets.only(top: rad, bottom: rad, left: rad);
                 dec = BoxDecoration(
                   borderRadius: BorderRadius.only(
                     topLeft: Radius.circular(rad),
@@ -379,9 +384,9 @@ class _CalendarPageState extends State<CalendarPage> {
                   color: backColor,
                 );
               } else if (next == false && monthMap[idx - 1]["tick"] == true) {
-                width = 50;
+                width = 45;
                 height = 40;
-                margin = EdgeInsets.symmetric(vertical: rad);
+                margin = EdgeInsets.only(top: rad, bottom: rad, right: rad);
                 dec = BoxDecoration(
                   borderRadius: BorderRadius.only(
                     topRight: Radius.circular(rad),

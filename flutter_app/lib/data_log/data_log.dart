@@ -557,6 +557,7 @@ class DataletGV extends StatelessWidget {
                               if (controller1.isOpen) {
                                 print('delete! NEW');
                                 print(trackTmGV.listOfGV);
+                                print('0');
                                 dkey.currentState?.deleteGV(trackTmGV);
                                 controller1.close();
                               }
