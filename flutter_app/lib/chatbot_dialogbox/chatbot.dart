@@ -27,7 +27,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
           toolbarHeight: 0,
           elevation: 0,
         ),
-        body: Stack(children: [TopSet(), ChatbotBox(), ChatbotBottom()]));
+        body: Stack(children: [ChatbotBox(), TopSet(), ChatbotBottom()]));
   }
 
   Widget TopSet() {
@@ -88,10 +88,72 @@ class _ChatbotPageState extends State<ChatbotPage> {
   }
 
   Widget ChatbotBox() {
+    List<List<String>> list = [
+      ["What’s my average BG for the past 2 weeks?", "13:21"],
+      [
+        "8.3 mmol/L. It’s 1.5 mmol/L higher that past 2 week average, and 0.9 mmol/l higher than 2 month average ",
+        "13:21"
+      ],
+      ["What’s my average BG for the past 2 weeks?", "13:21"],
+      [
+        "8.3 mmol/L. It’s 1.5 mmol/L higher that past 2 week average, and 0.9 mmol/l higher than 2 month average ",
+        "13:21"
+      ],
+      ["What’s my average BG for the past 2 weeks?", "13:21"],
+      [
+        "8.3 mmol/L. It’s 1.5 mmol/L higher that past 2 week average, and 0.9 mmol/l higher than 2 month average ",
+        "13:21"
+      ],
+      ["What’s my average BG for the past 2 weeks?", "13:21"],
+      [
+        "8.3 mmol/L. It’s 1.5 mmol/L higher that past 2 week average, and 0.9 mmol/l higher than 2 month average ",
+        "13:21"
+      ],
+      ["What’s my average BG for the past 2 weeks?", "13:21"],
+      [
+        "8.3 mmol/L. It’s 1.5 mmol/L higher that past 2 week average, and 0.9 mmol/l higher than 2 month average ",
+        "13:21"
+      ],
+      ["What’s my average BG for the past 2 weeks?", "13:21"],
+      [
+        "8.3 mmol/L. It’s 1.5 mmol/L higher that past 2 week average, and 0.9 mmol/l higher than 2 month average ",
+        "13:21"
+      ],
+      ["What’s my average BG for the past 2 weeks?", "13:21"],
+      [
+        "8.3 mmol/L. It’s 1.5 mmol/L higher that past 2 week average, and 0.9 mmol/l higher than 2 month average ",
+        "13:21"
+      ],
+      ["What’s my average BG for the past 2 weeks?", "13:21"],
+      [
+        "8.3 mmol/L. It’s 1.5 mmol/L higher that past 2 week average, and 0.9 mmol/l higher than 2 month average ",
+        "13:21"
+      ],
+    ];
+
+    List<Widget> dialogList = [];
+    for (int i = 0; i < 12; i++) {
+      if (i % 2 == 0) {
+        dialogList.add(UserMessage(list[i][1], list[i][0]));
+      } else {
+        dialogList.add(AIMessage(list[i][1], list[i][0]));
+      }
+    }
+
     return Container(
-      height: MediaQuery.of(context).size.height,
-      width: MediaQuery.of(context).size.width,
-    );
+        constraints: BoxConstraints(
+          minWidth: MediaQuery.of(context).size.height,
+        ),
+        decoration:
+            BoxDecoration(border: Border.all(color: Colors.red, width: 2)),
+        width: MediaQuery.of(context).size.width,
+        padding: EdgeInsets.only(bottom: 90),
+        child: ListView(
+          semanticChildCount: dialogList.length,
+          children: dialogList,
+          dragStartBehavior: DragStartBehavior.down,
+          reverse: true,
+        ));
   }
 
   Widget ChatbotBottom() {
@@ -137,5 +199,73 @@ class _ChatbotPageState extends State<ChatbotPage> {
     return Container(
         width: MediaQuery.of(context).size.width * 0.2,
         child: Icon(Icons.send));
+  }
+
+  Widget AIMessage(String time, String text) {
+    return Container(
+        width: MediaQuery.of(context).size.width,
+        padding: EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+        alignment: Alignment.centerLeft,
+        child: Container(
+            padding: EdgeInsets.only(top: 15, left: 15, right: 15, bottom: 5),
+            width: MediaQuery.of(context).size.width * 0.8,
+            decoration: BoxDecoration(
+              color: AppColors.text_light,
+              borderRadius: BorderRadius.only(
+                  topRight: Radius.circular(20),
+                  topLeft: Radius.circular(20),
+                  bottomRight: Radius.circular(20)),
+            ),
+            child: Column(children: [
+              Text(text,
+                  style: TextStyle(
+                    fontFamily: 'Inter-Medium',
+                    fontSize: 15,
+                    color: AppColors.text_info,
+                  )),
+              Align(
+                alignment: Alignment.bottomRight,
+                child: Text(time,
+                    style: TextStyle(
+                      fontFamily: 'Inter-Medium',
+                      fontSize: 12,
+                      color: AppColors.text_sub,
+                    )),
+              )
+            ])));
+  }
+
+  Widget UserMessage(String time, String text) {
+    return Container(
+        width: MediaQuery.of(context).size.width,
+        padding: EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+        alignment: Alignment.centerRight,
+        child: Container(
+            padding: EdgeInsets.only(top: 15, left: 15, right: 15, bottom: 5),
+            width: MediaQuery.of(context).size.width * 0.8,
+            decoration: BoxDecoration(
+              color: AppColors.lavender_light,
+              borderRadius: BorderRadius.only(
+                  topRight: Radius.circular(20),
+                  topLeft: Radius.circular(20),
+                  bottomLeft: Radius.circular(20)),
+            ),
+            child: Column(children: [
+              Text(text,
+                  style: TextStyle(
+                    fontFamily: 'Inter-Medium',
+                    fontSize: 15,
+                    color: Colors.white,
+                  )),
+              Align(
+                alignment: Alignment.bottomRight,
+                child: Text(time,
+                    style: TextStyle(
+                      fontFamily: 'Inter-Medium',
+                      fontSize: 12,
+                      color: Colors.white,
+                    )),
+              )
+            ])));
   }
 }
