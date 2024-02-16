@@ -84,13 +84,15 @@ class DatabaseHelperGV {
   }
 
   Future<List<TrackTmGV>> selectMonth(DateTime dateSeconds) async {
-    DateTime nowMonth = DateTime(dateSeconds.year, dateSeconds.month);
-
-    DateTime minusMonth = nowMonth.subtract(Duration(days: 30));
+    DateTime minusMonth = DateTime(
+        dateSeconds.month == 1 ? dateSeconds.year - 1 : dateSeconds.year,
+        dateSeconds.month == 1 ? 12 : dateSeconds.month - 1);
     DateTime prevMonth = DateTime(minusMonth.year, minusMonth.month,
-        daysInMonth(minusMonth.year, minusMonth.month), 23, 59, 59);
-    ;
-    DateTime addMonth = nowMonth.add(Duration(days: 30));
+        daysInMonth(minusMonth.year, minusMonth.month), 23, 59);
+
+    DateTime addMonth = DateTime(
+        dateSeconds.month == 12 ? dateSeconds.year + 1 : dateSeconds.year,
+        dateSeconds.month == 12 ? 1 : dateSeconds.month + 1);
     DateTime nextMonth = DateTime(addMonth.year, addMonth.month, 1, 0, 0, 0);
 
     List<Map<String, dynamic>> list = await database.rawQuery(

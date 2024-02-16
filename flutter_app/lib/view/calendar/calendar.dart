@@ -86,11 +86,13 @@ class _CalendarPageState extends State<CalendarPage> {
   Future<List<List<int>>> getTickedDates(month) async {
     // SETTING YEAR WILL FAIL ON DEC <-> JAN
     List<TrackTmGV> prevList = await databaseHelperGV
-        .selectMonth(DateTime(year, month == 1 ? 12 : month - 1));
+        .selectMonth(DateTime(year, month == 1 ? 12 : month - 1, 1));
+    print(DateTime(year, month == 1 ? 12 : month - 1, 1).toIso8601String());
     List<TrackTmGV> curList =
-        await databaseHelperGV.selectMonth(DateTime(year, month));
+        await databaseHelperGV.selectMonth(DateTime(year, month, 1));
     List<TrackTmGV> nextList = await databaseHelperGV
-        .selectMonth(DateTime(year, month == 12 ? 1 : month + 1));
+        .selectMonth(DateTime(year, month == 12 ? 1 : month + 1, 1));
+    print(DateTime(year, month == 12 ? 1 : month + 1, 1).toIso8601String());
     Set<int> prevMonth = {};
     Set<int> curMonth = {};
     Set<int> nextMonth = {};

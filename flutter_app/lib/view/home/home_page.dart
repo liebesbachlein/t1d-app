@@ -127,7 +127,7 @@ class _HomePageState extends State<HomePage> {
           CalendarPage(),
           DataLog(key: lkey),
           ChatbotPage(),
-          ChatbotPage(),
+          ProfileSettings(),
         ][currentPageIndex]);
   }
 

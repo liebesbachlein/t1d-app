@@ -14,6 +14,8 @@ class ChatbotPage extends StatefulWidget {
 }
 
 class _ChatbotPageState extends State<ChatbotPage> {
+  final _formkey = GlobalKey<FormState>();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -57,7 +59,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
         CircleAvatar(
           radius: 25,
           backgroundColor: AppColors.lavender,
-          backgroundImage: AssetImage('lib/assets/images/profile_default1.png'),
+          backgroundImage: AssetImage('lib/assets/images/profile_default0.png'),
         ),
         Container(
             alignment: Alignment.centerLeft,
@@ -70,7 +72,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Hannibal Lecter',
+                  Text('John Wick',
                       textAlign: TextAlign.left,
                       style: TextStyle(
                           fontFamily: 'Inter-Medium',
@@ -141,13 +143,12 @@ class _ChatbotPageState extends State<ChatbotPage> {
     }
 
     return Container(
+        color: AppColors.background,
         constraints: BoxConstraints(
           minWidth: MediaQuery.of(context).size.height,
         ),
-        decoration:
-            BoxDecoration(border: Border.all(color: Colors.red, width: 2)),
         width: MediaQuery.of(context).size.width,
-        padding: EdgeInsets.only(bottom: 90),
+        padding: EdgeInsets.only(bottom: 80),
         child: ListView(
           semanticChildCount: dialogList.length,
           children: dialogList,
@@ -163,7 +164,6 @@ class _ChatbotPageState extends State<ChatbotPage> {
         width: MediaQuery.of(context).size.width,
         child: Container(
             height: 80,
-            width: MediaQuery.of(context).size.width,
             decoration: BoxDecoration(
                 borderRadius: BorderRadius.only(
                     topRight: Radius.circular(24),
@@ -184,27 +184,47 @@ class _ChatbotPageState extends State<ChatbotPage> {
   }
 
   Widget ChatbotInput() {
+    String message = '';
     return Container(
         padding: EdgeInsets.only(left: 20),
         width: MediaQuery.of(context).size.width * 0.8,
-        child: Text('Ask me anything... ',
-            style: TextStyle(
-              fontFamily: 'Inter-Medium',
-              fontSize: 15,
-              color: AppColors.text_sub,
+        child: Form(
+            key: _formkey,
+            child: TextFormField(
+              style: TextStyle(
+                fontFamily: 'Inter-Regular',
+                fontSize: 14,
+                color: AppColors.text_mes,
+              ),
+              decoration: InputDecoration(
+                border: InputBorder.none,
+                hintText: "Ask anything",
+                hintStyle: TextStyle(
+                  fontFamily: 'Inter-Regular',
+                  fontSize: 14,
+                  color: AppColors.text_sub,
+                ),
+              ),
+              onSaved: (e) {
+                if (e == null) {
+                  message = '';
+                } else {
+                  message = e;
+                }
+              },
             )));
   }
 
   Widget ChatbotSend() {
     return Container(
         width: MediaQuery.of(context).size.width * 0.2,
-        child: Icon(Icons.send));
+        child: Icon(Icons.cookie_rounded, color: AppColors.mint, size: 35));
   }
 
   Widget AIMessage(String time, String text) {
     return Container(
         width: MediaQuery.of(context).size.width,
-        padding: EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
         alignment: Alignment.centerLeft,
         child: Container(
             padding: EdgeInsets.only(top: 15, left: 15, right: 15, bottom: 5),
@@ -219,18 +239,17 @@ class _ChatbotPageState extends State<ChatbotPage> {
             child: Column(children: [
               Text(text,
                   style: TextStyle(
-                    fontFamily: 'Inter-Medium',
-                    fontSize: 15,
-                    color: AppColors.text_info,
+                    fontFamily: 'Inter-Regular',
+                    fontSize: 14,
+                    color: AppColors.text_mes,
                   )),
               Align(
                 alignment: Alignment.bottomRight,
                 child: Text(time,
                     style: TextStyle(
-                      fontFamily: 'Inter-Medium',
-                      fontSize: 12,
-                      color: AppColors.text_sub,
-                    )),
+                        fontFamily: 'Inter-Regular',
+                        fontSize: 10,
+                        color: AppColors.text_mes)),
               )
             ])));
   }
@@ -238,13 +257,13 @@ class _ChatbotPageState extends State<ChatbotPage> {
   Widget UserMessage(String time, String text) {
     return Container(
         width: MediaQuery.of(context).size.width,
-        padding: EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
         alignment: Alignment.centerRight,
         child: Container(
             padding: EdgeInsets.only(top: 15, left: 15, right: 15, bottom: 5),
             width: MediaQuery.of(context).size.width * 0.8,
             decoration: BoxDecoration(
-              color: AppColors.lavender_light,
+              color: AppColors.lavender_light_dark,
               borderRadius: BorderRadius.only(
                   topRight: Radius.circular(20),
                   topLeft: Radius.circular(20),
@@ -253,16 +272,16 @@ class _ChatbotPageState extends State<ChatbotPage> {
             child: Column(children: [
               Text(text,
                   style: TextStyle(
-                    fontFamily: 'Inter-Medium',
-                    fontSize: 15,
+                    fontFamily: 'Inter-Regular',
+                    fontSize: 14,
                     color: Colors.white,
                   )),
               Align(
                 alignment: Alignment.bottomRight,
                 child: Text(time,
                     style: TextStyle(
-                      fontFamily: 'Inter-Medium',
-                      fontSize: 12,
+                      fontFamily: 'Inter-Regular',
+                      fontSize: 10,
                       color: Colors.white,
                     )),
               )
