@@ -192,7 +192,9 @@ class _DataFieldState extends State<DataField> {
   void change() async {
     DateTime thisDate = DateTime.now().add(Duration(days: _g_pos_data));
 
-    tmgvs = getTMGVArr(thisDate);
+    setState(() {
+      tmgvs = getTMGVArr(thisDate);
+    });
 
     List<TrackTmGV> listmaps = await databaseHelperGV.selectDay(thisDate);
 
@@ -205,6 +207,12 @@ class _DataFieldState extends State<DataField> {
           }
           tmgvs[i.hour * 2 + add] = i;
         }
+      }
+
+      gvCol = [];
+      gvCol.add(DataletGV(tmgvs.elementAt(0), 50, false, false));
+      for (int i = 1; i < tmgvs.length; i++) {
+        gvCol.add(DataletGV(tmgvs.elementAt(i), 0, false, false));
       }
     });
   }
