@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_app/authentification/login_screen.dart';
-import 'package:flutter_app/authentification/signup_screen.dart';
-import 'package:flutter_app/colors.dart';
+import 'package:flutter_app/view/authentification/login_screen.dart';
+import 'package:flutter_app/view/authentification/signup_screen.dart';
+import 'package:flutter_app/assets/colors.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({Key? key}) : super(key: key);
@@ -32,15 +32,10 @@ class WelcomeScreen extends StatelessWidget {
             alignment: Alignment.topCenter,
             child: Column(
                 //mainAxisAlignment: MainAxisAlignment.center,
-                children: [WelcomeTop(), LoginSignup()])));
+                children: [WelcomeTop(context), LoginSignup(context)])));
   }
-}
 
-class WelcomeTop extends StatelessWidget {
-  const WelcomeTop({super.key});
-
-  @override
-  Widget build(BuildContext context) {
+  Widget WelcomeTop(BuildContext context) {
     return Container(
         alignment: Alignment.topLeft,
         //decoration: BoxDecoration(border: Border.all(color: Colors.black)),
@@ -73,15 +68,8 @@ class WelcomeTop extends StatelessWidget {
                   ])
             ]));
   }
-}
 
-class LoginSignup extends StatelessWidget {
-  const LoginSignup({
-    Key? key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
+  Widget LoginSignup(BuildContext context) {
     return Container(
         alignment: Alignment.center,
         width: MediaQuery.of(context).size.width * 0.92,

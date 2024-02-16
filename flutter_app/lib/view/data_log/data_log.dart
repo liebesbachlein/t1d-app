@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_app/colors.dart';
-import 'package:flutter_app/data_log/data_types.dart';
+import 'package:flutter_app/assets/colors.dart';
+import 'package:flutter_app/server/models/TrackTmGV.dart';
+import 'package:flutter_app/server/models/TrackGV.dart';
 import 'dart:core';
 import 'package:flutter_app/main.dart';
 
@@ -38,6 +39,7 @@ const List<String> months = [
 ];
 
 List<List<TrackGV>> gvsGlob = getGVArr();
+int _g_pos_data = 0;
 
 List<List<TrackGV>> getGVArr() {
   List<List<TrackGV>> col = [];
@@ -67,7 +69,9 @@ List<DataletTm> getTMArr() {
   return col;
 }
 
+GlobalKey tgableKey = GlobalKey();
 GlobalKey draggableKey = GlobalKey();
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class DataLog extends StatefulWidget {
@@ -150,7 +154,7 @@ class _DataFieldState extends State<DataField> {
   bool load = false;
 
   _DataFieldState(this.load) {
-    tmgvs = getTMGVArr();
+    tmgvs = getTMGVArr(DateTime.now());
     gvCol.add(DataletGV(tmgvs.elementAt(0), 50, false, false));
     for (int i = 1; i < tmgvs.length; i++) {
       gvCol.add(DataletGV(tmgvs.elementAt(i), 0, false, false));
@@ -158,29 +162,22 @@ class _DataFieldState extends State<DataField> {
 
     if (load) {
       load = false;
-      getLoad();
+      loadData();
     }
   }
 
-  void getLoad() async {
-    //await databaseHelper.init();
-    DateTime time = DateTime.now();
-    DateTime this_date =
-        DateTime(time.year, time.month, time.day, 0, 0, 0, 0, 0);
-
-    List<Map<String, dynamic>> listmaps =
-        await databaseHelper.selectGV(this_date.toIso8601String());
+  void loadData() async {
+    List<TrackTmGV> listmaps = await databaseHelperGV
+        .selectDay(DateTime.now().add(Duration(days: _g_pos_data)));
 
     setState(() {
-      //print(listmaps.toString());
-      if (listmaps.length != 0) {
-        for (int i = 0; i < listmaps.length; i++) {
-          TrackTmGV s = TrackTmGV.fromMapObject(listmaps[i]);
+      if (listmaps.isNotEmpty) {
+        for (TrackTmGV i in listmaps) {
           int add = 0;
-          if (s.minute == 30) {
+          if (i.minute == 30) {
             add = 1;
           }
-          tmgvs[s.hour * 2 + add] = s;
+          tmgvs[i.hour * 2 + add] = i;
         }
       }
 
@@ -190,38 +187,23 @@ class _DataFieldState extends State<DataField> {
         gvCol.add(DataletGV(tmgvs.elementAt(i), 0, false, false));
       }
     });
-    load = false;
   }
 
-  void change(int pos) async {
-    DateTime time = DateTime.now();
-    DateTime this_date =
-        DateTime(time.year, time.month, time.day, 0, 0, 0, 0, 0);
-    if (pos != 0) {
-      if (pos > 0) {
-        this_date = this_date.subtract(Duration(days: pos));
-      } else {
-        this_date = this_date.add(Duration(days: -pos));
-      }
-    }
+  void change() async {
+    DateTime thisDate = DateTime.now().add(Duration(days: _g_pos_data));
 
-    for (int i = 0; i < tmgvs.length; i++) {
-      tmgvs[i].nulled();
-      tmgvs[i].setDate(this_date);
-    }
-    List<Map<String, dynamic>> listmaps =
-        await databaseHelper.selectGV(this_date.toIso8601String());
+    tmgvs = getTMGVArr(thisDate);
+
+    List<TrackTmGV> listmaps = await databaseHelperGV.selectDay(thisDate);
+
     setState(() {
-      position = pos;
-      print(listmaps.toString());
-      if (listmaps.length != 0) {
-        for (int i = 0; i < listmaps.length; i++) {
-          TrackTmGV s = TrackTmGV.fromMapObject(listmaps[i]);
+      if (listmaps.isNotEmpty) {
+        for (TrackTmGV i in listmaps) {
           int add = 0;
-          if (s.minute == 30) {
+          if (i.minute == 30) {
             add = 1;
           }
-          tmgvs[s.hour * 2 + add] = s;
+          tmgvs[i.hour * 2 + add] = i;
         }
       }
     });
@@ -229,47 +211,39 @@ class _DataFieldState extends State<DataField> {
 
   void pushVals() async {
     if (isChanged) {
-      DateTime time = DateTime.now();
-      DateTime this_date =
-          DateTime(time.year, time.month, time.day, 0, 0, 0, 0, 0);
-      if (position != 0) {
-        if (position > 0) {
-          this_date = this_date.subtract(Duration(days: position));
-        } else {
-          this_date = this_date.add(Duration(days: -position));
-        }
+      print("pushVals");
+      DateTime thisDate = DateTime.now().add(Duration(days: _g_pos_data));
+
+      List<TrackTmGV> listmaps = await databaseHelperGV.selectDay(thisDate);
+      print(['listmaps', listmaps]);
+      for (TrackTmGV i in listmaps) {
+        databaseHelperGV.deleteTmGV(i.id);
       }
-      List<Map<String, dynamic>> listmaps =
-          await databaseHelper.selectGV(this_date.toIso8601String());
-      for (int j = 0; j < listmaps.length; j++) {
-        databaseHelper.deleteTmGV(listmaps[j]['id']);
-      }
+
       setState(() {
         for (int i = 0; i < tmgvs.length; i++) {
-          if (tmgvs[i].gluval != -1) {
-            databaseHelper.insert(tmgvs[i]);
+          if (tmgvs[i].isGV == true) {
+            databaseHelperGV.insert(tmgvs[i]);
           }
         }
-        databaseHelper.queryAllRowsGV();
         isChanged = false;
         lkey.currentState?.setIsChanged(false);
       });
     }
   }
 
-  List<TrackTmGV> getTMGVArr() {
+  List<TrackTmGV> getTMGVArr(DateTime time) {
     List<TrackTmGV> col = [];
-    DateTime time = DateTime(DateTime.now().year, DateTime.now().month,
-        DateTime.now().day, 0, 0, 0, 0, 0);
+    DateTime thisTime = DateTime(time.year, time.month, time.day);
 
-    col.add(TrackTmGV(time));
-    time = time.add(Duration(minutes: 30));
-    col.add(TrackTmGV(time));
+    col.add(TrackTmGV.empty(thisTime));
+    thisTime = thisTime.add(Duration(minutes: 30));
+    col.add(TrackTmGV.empty(thisTime));
     for (int i = 1; i < 24; i++) {
-      time = time.add(Duration(minutes: 30));
-      col.add(TrackTmGV(time));
-      time = time.add(Duration(minutes: 30));
-      col.add(TrackTmGV(time));
+      thisTime = thisTime.add(Duration(minutes: 30));
+      col.add(TrackTmGV.empty(thisTime));
+      thisTime = thisTime.add(Duration(minutes: 30));
+      col.add(TrackTmGV.empty(thisTime));
     }
     return col;
   }
@@ -278,7 +252,7 @@ class _DataFieldState extends State<DataField> {
     setState(() {
       isChanged = true;
       lkey.currentState?.setIsChanged(true);
-      tmgv.replace(gv);
+      tmgv.setGV(gv);
     });
   }
 
@@ -290,9 +264,9 @@ class _DataFieldState extends State<DataField> {
       if (tmgv.minute > 0) {
         index = index + 1; //подправь индекс для удаление прошлых записей
       }
-      print(gvCol[index].trackTmGV.listOfGV.toString());
+      print(gvCol[index].trackTmGV.toString());
       gvCol[index].trackTmGV.nulled();
-      print(gvCol[index].trackTmGV.listOfGV.toString());
+      print(gvCol[index].trackTmGV.toString());
     });
   }
 
@@ -333,7 +307,7 @@ class _DataFieldState extends State<DataField> {
         trackC,
         offset,
         candidateItems.isNotEmpty,
-        trackC.listOfGV.isNotEmpty,
+        trackC.isGV,
       );
     }, onAccept: (item) {
       dropGV(
@@ -356,22 +330,13 @@ class _TopSetDLState extends State<TopSetDL> {
   String tx = 'Today';
 
   String getTx() {
-    if (pos != 0) {
-      DateTime time = DateTime.now();
-      DateTime this_date =
-          DateTime(time.year, time.month, time.day, 0, 0, 0, 0, 0);
-      if (pos > 0) {
-        this_date = this_date.subtract(Duration(days: pos));
-      } else {
-        this_date = this_date.add(Duration(days: -pos));
-      }
-      tx = weekdays[this_date.weekday - 1] +
-          ' ' +
-          this_date.day.toString() +
-          ' ' +
-          months[this_date.month - 1];
-    } else {
+    if (_g_pos_data == 0) {
       tx = 'Today';
+    } else if (_g_pos_data == -1) {
+      tx = 'Yesterday';
+    } else {
+      DateTime thisDate = DateTime.now().add(Duration(days: _g_pos_data));
+      tx = months[thisDate.month - 1] + ' ' + thisDate.day.toString();
     }
     return tx;
   }
@@ -388,8 +353,8 @@ class _TopSetDLState extends State<TopSetDL> {
                   color: Colors.black,
                   onPressed: () {
                     setState(() {
-                      pos = pos + 1;
-                      dkey.currentState?.change(pos);
+                      _g_pos_data--;
+                      dkey.currentState?.change();
                     });
                   })),
           Container(
@@ -407,8 +372,8 @@ class _TopSetDLState extends State<TopSetDL> {
                   color: Colors.black,
                   onPressed: () {
                     setState(() {
-                      pos = pos - 1;
-                      dkey.currentState?.change(pos);
+                      _g_pos_data++;
+                      dkey.currentState?.change();
                     });
                   })),
         ]));
@@ -486,7 +451,7 @@ class DataletTm extends Container {
 }
 
 class DataletGV extends StatelessWidget {
-  TrackTmGV trackTmGV = TrackTmGV(DateTime.now());
+  TrackTmGV trackTmGV = TrackTmGV.empty(DateTime.now());
   double offset = 0;
   bool highlighted = false;
   bool hasItems = false;
@@ -544,11 +509,9 @@ class DataletGV extends StatelessWidget {
                             },
                             child: ColoredCircle2(
                                 hasItems
-                                    ? pallete2[trackTmGV.listOfGV[0].GV2]
+                                    ? pallete2[trackTmGV.gluval.GV2]
                                     : AppColors.trans,
-                                hasItems
-                                    ? trackTmGV.listOfGV[0].toString()
-                                    : ''));
+                                hasItems ? trackTmGV.gluval.toString() : ''));
                       },
                       alignmentOffset: Offset(-18, -18),
                       menuChildren: [
@@ -556,7 +519,7 @@ class DataletGV extends StatelessWidget {
                             onTap: () {
                               if (controller1.isOpen) {
                                 print('delete! NEW');
-                                print(trackTmGV.listOfGV);
+                                print(trackTmGV.gluval);
                                 print('0');
                                 dkey.currentState?.deleteGV(trackTmGV);
                                 controller1.close();

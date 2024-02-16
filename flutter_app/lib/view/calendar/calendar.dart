@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_app/colors.dart';
-import 'package:flutter_app/data_log/data_types.dart';
+import 'package:flutter_app/assets/colors.dart';
+import 'package:flutter_app/server/models/TrackTmGV.dart';
 import 'package:flutter_app/main.dart';
 import 'dart:core';
 import 'package:quiver/time.dart';
@@ -84,22 +84,24 @@ class _CalendarPageState extends State<CalendarPage> {
   }
 
   Future<List<List<int>>> getTickedDates(month) async {
-    List<TrackTmGV> prevList =
-        await databaseHelper.queryMonth(month == 1 ? 12 : month - 1);
-    List<TrackTmGV> curList = await databaseHelper.queryMonth(month);
-    List<TrackTmGV> nextList =
-        await databaseHelper.queryMonth(month == 12 ? 1 : month + 1);
+    // SETTING YEAR WILL FAIL ON DEC <-> JAN
+    List<TrackTmGV> prevList = await databaseHelperGV
+        .selectMonth(DateTime(year, month == 1 ? 12 : month - 1));
+    List<TrackTmGV> curList =
+        await databaseHelperGV.selectMonth(DateTime(year, month));
+    List<TrackTmGV> nextList = await databaseHelperGV
+        .selectMonth(DateTime(year, month == 12 ? 1 : month + 1));
     Set<int> prevMonth = {};
     Set<int> curMonth = {};
     Set<int> nextMonth = {};
     for (TrackTmGV i in prevList) {
-      prevMonth.add(DateTime.parse(i.date).day);
+      prevMonth.add(i.day);
     }
     for (TrackTmGV i in curList) {
-      curMonth.add(DateTime.parse(i.date).day);
+      curMonth.add(i.day);
     }
     for (TrackTmGV i in nextList) {
-      nextMonth.add(DateTime.parse(i.date).day);
+      nextMonth.add(i.day);
     }
 
     List<int> prevMonthL = prevMonth.toList();

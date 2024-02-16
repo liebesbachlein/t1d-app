@@ -1,15 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_app/authentification/welcome_screen.dart';
-//import 'package:flutter/services.dart';
-import 'package:flutter_app/colors.dart';
-import 'package:flutter_app/db_user.dart';
+import 'package:flutter_app/assets/colors.dart';
 import 'dart:core';
-
 import 'package:flutter_app/main.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_app/server/controllers/sharedPreferences.dart';
 
 class AccountSetting extends StatefulWidget {
   const AccountSetting({super.key});
@@ -76,7 +71,7 @@ class _AccountSettingState extends State<AccountSetting> {
               onPressed: () {
                 FirebaseAuth.instance.signOut();
                 runApp(const MainWelcome());
-                deleteUserInfo();
+                deletePersonalInfo();
               },
               child: Text('Sign out',
                   style: TextStyle(
@@ -134,10 +129,4 @@ class _AccountSettingState extends State<AccountSetting> {
                   onPressed: () {})),
         ]));
   }
-}
-
-deleteUserInfo() async {
-  databaseHelperUser.deleteDatabase();
-  final prefs = await SharedPreferences.getInstance();
-  await prefs.setInt('authToken', 0);
 }

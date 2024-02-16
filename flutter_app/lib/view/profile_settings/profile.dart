@@ -1,14 +1,11 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-//import 'package:flutter/services.dart';
-import 'package:flutter_app/colors.dart';
-import 'package:flutter_app/db_user.dart';
-import 'package:flutter_app/main.dart';
-import 'package:flutter_app/profile_settings/account.dart';
+import 'package:flutter_app/assets/colors.dart';
+import 'package:flutter_app/view/profile_settings/account.dart';
 import 'dart:core';
+import 'package:flutter_app/server/controllers/sharedPreferences.dart';
 
-import 'package:flutter_app/profile_settings/backup.dart';
+import 'package:flutter_app/view/profile_settings/backup.dart';
 
 class ProfileSettings extends StatefulWidget {
   const ProfileSettings({super.key});
@@ -190,12 +187,6 @@ class _PicNameState extends State<PicName> {
             child: CircularProgressIndicator(color: AppColors.lavender),
           );
         },
-        future: getUsername());
-  }
-
-  Future<String> getUsername() async {
-    List<UserModel> listUsers = await databaseHelperUser.queryAllRowsUsers();
-    username = listUsers.last.username;
-    return username;
+        future: getUsername().then((e) => username = e));
   }
 }

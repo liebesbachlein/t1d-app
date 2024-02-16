@@ -2,7 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 //import 'package:flutter/services.dart';
-import 'package:flutter_app/colors.dart';
+import 'package:flutter_app/assets/colors.dart';
 import 'package:flutter_app/main.dart';
 import 'dart:core';
 

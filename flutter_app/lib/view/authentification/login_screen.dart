@@ -1,164 +1,42 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_app/authentification/auth_services.dart';
+import 'package:flutter_app/server/controllers/authServices.dart';
+import 'package:flutter_app/server/controllers/sharedPreferences.dart';
+import 'package:flutter_app/server/models/UserModel.dart';
 import 'package:flutter_app/main.dart';
-import 'package:flutter_app/colors.dart';
+import 'package:flutter_app/assets/colors.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:math';
 
-import 'package:shared_preferences/shared_preferences.dart';
-
-//import 'package:google_sign_in/google_sign_in.dart';
-//import 'package:http/http.dart' as http;
-//import 'dart:convert' show json;
-//import 'dart:async';
-
-/*
-typedef HandleSignInFn = Future<void> Function();
-/*
-Widget buildSignInButton({HandleSignInFn? onPressed}) {
-  return ElevatedButton(
-    onPressed: onPressed,
-    child: const Text('SIGN IN'),
-  );
-}*/
-
-const List<String> scopes = <String>[
-  'email',
-  'https://www.googleapis.com/auth/contacts.readonly',
-];
-
-GoogleSignIn _googleSignIn = GoogleSignIn(
-  scopes: scopes,
-);
-*/
-class SignUpScreen extends StatefulWidget {
-  const SignUpScreen({super.key});
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
   @override
-  State<SignUpScreen> createState() => _SignUpScreenState();
+  State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _SignUpScreenState extends State<SignUpScreen> {
-  //GoogleSignInAccount? _currentUser;
-  //bool _isAuthorized = false;
-  //String _contactText = '';
-  bool _isSignUping = false;
+class _LoginScreenState extends State<LoginScreen> {
+  bool _isSignIning = false;
 
   final _formkey = GlobalKey<FormState>();
 
   final FirebaseServices _auth = FirebaseServices();
 
-  TextEditingController _usernameController = TextEditingController();
   TextEditingController _emailController = TextEditingController();
   TextEditingController _passwordController = TextEditingController();
 
   @override
   void dispose() {
-    _usernameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
 
-/*
-  @override
-  void initState() {
-    super.initState();
-
-    _googleSignIn.onCurrentUserChanged
-        .listen((GoogleSignInAccount? account) async {
-      bool isAuthorized = account != null;
-      if (kIsWeb && account != null) {
-        isAuthorized = await _googleSignIn.canAccessScopes(scopes);
-      }
-
-      setState(() {
-        _currentUser = account;
-        _isAuthorized = isAuthorized;
-      });
-      if (isAuthorized) {
-        unawaited(_handleGetContact(account!));
-      }
-    });
-
-    _googleSignIn.signInSilently();
-  }
-
-  Future<void> _handleGetContact(GoogleSignInAccount user) async {
-    setState(() {
-      _contactText = 'Loading contact info...';
-    });
-    final http.Response response = await http.get(
-      Uri.parse('https://people.googleapis.com/v1/people/me/connections'
-          '?requestMask.includeField=person.names'),
-      headers: await user.authHeaders,
-    );
-    if (response.statusCode != 200) {
-      setState(() {
-        _contactText = 'People API gave a ${response.statusCode} '
-            'response. Check logs for details.';
-      });
-      print('People API ${response.statusCode} response: ${response.body}');
-      return;
-    }
-    final Map<String, dynamic> data =
-        json.decode(response.body) as Map<String, dynamic>;
-    final String? namedContact = _pickFirstNamedContact(data);
-    setState(() {
-      if (namedContact != null) {
-        _contactText = 'I see you know $namedContact!';
-      } else {
-        _contactText = 'No contacts to display.';
-      }
-    });
-  }
-
-  String? _pickFirstNamedContact(Map<String, dynamic> data) {
-    final List<dynamic>? connections = data['connections'] as List<dynamic>?;
-    final Map<String, dynamic>? contact = connections?.firstWhere(
-      (dynamic contact) => (contact as Map<Object?, dynamic>)['names'] != null,
-      orElse: () => null,
-    ) as Map<String, dynamic>?;
-    if (contact != null) {
-      final List<dynamic> names = contact['names'] as List<dynamic>;
-      final Map<String, dynamic>? name = names.firstWhere(
-        (dynamic name) =>
-            (name as Map<Object?, dynamic>)['displayName'] != null,
-        orElse: () => null,
-      ) as Map<String, dynamic>?;
-      if (name != null) {
-        return name['displayName'] as String?;
-      }
-    }
-    return null;
-  }
-
-  Future<void> _handleSignIn() async {
-    try {
-      await _googleSignIn.signIn();
-    } catch (error) {
-      print(error);
-    }
-  }
-
-  Future<void> _handleAuthorizeScopes() async {
-    final bool isAuthorized = await _googleSignIn.requestScopes(scopes);
-    setState(() {
-      _isAuthorized = isAuthorized;
-    });
-    if (isAuthorized) {
-      unawaited(_handleGetContact(_currentUser!));
-    }
-  }
-
-  Future<void> _handleSignOut() => _googleSignIn.disconnect();*/
-  double offsetForm = 0.7;
+  double offsetForm = 0.52;
 
   @override
   Widget build(BuildContext context) {
-    //final GoogleSignInAccount? user = _currentUser;
-
     return Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
@@ -179,19 +57,19 @@ class _SignUpScreenState extends State<SignUpScreen> {
             height: MediaQuery.of(context).size.height,
             child: Stack(alignment: Alignment.topCenter, children: [
               TopBack(),
-              SignUp(context),
+              LogTop(),
               Container(
                   //padding: EdgeInsets.only(
                   //  top: MediaQuery.of(context).size.height * 0.2),
                   //alignment: Alignment.topCenter,
                   //color: AppColors.background,
                   alignment: Alignment.bottomCenter,
-                  child: SignUpForm(context))
+                  child: LoginForm())
             ])));
   }
 
-  Widget SignUpForm(BuildContext context) {
-    String name = '';
+  Widget LoginForm() {
+    Map userData = {};
     String email = '';
     String password = '';
 
@@ -219,58 +97,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     margin: EdgeInsets.only(bottom: 20, top: 10),
                     height: 55,
                     child: TextFormField(
-                        controller: _usernameController,
-                        style: TextStyle(
-                            fontFamily: 'Inter-Regular',
-                            fontSize: 16,
-                            color: AppColors.mint),
-                        onTap: () {
-                          setState(() {
-                            offsetForm = 0.8;
-                          });
-                        },
-                        /*onEditingComplete: () {
-                          setState(() {
-                            offsetForm = 0.52;
-                          });
-                        },*/
-                        autocorrect: false,
-                        validator: MultiValidator([
-                          RequiredValidator(errorText: 'name?'),
-                          //EmailValidator(errorText: 'Fix the email'),
-                        ]),
-                        onSaved: (e) {
-                          if (e == null) {
-                            name = '';
-                          } else {
-                            name = e;
-                          }
-                        },
-                        decoration: InputDecoration(
-                            constraints: BoxConstraints(minHeight: 60),
-                            hintText: "Name",
-                            hintStyle: TextStyle(
-                                fontFamily: 'Inter-Regular',
-                                fontSize: 16,
-                                color: AppColors.lavender_light),
-                            prefixIcon: Padding(
-                              padding: const EdgeInsets.all(5),
-                              child: Icon(Icons.flood,
-                                  color: AppColors.lavender_light),
-                            ),
-                            enabledBorder: UnderlineInputBorder(
-                                borderSide: BorderSide(
-                                    width: 1, color: AppColors.lavender_light)),
-                            errorStyle: TextStyle(
-                                fontSize: 14, fontFamily: 'Inter-Regular'),
-                            border: UnderlineInputBorder(
-                                borderSide: BorderSide(
-                                    width: 1,
-                                    color: AppColors.lavender_light))))),
-                Container(
-                    margin: EdgeInsets.only(bottom: 20),
-                    height: 55,
-                    child: TextFormField(
                         controller: _emailController,
                         style: TextStyle(
                             fontFamily: 'Inter-Regular',
@@ -278,7 +104,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             color: AppColors.mint),
                         onTap: () {
                           setState(() {
-                            offsetForm = 0.8;
+                            offsetForm = 0.75;
                           });
                         },
                         /*onEditingComplete: () {
@@ -319,8 +145,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 borderSide: BorderSide(
                                     width: 1,
                                     color: AppColors.lavender_light))))),
-                Container(
-                    margin: EdgeInsets.only(bottom: 25),
+                SizedBox(
+                    //margin: EdgeInsets.only(bottom: 5),
                     height: 55,
                     child: TextFormField(
                         controller: _passwordController,
@@ -330,7 +156,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             color: Colors.black),
                         onTap: () {
                           setState(() {
-                            offsetForm = 0.8;
+                            offsetForm = 0.75;
                           });
                         },
                         /*onEditingComplete: () {
@@ -378,6 +204,20 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                     width: 1,
                                     color: AppColors.lavender_light)))))
               ])),
+          Align(
+              alignment: Alignment.centerRight,
+              child: Padding(
+                  padding:
+                      EdgeInsets.only(top: 5, bottom: 8, left: 10, right: 10),
+                  child: TextButton(
+                      onPressed: () {
+                        popUpNoSuchFeature("the feature will be here soon");
+                      },
+                      child: Text('Forgot password?',
+                          style: TextStyle(
+                              fontFamily: 'Inter-Regular',
+                              fontSize: 12,
+                              color: AppColors.text_sub))))),
           ElevatedButton(
               style: ButtonStyle(
                 fixedSize: MaterialStatePropertyAll<Size>(
@@ -397,12 +237,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
               onPressed: () {
                 if (_formkey.currentState!.validate()) {
                   _formkey.currentState?.save();
-                  _signUp();
+                  _signIn();
                 }
               },
-              child: _isSignUping
+              child: _isSignIning
                   ? CircularProgressIndicator(color: Colors.white)
-                  : Text('Sign up',
+                  : Text('Login',
                       style: TextStyle(
                         fontFamily: 'Inter-Medium',
                         fontSize: 16,
@@ -412,10 +252,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
               padding: EdgeInsets.only(top: 40),
               child: TextButton(
                   onPressed: () {
-                    popUpNoSuchFeature('the feature will be here soon');
+                    popUpNoSuchFeature("the feature will be here soon");
                   },
                   child: Column(children: [
-                    Text('or sign up with',
+                    Text('or login with',
                         style: TextStyle(
                             fontFamily: 'Inter-Regular',
                             fontSize: 12,
@@ -429,36 +269,34 @@ class _SignUpScreenState extends State<SignUpScreen> {
         ]));
   }
 
-  void _signUp() async {
+  void _signIn() async {
     setState(() {
-      _isSignUping = true;
+      _isSignIning = true;
     });
 
-    String username = _usernameController.text;
     String email = _emailController.text;
     String password = _passwordController.text;
 
-    User? user = await _auth.signUpWithEmailAndPassword(email, password);
-
+    User? user = await _auth.signInWithEmailAndPassword(email, password);
     setState(() {
-      _isSignUping = false;
+      _isSignIning = false;
     });
+
     if (user != null) {
-      print('User is successfully created');
-      firebaseRemoteHelper.addUser(username, email);
-      Random random = new Random();
-      int randomNumber = random.nextInt(1000) + 1000;
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setInt('authToken', randomNumber);
-      await prefs.setString('email', email);
-      await prefs.setString('username', username);
-      main2(username: username, email: email);
+      print('User successfully signed in');
+
+      UserModel resUser = await firebaseRemoteHelper.getUsername(email);
+      await setPersonalInfo(username: resUser.username, email: email);
+
+      //firebaseRemoteHelper.changeToken(email, Random().nextInt(1000) + 1000);
+
+      mainHome(username: resUser.username, email: email);
     } else {
-      popUpNoSuchFeature("Email already exists");
+      popUpNoSuchFeature("Incorrect email/password");
     }
   }
 
-  Widget SignUp(BuildContext context) {
+  Widget LogTop() {
     return Container(
         alignment: Alignment.topLeft,
         //decoration: BoxDecoration(border: Border.all(color: Colors.black)),
@@ -467,7 +305,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         height: MediaQuery.of(context).size.height * 0.92,
         padding: EdgeInsets.only(left: 12),
         margin: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.08),
-        child: const Text('Sign up',
+        child: Text('Login',
             style: TextStyle(
               fontFamily: 'Inter-Medium',
               fontSize: 32,
@@ -506,17 +344,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       width: 170, height: 170)
                 ]))));
   }
-}
 
-class TopBack extends StatefulWidget {
-  const TopBack({super.key});
-  @override
-  State<TopBack> createState() => _TopBackState();
-}
-
-class _TopBackState extends State<TopBack> {
-  @override
-  Widget build(BuildContext context) {
+  Widget TopBack() {
     return Container(
         alignment: Alignment.centerLeft,
         padding: EdgeInsets.only(left: 12),
