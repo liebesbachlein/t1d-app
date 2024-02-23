@@ -1,16 +1,19 @@
 // ignore_for_file: avoid_print, non_constant_identifier_names, no_leading_underscores_for_local_identifiers
 
+import 'dart:math';
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 //import 'package:flutter/services.dart';
 import 'package:flutter_app/assets/colors.dart';
+import 'package:flutter_app/assets/ai_script.dart';
 import 'package:flutter_app/main.dart';
 import 'dart:core';
 
 import 'package:flutter_app/server/models/DialogModel.dart';
 
-late List<DialogModel>? listDialog;
+late List<DialogModel> listDialog;
 
 class ChatbotPage extends StatefulWidget {
   const ChatbotPage({super.key});
@@ -37,7 +40,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
                 ),
               );
             } else if (snapshot.hasData) {
-              listDialog = snapshot.data;
+              listDialog = snapshot.data ?? [];
               print('Load Dialog Data: Success');
               return Scaffold(
                   appBar: AppBar(
@@ -174,12 +177,13 @@ class _ChatbotPageState extends State<ChatbotPage> {
                         onTap: () {
                           String message = _messageController.text;
                           if (message != '') {
-                            _formkey.currentState?.reset();
                             DialogModel newMessage = DialogModel.createUserText(
                                 DateTime.now(), message);
                             databaseHelperDialog.insert(newMessage);
-                            listDialog?.add(newMessage);
+                            listDialog.add(newMessage);
                             _chatBox.currentState?.buildList();
+                            _chatBox.currentState?.buildAItext();
+                            _formkey.currentState?.reset();
                           }
                         },
                         child: const Icon(Icons.cookie_rounded,
@@ -198,9 +202,10 @@ class ChatbotBox extends StatefulWidget {
 
 class _ChatbotBoxState extends State<ChatbotBox> {
   List<Widget> widgetListDialog = [];
+
   _ChatbotBoxState() {
     widgetListDialog = [];
-    for (DialogModel itemDialog in listDialog?.reversed ?? []) {
+    for (DialogModel itemDialog in listDialog.reversed) {
       String time =
           '${itemDialog.displayDate.hour < 10 ? '0${itemDialog.displayDate.hour}' : itemDialog.displayDate.hour}:${itemDialog.displayDate.minute < 10 ? '0${itemDialog.displayDate.minute}' : itemDialog.displayDate.minute}';
       if (itemDialog.fromWho == 0) {
@@ -213,8 +218,9 @@ class _ChatbotBoxState extends State<ChatbotBox> {
 
   void buildList() {
     setState(() {
+      //    ALTER IT SO THAT IT APPENDS NEW MESSAGE TO widgetListDialog DIRECTLY
       widgetListDialog = [];
-      for (DialogModel itemDialog in listDialog?.reversed ?? []) {
+      for (DialogModel itemDialog in listDialog.reversed) {
         String time =
             '${itemDialog.displayDate.hour < 10 ? '0${itemDialog.displayDate.hour}' : itemDialog.displayDate.hour}:${itemDialog.displayDate.minute < 10 ? '0${itemDialog.displayDate.minute}' : itemDialog.displayDate.minute}';
         if (itemDialog.fromWho == 0) {
@@ -224,6 +230,20 @@ class _ChatbotBoxState extends State<ChatbotBox> {
         }
       }
     });
+  }
+
+  void buildAItext() {
+    Random rand = Random();
+    Map<String, String> mapResponse =
+        aiResponces[rand.nextInt(aiResponces.length)];
+    String quote = mapResponse['quote'] ?? '';
+    String movie = mapResponse['movie'] ?? '';
+    String year = mapResponse['year'] ?? '';
+    String text = '$quote\n$movie, $year';
+    DialogModel newMessage = DialogModel.createAIText(DateTime.now(), text);
+    databaseHelperDialog.insert(newMessage);
+    listDialog.add(newMessage);
+    buildList();
   }
 
   @override
@@ -257,7 +277,7 @@ class _ChatbotBoxState extends State<ChatbotBox> {
               borderRadius: BorderRadius.only(
                   topRight: Radius.circular(12),
                   topLeft: Radius.circular(12),
-                  bottomLeft: Radius.circular(12)),
+                  bottomRight: Radius.circular(12)),
             ),
             child:
                 Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
