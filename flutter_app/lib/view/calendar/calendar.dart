@@ -1,3 +1,5 @@
+// ignore_for_file: non_constant_identifier_names, avoid_print
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_app/assets/colors.dart';
@@ -7,6 +9,8 @@ import 'dart:core';
 import 'package:quiver/time.dart';
 
 class CalendarPage extends StatefulWidget {
+  const CalendarPage({super.key});
+
   @override
   State<CalendarPage> createState() => _CalendarPageState();
 }
@@ -22,7 +26,7 @@ class _CalendarPageState extends State<CalendarPage> {
             foregroundColor: AppColors.background,
             surfaceTintColor: AppColors.background,
             backgroundColor: AppColors.background,
-            systemOverlayStyle: SystemUiOverlayStyle(
+            systemOverlayStyle: const SystemUiOverlayStyle(
               systemNavigationBarColor: AppColors.background,
               systemNavigationBarDividerColor: AppColors.background,
               statusBarColor: AppColors.background,
@@ -47,19 +51,19 @@ class _CalendarPageState extends State<CalendarPage> {
               return Center(
                 child: Text(
                   '${snapshot.error} occurred',
-                  style: TextStyle(fontSize: 18),
+                  style: const TextStyle(fontSize: 18),
                 ),
               );
             } else if (snapshot.hasData) {
               return Container(
                   width: MediaQuery.of(context).size.width,
-                  margin: EdgeInsets.only(left: 17, right: 17, top: 37),
+                  margin: const EdgeInsets.only(left: 17, right: 17, top: 37),
                   constraints: BoxConstraints(
                       minHeight: MediaQuery.of(context).size.height * 0.45),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(24),
-                    boxShadow: [
+                    boxShadow: const [
                       BoxShadow(
                           color: Color.fromRGBO(149, 157, 165, 0.1),
                           offset: Offset.zero,
@@ -76,7 +80,7 @@ class _CalendarPageState extends State<CalendarPage> {
                   ));
             }
           }
-          return Center(
+          return const Center(
             child: CircularProgressIndicator(color: AppColors.lavender),
           );
         }, //builder
@@ -87,12 +91,10 @@ class _CalendarPageState extends State<CalendarPage> {
     // SETTING YEAR WILL FAIL ON DEC <-> JAN
     List<TrackTmGV> prevList = await databaseHelperGV
         .selectMonth(DateTime(year, month == 1 ? 12 : month - 1, 1));
-    print(DateTime(year, month == 1 ? 12 : month - 1, 1).toIso8601String());
     List<TrackTmGV> curList =
         await databaseHelperGV.selectMonth(DateTime(year, month, 1));
     List<TrackTmGV> nextList = await databaseHelperGV
         .selectMonth(DateTime(year, month == 12 ? 1 : month + 1, 1));
-    print(DateTime(year, month == 12 ? 1 : month + 1, 1).toIso8601String());
     Set<int> prevMonth = {};
     Set<int> curMonth = {};
     Set<int> nextMonth = {};
@@ -114,15 +116,14 @@ class _CalendarPageState extends State<CalendarPage> {
     curMonthL.sort();
     nextMonthL.sort();
 
-    print([prevMonthL, curMonthL, nextMonthL]);
     return [prevMonthL, curMonthL, nextMonthL];
   }
 
   Widget CalendarInterface(int month, int year, List<List<int>> isTicked) {
     int lastDay = daysInMonth(year, month);
     int lastDayPrevMonth = daysInMonth(year, month == 1 ? 12 : month - 1);
-    int firstWeekday = DateTime(year, month, 1).weekday;
-    int lastWeekday = DateTime(year, month, lastDay).weekday;
+    //int firstWeekday = DateTime(year, month, 1).weekday;
+    //int lastWeekday = DateTime(year, month, lastDay).weekday;
     List<List<int>> allDays = [
       [0, 0, 0, 0, 0, 0, 0],
       [0, 0, 0, 0, 0, 0, 0],
@@ -242,14 +243,14 @@ class _CalendarPageState extends State<CalendarPage> {
       ];
       List<Widget> list = [];
       for (String i in weekNames) {
-        Widget weekName = Container(
+        Widget weekName = SizedBox(
             width: 50,
             height: 50,
             //decoration: dec,
             child:
                 Column(mainAxisAlignment: MainAxisAlignment.center, children: [
               Text(i,
-                  style: TextStyle(
+                  style: const TextStyle(
                       fontFamily: 'Inter-Regular',
                       fontSize: 12,
                       color: Colors.black))
@@ -273,7 +274,7 @@ class _CalendarPageState extends State<CalendarPage> {
         Color backColor = Colors.white;
         double width = 50;
         double height = 50;
-        EdgeInsets margin = EdgeInsets.symmetric(vertical: 0);
+        EdgeInsets margin = const EdgeInsets.symmetric(vertical: 0);
 
         BoxDecoration dec = BoxDecoration(
           borderRadius: BorderRadius.circular(0),
@@ -317,7 +318,7 @@ class _CalendarPageState extends State<CalendarPage> {
               width = 45;
               height = 40;
               margin = EdgeInsets.only(top: rad, bottom: rad, right: rad);
-              ;
+
               dec = BoxDecoration(
                 borderRadius: BorderRadius.only(
                   topRight: Radius.circular(rad),
@@ -330,7 +331,7 @@ class _CalendarPageState extends State<CalendarPage> {
               height = 40;
               margin = EdgeInsets.symmetric(vertical: rad);
               dec = BoxDecoration(
-                borderRadius: BorderRadius.all(Radius.circular(0)),
+                borderRadius: const BorderRadius.all(Radius.circular(0)),
                 color: backColor,
               );
             }
@@ -371,7 +372,7 @@ class _CalendarPageState extends State<CalendarPage> {
                 height = 40;
                 margin = EdgeInsets.symmetric(vertical: rad);
                 dec = BoxDecoration(
-                  borderRadius: BorderRadius.all(Radius.circular(0)),
+                  borderRadius: const BorderRadius.all(Radius.circular(0)),
                   color: backColor,
                 );
               }
@@ -411,7 +412,7 @@ class _CalendarPageState extends State<CalendarPage> {
                 height = 40;
                 margin = EdgeInsets.symmetric(vertical: rad);
                 dec = BoxDecoration(
-                  borderRadius: BorderRadius.all(Radius.circular(0)),
+                  borderRadius: const BorderRadius.all(Radius.circular(0)),
                   color: backColor,
                 );
               }
@@ -457,37 +458,34 @@ class _CalendarPageState extends State<CalendarPage> {
 
     return Container(
         height: 50,
-        decoration: BoxDecoration(color: Colors.white),
+        decoration: const BoxDecoration(color: Colors.white),
         child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-          Container(
-              child: IconButton(
-                  icon: Icon(Icons.arrow_back_ios),
-                  color: Colors.black,
-                  onPressed: () {
-                    setState(() {
-                      year = month == 1 ? year - 1 : year;
-                      month = month == 1 ? 12 : month - 1;
-                    });
-                  })),
+          IconButton(
+              icon: const Icon(Icons.arrow_back_ios),
+              color: Colors.black,
+              onPressed: () {
+                setState(() {
+                  year = month == 1 ? year - 1 : year;
+                  month = month == 1 ? 12 : month - 1;
+                });
+              }),
           Container(
               alignment: Alignment.center,
               width: MediaQuery.of(context).size.width * 0.5,
               child: Text(months[month - 1],
-                  style: TextStyle(
+                  style: const TextStyle(
                       color: Colors.black,
                       fontFamily: 'Inter-Medium',
                       fontSize: 16))),
-          Container(
-              //padding: EdgeInsets.only(left: 8, right: 3),
-              child: IconButton(
-                  icon: Icon(Icons.arrow_forward_ios),
-                  color: Colors.black,
-                  onPressed: () {
-                    setState(() {
-                      year = month == 12 ? year + 1 : year;
-                      month = month == 12 ? 1 : month + 1;
-                    });
-                  })),
+          IconButton(
+              icon: const Icon(Icons.arrow_forward_ios),
+              color: Colors.black,
+              onPressed: () {
+                setState(() {
+                  year = month == 12 ? year + 1 : year;
+                  month = month == 12 ? 1 : month + 1;
+                });
+              }),
         ]));
   }
 

@@ -1,9 +1,10 @@
+// ignore_for_file: file_names, avoid_function_literals_in_foreach_calls
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_app/server/models/TrackTmGV.dart';
 import 'package:flutter_app/server/models/UserModel.dart';
 import 'package:flutter_app/server/controllers/sharedPreferences.dart';
 import 'package:flutter_app/main.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class FirebaseRemoteHelper {
   final FirebaseFirestore firestore = FirebaseFirestore.instance;

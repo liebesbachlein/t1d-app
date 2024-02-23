@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print, non_constant_identifier_names
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_app/assets/colors.dart';
@@ -59,11 +61,11 @@ List<DataletTm> getTMArr() {
   List<DataletTm> col = [];
   for (int i = 0; i < 24; i++) {
     if (i < 10) {
-      col.add(DataletTm('0' + i.toString() + ':' + '00'));
-      col.add(DataletTm('0' + i.toString() + ':' + '30'));
+      col.add(DataletTm('0$i:00'));
+      col.add(DataletTm('0$i:30'));
     } else {
-      col.add(DataletTm(i.toString() + ':' + '00'));
-      col.add(DataletTm(i.toString() + ':' + '30'));
+      col.add(DataletTm('$i:00'));
+      col.add(DataletTm('$i:30'));
     }
   }
   return col;
@@ -75,14 +77,14 @@ GlobalKey draggableKey = GlobalKey();
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class DataLog extends StatefulWidget {
-  DataLog({required Key key}) : super(key: key);
+  const DataLog({required Key key}) : super(key: key);
 
   @override
   State<DataLog> createState() => _DataLogState();
 }
 
 class _DataLogState extends State<DataLog> {
-  TopSetDL top = TopSetDL();
+  TopSetDL top = const TopSetDL();
   bool isChanged = false;
 
   void setIsChanged(bool newChanged) {
@@ -96,7 +98,7 @@ class _DataLogState extends State<DataLog> {
     return Scaffold(
         appBar: AppBar(
             backgroundColor: Colors.white,
-            systemOverlayStyle: SystemUiOverlayStyle(
+            systemOverlayStyle: const SystemUiOverlayStyle(
               statusBarColor: Colors.white,
               statusBarIconBrightness: Brightness.dark, // Android dark???
               statusBarBrightness: Brightness.light, // iOS dark???
@@ -107,7 +109,7 @@ class _DataLogState extends State<DataLog> {
           DataField(key: dkey),
           Container(
               height: 110,
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.all(Radius.circular(12)),
                 boxShadow: [
@@ -118,7 +120,7 @@ class _DataLogState extends State<DataLog> {
                       blurRadius: 10)
                 ],
               ),
-              child: Column(children: [TopSetDL(), Scale1()]))
+              child: Column(children: [const TopSetDL(), Scale1()]))
         ]),
         floatingActionButton: FloatingActionButton(
             elevation: 2,
@@ -132,13 +134,13 @@ class _DataLogState extends State<DataLog> {
               });
             },
             child: isChanged
-                ? Icon(Icons.add_task_outlined)
-                : Icon(Icons.task_alt)));
+                ? const Icon(Icons.add_task_outlined)
+                : const Icon(Icons.task_alt)));
   }
 }
 
 class DataField extends StatefulWidget {
-  DataField({required Key key}) : super(key: key) {}
+  const DataField({required Key key}) : super(key: key);
 
   @override
   State<DataField> createState() => _DataFieldState(true);
@@ -245,12 +247,12 @@ class _DataFieldState extends State<DataField> {
     DateTime thisTime = DateTime(time.year, time.month, time.day);
 
     col.add(TrackTmGV.empty(thisTime));
-    thisTime = thisTime.add(Duration(minutes: 30));
+    thisTime = thisTime.add(const Duration(minutes: 30));
     col.add(TrackTmGV.empty(thisTime));
     for (int i = 1; i < 24; i++) {
-      thisTime = thisTime.add(Duration(minutes: 30));
+      thisTime = thisTime.add(const Duration(minutes: 30));
       col.add(TrackTmGV.empty(thisTime));
-      thisTime = thisTime.add(Duration(minutes: 30));
+      thisTime = thisTime.add(const Duration(minutes: 30));
       col.add(TrackTmGV.empty(thisTime));
     }
     return col;
@@ -344,7 +346,7 @@ class _TopSetDLState extends State<TopSetDL> {
       tx = 'Yesterday';
     } else {
       DateTime thisDate = DateTime.now().add(Duration(days: _g_pos_data));
-      tx = months[thisDate.month - 1] + ' ' + thisDate.day.toString();
+      tx = '${months[thisDate.month - 1]} ${thisDate.day}';
     }
     return tx;
   }
@@ -353,44 +355,41 @@ class _TopSetDLState extends State<TopSetDL> {
   Widget build(BuildContext context) {
     return Container(
         height: 50,
-        decoration: BoxDecoration(color: Colors.white),
+        decoration: const BoxDecoration(color: Colors.white),
         child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-          Container(
-              child: IconButton(
-                  icon: Icon(Icons.arrow_back_ios),
-                  color: Colors.black,
-                  onPressed: () {
-                    setState(() {
-                      _g_pos_data--;
-                      dkey.currentState?.change();
-                    });
-                  })),
+          IconButton(
+              icon: const Icon(Icons.arrow_back_ios),
+              color: Colors.black,
+              onPressed: () {
+                setState(() {
+                  _g_pos_data--;
+                  dkey.currentState?.change();
+                });
+              }),
           Container(
               alignment: Alignment.center,
               width: MediaQuery.of(context).size.width * 0.5,
               child: Text(getTx(),
-                  style: TextStyle(
+                  style: const TextStyle(
                       color: Colors.black,
                       fontFamily: 'Inter-Medium',
                       fontSize: 16))),
-          Container(
-              //padding: EdgeInsets.only(left: 8, right: 3),
-              child: IconButton(
-                  icon: Icon(Icons.arrow_forward_ios),
-                  color: Colors.black,
-                  onPressed: () {
-                    setState(() {
-                      _g_pos_data++;
-                      dkey.currentState?.change();
-                    });
-                  })),
+          IconButton(
+              icon: const Icon(Icons.arrow_forward_ios),
+              color: Colors.black,
+              onPressed: () {
+                setState(() {
+                  _g_pos_data++;
+                  dkey.currentState?.change();
+                });
+              }),
         ]));
   }
 }
 
 List<Widget> Scale2(List<TrackGV> gvs) {
   List<Widget> scale2 = [];
-  List<Widget> scale = [];
+  //List<Widget> scale = [];
 
   int s = pallete2.length;
   for (int i = 0; i < s; i++) {
@@ -410,11 +409,10 @@ Widget buildGV(Color color, TrackGV item) {
 }
 
 class DraggingGV extends StatelessWidget {
-  GlobalKey dragKey = GlobalKey();
-  String GV = '';
-  Color color = Colors.red;
-
-  DraggingGV(this.dragKey, this.GV, this.color);
+  const DraggingGV(this.dragKey, this.GV, this.color, {super.key});
+  final GlobalKey dragKey;
+  final String GV;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
@@ -431,20 +429,18 @@ class DraggingGV extends StatelessWidget {
               borderRadius: BorderRadius.circular(20),
             ),
             child: DefaultTextStyle(
-                child: Text(GV),
                 style: const TextStyle(
                     color: Colors.black,
                     fontFamily: 'Inter-Thin',
-                    fontSize: 14))));
+                    fontSize: 14),
+                child: Text(GV))));
   }
 }
 
 class DataletTm extends Container {
-  String tx = '';
+  DataletTm(this.tx, {super.key});
 
-  DataletTm(String tx) {
-    this.tx = tx;
-  }
+  final String tx;
 
   @override
   Widget build(BuildContext context) {
@@ -453,22 +449,23 @@ class DataletTm extends Container {
         height: 60,
         width: MediaQuery.of(context).size.width * 0.15,
         child: Text(tx,
-            style: TextStyle(
+            style: const TextStyle(
                 fontFamily: 'Inter-Thin', fontSize: 16, color: Colors.black)));
   }
 }
 
 class DataletGV extends StatelessWidget {
-  TrackTmGV trackTmGV = TrackTmGV.empty(DateTime.now());
-  double offset = 0;
-  bool highlighted = false;
-  bool hasItems = false;
-  DataletGV(this.trackTmGV, this.offset, this.highlighted, this.hasItems);
+  const DataletGV(this.trackTmGV, this.offset, this.highlighted, this.hasItems,
+      {super.key});
+  final TrackTmGV trackTmGV;
+  final double offset;
+  final bool highlighted;
+  final bool hasItems;
   //Widget child = Widget();
 
   @override
   Widget build(BuildContext context) {
-    Color textColor = highlighted ? Colors.white : Colors.black;
+    //Color textColor = highlighted ? Colors.white : Colors.black;
     MenuController controller1 = MenuController();
     return Transform.scale(
         scale: highlighted ? 1.0 : 1.0,
@@ -521,7 +518,7 @@ class DataletGV extends StatelessWidget {
                                     : AppColors.trans,
                                 hasItems ? trackTmGV.gluval.toString() : ''));
                       },
-                      alignmentOffset: Offset(-18, -18),
+                      alignmentOffset: const Offset(-18, -18),
                       menuChildren: [
                         GestureDetector(
                             onTap: () {
@@ -540,9 +537,10 @@ class DataletGV extends StatelessWidget {
                                     color: Colors.red,
                                     borderRadius: BorderRadius.circular(25)),
                                 alignment: Alignment.center,
-                                child: Icon(Icons.close, color: Colors.white)))
+                                child: const Icon(Icons.close,
+                                    color: Colors.white)))
                       ],
-                      style: MenuStyle(
+                      style: const MenuStyle(
                           elevation: MaterialStatePropertyAll<double>(0),
                           backgroundColor:
                               MaterialStatePropertyAll<Color>(AppColors.trans),
@@ -560,79 +558,50 @@ class DataletGV extends StatelessWidget {
   }
 }
 
-class Scale1 extends Container {
+Widget Scale1() {
   List<GluVal1> scale1 = [];
 
-  Scale1() {
-    scale1 = [];
-    int s = pallete1.length;
-    for (int i = 0; i < s; i++) {
-      scale1.add(GluVal1(pallete1[i], gvsGlob[i]));
-    }
+  int s = pallete1.length;
+  for (int i = 0; i < s; i++) {
+    scale1.add(GluVal1(pallete1[i], gvsGlob[i]));
   }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-        height: 48,
-        child: ListView(
-          controller: ScrollController(
-            initialScrollOffset: 160.0,
-            keepScrollOffset: false,
-          ),
-          scrollDirection: Axis.horizontal,
-          children: scale1,
-        ));
-  }
-}
-
-class ColoredCircle1 extends Container {
-  Color col = Colors.black;
-  String tx = '';
-
-  ColoredCircle1(this.col, int t) {
-    tx = t.toString();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-        child: Container(
-            alignment: Alignment.center,
-            width: 30,
-            height: 30,
-            decoration: BoxDecoration(color: col, shape: BoxShape.circle)));
-  }
-}
-
-class ColoredCircle2 extends Container {
-  Color col = Colors.black;
-  BoxDecoration dec = BoxDecoration();
-  String tx = '';
-  bool isBorder = false;
-
-  ColoredCircle2(this.col, this.tx);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-        alignment: Alignment.center,
-        width: 35,
-        height: 35,
-        decoration: BoxDecoration(
-          border: Border.all(color: col, width: 1.5),
-          shape: BoxShape.circle,
+  return SizedBox(
+      height: 48,
+      child: ListView(
+        controller: ScrollController(
+          initialScrollOffset: 160.0,
+          keepScrollOffset: false,
         ),
-        child:
-            Text(tx, style: TextStyle(fontFamily: 'Inter-Thin', fontSize: 12)));
-  }
+        scrollDirection: Axis.horizontal,
+        children: scale1,
+      ));
+}
+
+Widget ColoredCircle1(Color col, int t) {
+  return Container(
+      alignment: Alignment.center,
+      width: 30,
+      height: 30,
+      decoration: BoxDecoration(color: col, shape: BoxShape.circle));
+}
+
+Widget ColoredCircle2(Color col, String tx) {
+  return Container(
+      alignment: Alignment.center,
+      width: 35,
+      height: 35,
+      decoration: BoxDecoration(
+        border: Border.all(color: col, width: 1.5),
+        shape: BoxShape.circle,
+      ),
+      child: Text(tx,
+          style: const TextStyle(fontFamily: 'Inter-Thin', fontSize: 12)));
 }
 
 class GluVal1 extends StatefulWidget {
-  Color col = Colors.black;
-  List<TrackGV> gvs = [];
-
-  GluVal1(this.col, this.gvs);
+  const GluVal1(this.col, this.gvs, {super.key});
+  final Color col;
+  final List<TrackGV> gvs;
 
   @override
   State<GluVal1> createState() => _GluVal1State(col, gvs);
@@ -642,7 +611,7 @@ class _GluVal1State extends State<GluVal1> {
   Color col = Colors.black;
   List<TrackGV> gvs = gvsGlob[0];
   List<Widget> scale2 = Scale2(gvsGlob[0]);
-  BorderSide bs = BorderSide(width: 1.5, color: AppColors.trans);
+  BorderSide bs = const BorderSide(width: 1.5, color: AppColors.trans);
 
   _GluVal1State(this.col, List<TrackGV> Gvs) {
     gvs = Gvs;
@@ -653,12 +622,12 @@ class _GluVal1State extends State<GluVal1> {
     return MenuAnchor(
         onOpen: () {
           setState(() {
-            bs = BorderSide(width: 1.5, color: AppColors.lavender);
+            bs = const BorderSide(width: 1.5, color: AppColors.lavender);
           });
         },
         onClose: () {
           setState(() {
-            bs = BorderSide(width: 1.5, color: AppColors.trans);
+            bs = const BorderSide(width: 1.5, color: AppColors.trans);
           });
         },
         builder:
@@ -673,22 +642,22 @@ class _GluVal1State extends State<GluVal1> {
               },
               child: Container(
                   decoration: BoxDecoration(border: Border(top: bs)),
-                  margin: EdgeInsets.only(right: 11, left: 11),
+                  margin: const EdgeInsets.only(right: 11, left: 11),
                   alignment: Alignment.center,
                   child: Column(children: [
                     ColoredCircle1(col, gvs[0].GV1),
                     Text(gvs[0].GV1.toString(),
-                        style: TextStyle(
+                        style: const TextStyle(
                             fontFamily: 'Inter-Thin',
                             fontSize: 12,
                             color: Colors.black))
                   ])));
         },
-        alignmentOffset: Offset(0, 55),
+        alignmentOffset: const Offset(0, 55),
         menuChildren: [
           Container(
               height: 50,
-              padding: EdgeInsets.only(left: 8, right: 10),
+              padding: const EdgeInsets.only(left: 8, right: 10),
               width: MediaQuery.of(context).size.width * 0.9,
               decoration: BoxDecoration(
                 color: AppColors.lavender_light,
@@ -703,16 +672,17 @@ class _GluVal1State extends State<GluVal1> {
                   children: scale2))
         ],
         style: MenuStyle(
-            elevation: MaterialStatePropertyAll<double>(8),
-            shadowColor: MaterialStatePropertyAll<Color>(
+            elevation: const MaterialStatePropertyAll<double>(8),
+            shadowColor: const MaterialStatePropertyAll<Color>(
                 Color.fromRGBO(149, 157, 165, 0.2)),
-            backgroundColor: MaterialStatePropertyAll<Color>(AppColors.trans),
-            shape: MaterialStatePropertyAll<OutlinedBorder>(
+            backgroundColor:
+                const MaterialStatePropertyAll<Color>(AppColors.trans),
+            shape: const MaterialStatePropertyAll<OutlinedBorder>(
                 RoundedRectangleBorder()),
             alignment: AlignmentDirectional.center,
             //side:
-            padding:
-                MaterialStatePropertyAll<EdgeInsets>(EdgeInsets.only(left: 0)),
+            padding: const MaterialStatePropertyAll<EdgeInsets>(
+                EdgeInsets.only(left: 0)),
             fixedSize: MaterialStatePropertyAll<Size>(
                 Size(MediaQuery.of(context).size.width * 2, 50)),
             maximumSize: MaterialStatePropertyAll<Size>(
@@ -720,16 +690,8 @@ class _GluVal1State extends State<GluVal1> {
   }
 }
 
-class GluVal2 extends StatelessWidget {
-  Color color = Colors.black;
-  TrackGV trackGV = TrackGV(0);
-
-  GluVal2(this.color, this.trackGV);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-        padding: EdgeInsets.only(left: 8, right: 8),
-        child: ColoredCircle2(color, '${trackGV.GV1}.${trackGV.GV2}'));
-  }
+Widget GluVal2(Color color, TrackGV trackGV) {
+  return Container(
+      padding: const EdgeInsets.only(left: 8, right: 8),
+      child: ColoredCircle2(color, '${trackGV.GV1}.${trackGV.GV2}'));
 }

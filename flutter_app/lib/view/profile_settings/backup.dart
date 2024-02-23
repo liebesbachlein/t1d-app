@@ -1,3 +1,5 @@
+// ignore_for_file: non_constant_identifier_names
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 //import 'package:flutter/services.dart';
@@ -18,7 +20,7 @@ class _BackUpSettingState extends State<BackUpSetting> {
     return Scaffold(
         appBar: AppBar(
           foregroundColor: Colors.white,
-          systemOverlayStyle: SystemUiOverlayStyle(
+          systemOverlayStyle: const SystemUiOverlayStyle(
             statusBarColor: Colors.white,
             statusBarIconBrightness: Brightness.dark, // Android dark???
             statusBarBrightness: Brightness.light, // iOS dark???
@@ -34,7 +36,7 @@ class _BackUpSettingState extends State<BackUpSetting> {
   Widget TopSet() {
     return Container(
         height: 50,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.only(
               bottomRight: Radius.circular(24),
@@ -48,40 +50,37 @@ class _BackUpSettingState extends State<BackUpSetting> {
           ],
         ),
         child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-          Container(
-              child: IconButton(
-                  icon: Icon(Icons.arrow_back_ios),
-                  color: AppColors.lavender,
-                  onPressed: () {
-                    setState(() {
-                      Navigator.pop(context);
-                    });
-                  })),
+          IconButton(
+              icon: const Icon(Icons.arrow_back_ios),
+              color: AppColors.lavender,
+              onPressed: () {
+                setState(() {
+                  Navigator.pop(context);
+                });
+              }),
           Container(
               alignment: Alignment.center,
               width: MediaQuery.of(context).size.width * 0.5,
-              child: Text('Backup & Sync',
+              child: const Text('Backup & Sync',
                   style: TextStyle(
                       color: Colors.black,
                       fontFamily: 'Inter-Medium',
                       fontSize: 16))),
-          Container(
-              //padding: EdgeInsets.only(left: 8, right: 3),
-              child: IconButton(
-                  icon: Icon(Icons.arrow_forward_ios),
-                  color: AppColors.trans,
-                  onPressed: () {})),
+          IconButton(
+              icon: const Icon(Icons.arrow_forward_ios),
+              color: AppColors.trans,
+              onPressed: () {}),
         ]));
   }
 
   Widget SettingsCont() {
     String tx = '';
     return Container(
-        margin: EdgeInsets.only(right: 17, left: 17, top: 100),
-        padding: EdgeInsets.all(10),
+        margin: const EdgeInsets.only(right: 17, left: 17, top: 100),
+        padding: const EdgeInsets.all(10),
         width: MediaQuery.of(context).size.width,
         height: 260,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.all(Radius.circular(12)),
           boxShadow: [
@@ -97,15 +96,15 @@ class _BackUpSettingState extends State<BackUpSetting> {
               style: ButtonStyle(
                 fixedSize: MaterialStatePropertyAll<Size>(
                     Size(MediaQuery.of(context).size.width * 0.85, 60)),
-                elevation: MaterialStatePropertyAll<double>(2),
-                shadowColor: MaterialStatePropertyAll<Color>(
+                elevation: const MaterialStatePropertyAll<double>(2),
+                shadowColor: const MaterialStatePropertyAll<Color>(
                     Color.fromARGB(179, 233, 221, 233)),
                 alignment: AlignmentDirectional.center,
                 backgroundColor:
-                    MaterialStatePropertyAll<Color>(AppColors.lavender),
-                padding:
-                    MaterialStatePropertyAll<EdgeInsets>(EdgeInsets.all(0)),
-                shape: MaterialStatePropertyAll<OutlinedBorder>(
+                    const MaterialStatePropertyAll<Color>(AppColors.lavender),
+                padding: const MaterialStatePropertyAll<EdgeInsets>(
+                    EdgeInsets.all(0)),
+                shape: const MaterialStatePropertyAll<OutlinedBorder>(
                     RoundedRectangleBorder(
                         borderRadius: BorderRadius.all(Radius.circular(12)))),
               ),
@@ -122,14 +121,14 @@ class _BackUpSettingState extends State<BackUpSetting> {
                   });
                 }
               },
-              child: Text('Backup now',
+              child: const Text('Backup now',
                   style: TextStyle(
                     fontFamily: 'Inter-Medium',
                     fontSize: 16,
                     color: Colors.white,
                   ))),
           Text(tx,
-              style: TextStyle(
+              style: const TextStyle(
                   fontFamily: 'Inter-Regular',
                   fontSize: 16,
                   color: Colors.black)),
@@ -137,15 +136,15 @@ class _BackUpSettingState extends State<BackUpSetting> {
               style: ButtonStyle(
                 fixedSize: MaterialStatePropertyAll<Size>(
                     Size(MediaQuery.of(context).size.width * 0.85, 60)),
-                elevation: MaterialStatePropertyAll<double>(2),
-                shadowColor: MaterialStatePropertyAll<Color>(
+                elevation: const MaterialStatePropertyAll<double>(2),
+                shadowColor: const MaterialStatePropertyAll<Color>(
                     Color.fromARGB(179, 233, 221, 233)),
                 alignment: AlignmentDirectional.center,
                 backgroundColor:
-                    MaterialStatePropertyAll<Color>(AppColors.mint),
-                padding:
-                    MaterialStatePropertyAll<EdgeInsets>(EdgeInsets.all(0)),
-                shape: MaterialStatePropertyAll<OutlinedBorder>(
+                    const MaterialStatePropertyAll<Color>(AppColors.mint),
+                padding: const MaterialStatePropertyAll<EdgeInsets>(
+                    EdgeInsets.all(0)),
+                shape: const MaterialStatePropertyAll<OutlinedBorder>(
                     RoundedRectangleBorder(
                         borderRadius: BorderRadius.all(Radius.circular(12)))),
               ),
@@ -162,14 +161,14 @@ class _BackUpSettingState extends State<BackUpSetting> {
                   });
                 }
               },
-              child: Text('Sync data now',
+              child: const Text('Sync data now',
                   style: TextStyle(
                     fontFamily: 'Inter-Medium',
                     fontSize: 16,
                     color: Colors.white,
                   ))),
           Text(tx,
-              style: TextStyle(
+              style: const TextStyle(
                   fontFamily: 'Inter-Regular',
                   fontSize: 16,
                   color: Colors.black))

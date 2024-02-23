@@ -1,3 +1,5 @@
+// ignore_for_file: file_names, non_constant_identifier_names
+
 class TrackGV {
   double GV = 0.0;
   int GV1 = 0;

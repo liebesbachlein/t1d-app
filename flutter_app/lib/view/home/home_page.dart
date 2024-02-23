@@ -1,6 +1,7 @@
+// ignore_for_file: non_constant_identifier_names, avoid_print
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_app/server/models/TrackGV.dart';
 import 'package:flutter_app/server/models/TrackTmGV.dart';
 import 'package:flutter_app/view/calendar/calendar.dart';
 import 'package:flutter_app/view/chatbot_dialogbox/chatbot.dart';
@@ -34,6 +35,7 @@ DateTime pointTo =
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
+  @override
   State<HomePage> createState() => _HomePageState();
 }
 
@@ -43,7 +45,7 @@ class _HomePageState extends State<HomePage> {
   int currentPageIndex = 0;
   String dateString = 'Today';
   int _g_pos = 0;
-  bool _isThereInfo = false;
+  //bool _isThereInfo = false;
 
   _HomePageState() {
     //gaf, set Date Text at the top
@@ -64,7 +66,7 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
         appBar: AppBar(
           foregroundColor: Colors.white,
-          systemOverlayStyle: SystemUiOverlayStyle(
+          systemOverlayStyle: const SystemUiOverlayStyle(
             statusBarColor: Colors.white,
             statusBarIconBrightness: Brightness.dark, // Android dark???
             statusBarBrightness: Brightness.light, // iOS dark???
@@ -72,7 +74,7 @@ class _HomePageState extends State<HomePage> {
           toolbarHeight: 0,
           elevation: 0,
         ),
-        bottomNavigationBar: Container(
+        bottomNavigationBar: SizedBox(
             height: 60,
             /*decoration: BoxDecoration(boxShadow: [
               BoxShadow(
@@ -124,35 +126,26 @@ class _HomePageState extends State<HomePage> {
           Container(
               color: AppColors.background,
               child: Column(children: [TopBox(), PlotBox()])),
-          CalendarPage(),
+          const CalendarPage(),
           DataLog(key: lkey),
-          ChatbotPage(),
-          ProfileSettings(),
+          const ChatbotPage(),
+          const ProfileSettings(),
         ][currentPageIndex]);
   }
 
   Widget DateAndProfilePic() {
-    return Container(
-        child:
-            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-      Container(
-          child: Padding(
-              padding: EdgeInsets.only(left: 29, right: 29),
-              /*child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 300),
-                  transitionBuilder:
-                      (Widget child, Animation<double> animation) {
-                    return FadeTransition(opacity: animation, child: child);
-                  },*/
-              child: Text(dateString,
-                  style:
-                      TextStyle(fontFamily: 'Inter-Regular', fontSize: 24)))),
+    return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+      Padding(
+          padding: const EdgeInsets.only(left: 29, right: 29),
+          child: Text(dateString,
+              style:
+                  const TextStyle(fontFamily: 'Inter-Regular', fontSize: 24))),
       Align(
           alignment: Alignment.centerRight,
           child: Container(
               width: 90,
               height: 90,
-              decoration: BoxDecoration(color: Colors.transparent),
+              decoration: const BoxDecoration(color: Colors.transparent),
               alignment: Alignment.center,
               child: Container(
                   width: 58,
@@ -171,12 +164,12 @@ class _HomePageState extends State<HomePage> {
                           );
                         });
                       },
-                      child: CircleAvatar(
+                      child: const CircleAvatar(
                         backgroundColor: AppColors.lavender,
                         backgroundImage: AssetImage(
                             'lib/assets/images/profile_default1.png'),
                       )))))
-    ]));
+    ]);
   }
 
   Widget CalendarScroll() {
@@ -198,13 +191,13 @@ class _HomePageState extends State<HomePage> {
     String day_str = 'Err';
     Color dateTextColor = Colors.black;
     Color dateTextColorPointing = Colors.white;
-    BoxDecoration dec = BoxDecoration();
-    BoxDecoration decPointing = BoxDecoration(
+    BoxDecoration dec = const BoxDecoration();
+    BoxDecoration decPointing = const BoxDecoration(
         color: AppColors.lavender,
         borderRadius: BorderRadius.all(Radius.circular(14)));
     BoxDecoration decToday = BoxDecoration(
         border: Border.all(color: AppColors.mint, width: 1.0),
-        borderRadius: BorderRadius.all(Radius.circular(14)));
+        borderRadius: const BorderRadius.all(Radius.circular(14)));
 
     bool tick = false;
     bool isPointing = false;
@@ -232,11 +225,10 @@ class _HomePageState extends State<HomePage> {
               return Center(
                 child: Text(
                   '${snapshot.error} occurred',
-                  style: TextStyle(fontSize: 18),
+                  style: const TextStyle(fontSize: 18),
                 ),
               );
             } else if (snapshot.hasData) {
-              print('Plot');
               return GestureDetector(
                   onTap: () {
                     setState(() {
@@ -272,7 +264,7 @@ class _HomePageState extends State<HomePage> {
                       alignment: Alignment.center,
                       child: Column(children: [
                         Container(
-                            padding: EdgeInsets.only(bottom: 10),
+                            padding: const EdgeInsets.only(bottom: 10),
                             child: Icon(Icons.done_outline_rounded,
                                 color:
                                     tick ? AppColors.mint : AppColors.trans)),
@@ -305,7 +297,7 @@ class _HomePageState extends State<HomePage> {
                       ])));
             }
           }
-          return Center(
+          return const Center(
             child: CircularProgressIndicator(color: AppColors.trans),
           );
         },
@@ -322,7 +314,7 @@ class _HomePageState extends State<HomePage> {
         height: 200,
         //constraints: BoxConstraints(
         //  minHeight: MediaQuery.of(context).size.height * 0.22),
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
             boxShadow: [
               BoxShadow(
                   color: Color.fromRGBO(149, 157, 165, 0.1),
@@ -344,8 +336,7 @@ class _HomePageState extends State<HomePage> {
         DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day)
             .add(Duration(days: _g_pos));
     List<TrackTmGV> d = await databaseHelperGV.selectDay(thisDate);
-    List<Map<String, dynamic>> a = await databaseHelperGV.queryAllRowsMap();
-    print(['Plot: ', a]);
+    await databaseHelperGV.queryAllRowsMap();
 
     return d;
   }
@@ -360,20 +351,19 @@ class _HomePageState extends State<HomePage> {
               return Center(
                 child: Text(
                   '${snapshot.error} occurred',
-                  style: TextStyle(fontSize: 18),
+                  style: const TextStyle(fontSize: 18),
                 ),
               );
             } else if (snapshot.hasData) {
-              print('Plot');
               return Container(
                   width: MediaQuery.of(context).size.width,
-                  margin: EdgeInsets.only(left: 17, right: 17, top: 37),
+                  margin: const EdgeInsets.only(left: 17, right: 17, top: 37),
                   constraints: BoxConstraints(
                       minHeight: MediaQuery.of(context).size.height * 0.45),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(24),
-                    boxShadow: [
+                    boxShadow: const [
                       BoxShadow(
                           color: Color.fromRGBO(149, 157, 165, 0.1),
                           offset: Offset.zero,
@@ -383,7 +373,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                   child: Column(children: [
                     Container(
-                        padding: EdgeInsets.only(
+                        padding: const EdgeInsets.only(
                             left: 10, right: 10, top: 26, bottom: 26),
                         alignment: Alignment.topLeft,
                         child: (dayData.isNotEmpty)
@@ -397,11 +387,12 @@ class _HomePageState extends State<HomePage> {
                                         fontSize: 16)))*/
                             : Row(children: [
                                 Container(
-                                    padding: EdgeInsets.only(
+                                    padding: const EdgeInsets.only(
                                         left: 0, right: 10, top: 0, bottom: 0),
-                                    child: Icon(Icons.info_outline,
+                                    child: const Icon(Icons.info_outline,
                                         color: AppColors.lavender)),
-                                Text('Log your data to see graph for today',
+                                const Text(
+                                    'Log your data to see graph for today',
                                     style: TextStyle(
                                         fontFamily: 'Inter-Regular',
                                         fontSize: 16))
@@ -409,7 +400,7 @@ class _HomePageState extends State<HomePage> {
                   ]));
             }
           }
-          return Center(
+          return const Center(
             child: CircularProgressIndicator(color: AppColors.trans),
           );
         },
@@ -470,8 +461,6 @@ class _HomePageState extends State<HomePage> {
     } else {
       maxY = 14;
     }
-
-    print([minX, maxX, minY, maxY].toString());
     final lineBarsData = [
       LineChartBarData(
         showingIndicators: showingTooltipOnSpots,
@@ -533,7 +522,7 @@ class _HomePageState extends State<HomePage> {
                           (LineChartBarData barData, List<int> spotIndexes) {
                         return spotIndexes.map((index) {
                           return TouchedSpotIndicatorData(
-                              FlLine(
+                              const FlLine(
                                 color: AppColors.trans,
                               ),
                               FlDotData(
@@ -552,13 +541,13 @@ class _HomePageState extends State<HomePage> {
                           tooltipBgColor: AppColors.lavender_light,
                           tooltipRoundedRadius: 12,
                           //tooltipMargin: 12,
-                          tooltipPadding:
-                              EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                          tooltipPadding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 8),
                           getTooltipItems: (List<LineBarSpot> lineBarsSpot) {
                             return lineBarsSpot.map((lineBarSpot) {
                               return LineTooltipItem(
                                   lineBarSpot.y.toString(),
-                                  TextStyle(
+                                  const TextStyle(
                                     color: AppColors.text_info,
                                     fontFamily: 'Inter-Regular',
                                     fontSize: 12,
@@ -583,7 +572,7 @@ class _HomePageState extends State<HomePage> {
                                 return SideTitleWidget(
                                     axisSide: meta.axisSide,
                                     child: Text(s.toString(),
-                                        style: TextStyle(
+                                        style: const TextStyle(
                                             color: AppColors.text_info,
                                             fontFamily: 'Inter-Regular',
                                             fontSize: 12)));
@@ -604,7 +593,7 @@ class _HomePageState extends State<HomePage> {
                           return SideTitleWidget(
                               axisSide: meta.axisSide,
                               child: Text(s,
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                       color: AppColors.text_info,
                                       fontFamily: 'Inter-Regular',
                                       fontSize: 12)));

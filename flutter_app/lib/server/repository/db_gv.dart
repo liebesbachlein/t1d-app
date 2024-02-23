@@ -1,9 +1,12 @@
+// ignore_for_file: avoid_print
+
 import 'dart:async';
 import 'package:flutter_app/server/models/TrackTmGV.dart';
 import 'package:sqflite/sqflite.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:quiver/time.dart';
+import 'package:flutter_app/main.dart';
 
 class DatabaseHelperGV {
   late Database database;
@@ -27,26 +30,25 @@ class DatabaseHelperGV {
     //dbName = users.last.email;
 
     this.dbName = '$dbName.db';
-    print('1');
     Directory directory = await getApplicationDocumentsDirectory();
-    print('2');
     dbPath = directory.path + dbName;
-    print('Local database [${dbName}] initialized: ');
+    print('Local database [$dbName] initialized: ');
     database = await openDatabase(dbPath, version: 1, onCreate: _createDb);
-    print('3');
+    databaseHelperDialog.setDb(database);
     return database;
   }
 
   Future<void> deleteDatabase() => databaseFactory.deleteDatabase(dbPath);
 
   void _createDb(Database db, int version) async {
-    print('create database');
-    await db.execute(
-        'CREATE TABLE $trackTmGVTable($colId TEXT PRIMARY KEY, $colDateSeconds INTEGER, $colYear INTEGER, $colMonth INTEGER, $colDay INTEGER, $colHour INTEGER, $colMinute INTEGER, $colGV REAL)');
+    String dialogEx = databaseHelperDialog.createDb();
+    String GVEx =
+        'CREATE TABLE $trackTmGVTable($colId TEXT PRIMARY KEY, $colDateSeconds INTEGER, $colYear INTEGER, $colMonth INTEGER, $colDay INTEGER, $colHour INTEGER, $colMinute INTEGER, $colGV REAL)';
+    await db.execute(GVEx);
+    await db.execute(dialogEx);
   }
 
   Future<List<Map<String, dynamic>>> queryAllRowsMap() async {
-    print('1');
     var a = await database.query(trackTmGVTable);
     return a;
   }
@@ -66,11 +68,11 @@ class DatabaseHelperGV {
     DateTime nowDay =
         DateTime(dateSeconds.year, dateSeconds.month, dateSeconds.day);
 
-    DateTime minusDay = nowDay.subtract(Duration(days: 1));
+    DateTime minusDay = nowDay.subtract(const Duration(days: 1));
     DateTime prevDay =
         DateTime(minusDay.year, minusDay.month, minusDay.day, 23, 59, 59);
 
-    DateTime addDay = nowDay.add(Duration(days: 1));
+    DateTime addDay = nowDay.add(const Duration(days: 1));
     DateTime nextDay = DateTime(addDay.year, addDay.month, addDay.day, 0, 0, 0);
 
     List<Map<String, dynamic>> list = await database.rawQuery(
@@ -107,9 +109,7 @@ class DatabaseHelperGV {
 
   Future<int> insert(TrackTmGV trackTmGV) async {
     print('insertion: $trackTmGV');
-    print(trackTmGV.toMap());
     var d = await database.insert(trackTmGVTable, trackTmGV.toMap());
-    print(trackTmGV.toMap());
     return d;
   }
 
@@ -144,7 +144,6 @@ class DatabaseHelperGV {
       allRows.add(TrackTmGV.fromMap(list[i]));
     }
 
-    print('${allRows.length} rows');
     return allRows;
   }
 }

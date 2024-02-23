@@ -1,7 +1,9 @@
+// ignore_for_file: file_names, avoid_print
+
 import "package:firebase_auth/firebase_auth.dart";
 
 class FirebaseServices {
-  FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   Future<User?> signUpWithEmailAndPassword(
       String email, String password) async {
@@ -25,7 +27,7 @@ class FirebaseServices {
           email: email, password: password);
       return credential.user;
     } on FirebaseAuthException catch (e) {
-      print("Some error occured");
+      print(e.message);
     }
 
     return null;

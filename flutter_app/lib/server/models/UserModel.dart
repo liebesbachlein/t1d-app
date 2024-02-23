@@ -1,8 +1,10 @@
+// ignore_for_file: file_names, avoid_function_literals_in_foreach_calls
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:math';
 
 String getRandomString() {
-  final String chars =
+  const String chars =
       'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
   Random rnd = Random();
   return String.fromCharCodes(Iterable.generate(

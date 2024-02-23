@@ -1,3 +1,5 @@
+// ignore_for_file: file_names
+
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:math';
 
@@ -22,7 +24,7 @@ Future<bool> deletePersonalInfo() async {
 
 Future<String> getUsername() async {
   final prefs = await SharedPreferences.getInstance();
-  final username = await prefs.getString('username');
+  final username = prefs.getString('username');
   if (username == null) {
     return 'Default';
   } else {
@@ -32,7 +34,7 @@ Future<String> getUsername() async {
 
 Future<String> getEmail() async {
   final prefs = await SharedPreferences.getInstance();
-  final email = await prefs.getString('email');
+  final email = prefs.getString('email');
   if (email == null) {
     return 'default@email.com';
   } else {

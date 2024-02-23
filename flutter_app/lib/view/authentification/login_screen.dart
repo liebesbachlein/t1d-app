@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print, non_constant_identifier_names, unused_local_variable
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_app/server/controllers/authServices.dart';
@@ -7,8 +9,6 @@ import 'package:flutter_app/main.dart';
 import 'package:flutter_app/assets/colors.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:math';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -23,8 +23,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
   final FirebaseServices _auth = FirebaseServices();
 
-  TextEditingController _emailController = TextEditingController();
-  TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
 
   @override
   void dispose() {
@@ -42,7 +42,7 @@ class _LoginScreenState extends State<LoginScreen> {
         appBar: AppBar(
           foregroundColor: AppColors.lavender_light,
           backgroundColor: AppColors.lavender_light,
-          systemOverlayStyle: SystemUiOverlayStyle(
+          systemOverlayStyle: const SystemUiOverlayStyle(
             statusBarColor: AppColors.lavender_light,
             statusBarIconBrightness: Brightness.dark, // Android dark???
             statusBarBrightness: Brightness.light, // iOS dark???
@@ -69,16 +69,12 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Widget LoginForm() {
-    Map userData = {};
-    String email = '';
-    String password = '';
-
     return Container(
         height: MediaQuery.of(context).size.height * offsetForm,
         alignment: Alignment.bottomCenter,
-        padding: EdgeInsets.all(20),
+        padding: const EdgeInsets.all(20),
         width: MediaQuery.of(context).size.width * 0.92,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.only(
                 topLeft: Radius.circular(24), topRight: Radius.circular(24)),
@@ -94,11 +90,11 @@ class _LoginScreenState extends State<LoginScreen> {
               key: _formkey,
               child: Column(children: [
                 Container(
-                    margin: EdgeInsets.only(bottom: 20, top: 10),
+                    margin: const EdgeInsets.only(bottom: 20, top: 10),
                     height: 55,
                     child: TextFormField(
                         controller: _emailController,
-                        style: TextStyle(
+                        style: const TextStyle(
                             fontFamily: 'Inter-Regular',
                             fontSize: 16,
                             color: AppColors.mint),
@@ -117,14 +113,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           RequiredValidator(errorText: 'email?'),
                           EmailValidator(errorText: 'Fix the email'),
                         ]),
-                        onSaved: (e) {
-                          if (e == null) {
-                            email = '';
-                          } else {
-                            email = e;
-                          }
-                        },
-                        decoration: InputDecoration(
+                        decoration: const InputDecoration(
                             constraints: BoxConstraints(minHeight: 60),
                             hintText: "Email",
                             hintStyle: TextStyle(
@@ -132,7 +121,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 fontSize: 16,
                                 color: AppColors.lavender_light),
                             prefixIcon: Padding(
-                              padding: const EdgeInsets.all(5),
+                              padding: EdgeInsets.all(5),
                               child: Icon(Icons.ramen_dining,
                                   color: AppColors.lavender_light),
                             ),
@@ -150,7 +139,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     height: 55,
                     child: TextFormField(
                         controller: _passwordController,
-                        style: TextStyle(
+                        style: const TextStyle(
                             fontFamily: 'Inter-Regular',
                             fontSize: 16,
                             color: Colors.black),
@@ -174,14 +163,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               errorText:
                                   'add a special character')*/
                         ]),
-                        onSaved: (e) {
-                          if (e == null) {
-                            password = '';
-                          } else {
-                            password = e;
-                          }
-                        },
-                        decoration: InputDecoration(
+                        decoration: const InputDecoration(
                             fillColor: AppColors.lavender,
                             focusColor: AppColors.lavender,
                             hintText: "Password",
@@ -190,7 +172,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 fontSize: 16,
                                 color: AppColors.lavender_light),
                             prefixIcon: Padding(
-                              padding: const EdgeInsets.all(5),
+                              padding: EdgeInsets.all(5),
                               child: Icon(Icons.castle,
                                   color: AppColors.lavender_light),
                             ),
@@ -207,13 +189,13 @@ class _LoginScreenState extends State<LoginScreen> {
           Align(
               alignment: Alignment.centerRight,
               child: Padding(
-                  padding:
-                      EdgeInsets.only(top: 5, bottom: 8, left: 10, right: 10),
+                  padding: const EdgeInsets.only(
+                      top: 5, bottom: 8, left: 10, right: 10),
                   child: TextButton(
                       onPressed: () {
                         popUpNoSuchFeature("the feature will be here soon");
                       },
-                      child: Text('Forgot password?',
+                      child: const Text('Forgot password?',
                           style: TextStyle(
                               fontFamily: 'Inter-Regular',
                               fontSize: 12,
@@ -222,15 +204,15 @@ class _LoginScreenState extends State<LoginScreen> {
               style: ButtonStyle(
                 fixedSize: MaterialStatePropertyAll<Size>(
                     Size(MediaQuery.of(context).size.width * 0.85, 60)),
-                elevation: MaterialStatePropertyAll<double>(2),
-                shadowColor: MaterialStatePropertyAll<Color>(
+                elevation: const MaterialStatePropertyAll<double>(2),
+                shadowColor: const MaterialStatePropertyAll<Color>(
                     Color.fromARGB(179, 233, 221, 233)),
                 alignment: AlignmentDirectional.center,
                 backgroundColor:
-                    MaterialStatePropertyAll<Color>(AppColors.mint),
-                padding:
-                    MaterialStatePropertyAll<EdgeInsets>(EdgeInsets.all(0)),
-                shape: MaterialStatePropertyAll<OutlinedBorder>(
+                    const MaterialStatePropertyAll<Color>(AppColors.mint),
+                padding: const MaterialStatePropertyAll<EdgeInsets>(
+                    EdgeInsets.all(0)),
+                shape: const MaterialStatePropertyAll<OutlinedBorder>(
                     RoundedRectangleBorder(
                         borderRadius: BorderRadius.all(Radius.circular(12)))),
               ),
@@ -241,21 +223,21 @@ class _LoginScreenState extends State<LoginScreen> {
                 }
               },
               child: _isSignIning
-                  ? CircularProgressIndicator(color: Colors.white)
-                  : Text('Login',
+                  ? const CircularProgressIndicator(color: Colors.white)
+                  : const Text('Login',
                       style: TextStyle(
                         fontFamily: 'Inter-Medium',
                         fontSize: 16,
                         color: Colors.white,
                       ))),
           Padding(
-              padding: EdgeInsets.only(top: 40),
+              padding: const EdgeInsets.only(top: 40),
               child: TextButton(
                   onPressed: () {
                     popUpNoSuchFeature("the feature will be here soon");
                   },
                   child: Column(children: [
-                    Text('or login with',
+                    const Text('or login with',
                         style: TextStyle(
                             fontFamily: 'Inter-Regular',
                             fontSize: 12,
@@ -263,7 +245,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     Container(
                         width: 40,
                         height: 40,
-                        margin: EdgeInsets.only(top: 12),
+                        margin: const EdgeInsets.only(top: 12),
                         child: Image.asset('lib/assets/images/google_icon.png'))
                   ])))
         ]));
@@ -303,9 +285,9 @@ class _LoginScreenState extends State<LoginScreen> {
         width: MediaQuery.of(context).size.width * 0.92,
         //constraints: BoxConstraints(minHeight: 100),
         height: MediaQuery.of(context).size.height * 0.92,
-        padding: EdgeInsets.only(left: 12),
+        padding: const EdgeInsets.only(left: 12),
         margin: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.08),
-        child: Text('Login',
+        child: const Text('Login',
             style: TextStyle(
               fontFamily: 'Inter-Medium',
               fontSize: 32,
@@ -317,7 +299,7 @@ class _LoginScreenState extends State<LoginScreen> {
     showDialog(
         context: context,
         builder: (BuildContext context) => AlertDialog(
-            contentPadding: EdgeInsets.all(0),
+            contentPadding: const EdgeInsets.all(0),
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
             content: SizedBox(
@@ -334,9 +316,10 @@ class _LoginScreenState extends State<LoginScreen> {
                               width: 20,
                               height: 20,
                               alignment: Alignment.centerRight,
-                              child: Icon(Icons.close, color: Colors.black)))),
+                              child: const Icon(Icons.close,
+                                  color: Colors.black)))),
                   Text(text,
-                      style: TextStyle(
+                      style: const TextStyle(
                           fontFamily: 'Inter-Regular',
                           fontSize: 16,
                           color: AppColors.mint)),
@@ -348,11 +331,11 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget TopBack() {
     return Container(
         alignment: Alignment.centerLeft,
-        padding: EdgeInsets.only(left: 12),
+        padding: const EdgeInsets.only(left: 12),
         height: 50,
         width: MediaQuery.of(context).size.width,
         child: IconButton(
-            icon: Icon(Icons.arrow_back_ios),
+            icon: const Icon(Icons.arrow_back_ios),
             color: Colors.white,
             onPressed: () {
               setState(() {

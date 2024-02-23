@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print, non_constant_identifier_names, no_leading_underscores_for_local_identifiers
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -5,6 +7,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_app/assets/colors.dart';
 import 'package:flutter_app/main.dart';
 import 'dart:core';
+
+import 'package:flutter_app/server/models/DialogModel.dart';
+
+late List<DialogModel>? listDialog;
 
 class ChatbotPage extends StatefulWidget {
   const ChatbotPage({super.key});
@@ -15,28 +21,55 @@ class ChatbotPage extends StatefulWidget {
 
 class _ChatbotPageState extends State<ChatbotPage> {
   final _formkey = GlobalKey<FormState>();
+  final TextEditingController _messageController = TextEditingController();
+  final _chatBox = GlobalKey<_ChatbotBoxState>();
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          foregroundColor: Colors.white,
-          systemOverlayStyle: SystemUiOverlayStyle(
-            statusBarColor: Colors.white,
-            statusBarIconBrightness: Brightness.dark, // Android dark???
-            statusBarBrightness: Brightness.light, // iOS dark???
-          ),
-          toolbarHeight: 0,
-          elevation: 0,
-        ),
-        body: Stack(children: [ChatbotBox(), TopSet(), ChatbotBottom()]));
+    return FutureBuilder(
+        builder: (ctx, snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            if (snapshot.hasError) {
+              return Center(
+                child: Text(
+                  '${snapshot.error} occurred',
+                  style: const TextStyle(fontSize: 18),
+                ),
+              );
+            } else if (snapshot.hasData) {
+              listDialog = snapshot.data;
+              print('Load Dialog Data: Success');
+              return Scaffold(
+                  appBar: AppBar(
+                    foregroundColor: Colors.white,
+                    systemOverlayStyle: const SystemUiOverlayStyle(
+                      statusBarColor: Colors.white,
+                      statusBarIconBrightness:
+                          Brightness.dark, // Android dark???
+                      statusBarBrightness: Brightness.light, // iOS dark???
+                    ),
+                    toolbarHeight: 0,
+                    elevation: 0,
+                  ),
+                  body: Stack(children: [
+                    ChatbotBox(key: _chatBox),
+                    TopSet(),
+                    ChatbotBottom()
+                  ]));
+            }
+          }
+          return const Center(
+            child: CircularProgressIndicator(color: AppColors.lavender),
+          );
+        }, //builder
+        future: databaseHelperDialog.queryAllRowsGV());
   }
 
   Widget TopSet() {
     return Container(
       height: 70,
-      padding: EdgeInsets.only(bottom: 5, top: 5, right: 20, left: 20),
-      decoration: BoxDecoration(
+      padding: const EdgeInsets.only(bottom: 5, top: 5, right: 20, left: 20),
+      decoration: const BoxDecoration(
         color: Colors.white,
         boxShadow: [
           BoxShadow(
@@ -56,19 +89,19 @@ class _ChatbotPageState extends State<ChatbotPage> {
   Widget ChatboxProfile() {
     return Row(
       children: [
-        CircleAvatar(
+        const CircleAvatar(
           radius: 25,
           backgroundColor: AppColors.lavender,
           backgroundImage: AssetImage('lib/assets/images/profile_default0.png'),
         ),
         Container(
             alignment: Alignment.centerLeft,
-            margin: EdgeInsets.only(
+            margin: const EdgeInsets.only(
               left: 20,
               bottom: 8,
               top: 8,
             ),
-            child: Column(
+            child: const Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -89,82 +122,14 @@ class _ChatbotPageState extends State<ChatbotPage> {
     );
   }
 
-  Widget ChatbotBox() {
-    List<List<String>> list = [
-      ["What’s my average BG for the past 2 weeks?", "13:21"],
-      [
-        "8.3 mmol/L. It’s 1.5 mmol/L higher that past 2 week average, and 0.9 mmol/l higher than 2 month average ",
-        "13:21"
-      ],
-      ["What’s my average BG for the past 2 weeks?", "13:21"],
-      [
-        "8.3 mmol/L. It’s 1.5 mmol/L higher that past 2 week average, and 0.9 mmol/l higher than 2 month average ",
-        "13:21"
-      ],
-      ["What’s my average BG for the past 2 weeks?", "13:21"],
-      [
-        "8.3 mmol/L. It’s 1.5 mmol/L higher that past 2 week average, and 0.9 mmol/l higher than 2 month average ",
-        "13:21"
-      ],
-      ["What’s my average BG for the past 2 weeks?", "13:21"],
-      [
-        "8.3 mmol/L. It’s 1.5 mmol/L higher that past 2 week average, and 0.9 mmol/l higher than 2 month average ",
-        "13:21"
-      ],
-      ["What’s my average BG for the past 2 weeks?", "13:21"],
-      [
-        "8.3 mmol/L. It’s 1.5 mmol/L higher that past 2 week average, and 0.9 mmol/l higher than 2 month average ",
-        "13:21"
-      ],
-      ["What’s my average BG for the past 2 weeks?", "13:21"],
-      [
-        "8.3 mmol/L. It’s 1.5 mmol/L higher that past 2 week average, and 0.9 mmol/l higher than 2 month average ",
-        "13:21"
-      ],
-      ["What’s my average BG for the past 2 weeks?", "13:21"],
-      [
-        "8.3 mmol/L. It’s 1.5 mmol/L higher that past 2 week average, and 0.9 mmol/l higher than 2 month average ",
-        "13:21"
-      ],
-      ["What’s my average BG for the past 2 weeks?", "13:21"],
-      [
-        "8.3 mmol/L. It’s 1.5 mmol/L higher that past 2 week average, and 0.9 mmol/l higher than 2 month average ",
-        "13:21"
-      ],
-    ];
-
-    List<Widget> dialogList = [];
-    for (int i = 0; i < 12; i++) {
-      if (i % 2 == 0) {
-        dialogList.add(UserMessage(list[i][1], list[i][0]));
-      } else {
-        dialogList.add(AIMessage(list[i][1], list[i][0]));
-      }
-    }
-
-    return Container(
-        color: AppColors.background,
-        constraints: BoxConstraints(
-          minWidth: MediaQuery.of(context).size.height,
-        ),
-        width: MediaQuery.of(context).size.width,
-        padding: EdgeInsets.only(bottom: 80),
-        child: ListView(
-          semanticChildCount: dialogList.length,
-          children: dialogList,
-          dragStartBehavior: DragStartBehavior.down,
-          reverse: true,
-        ));
-  }
-
   Widget ChatbotBottom() {
     return Container(
         height: MediaQuery.of(context).size.height,
         alignment: Alignment.bottomCenter,
         width: MediaQuery.of(context).size.width,
         child: Container(
-            height: 80,
-            decoration: BoxDecoration(
+            height: 60,
+            decoration: const BoxDecoration(
                 borderRadius: BorderRadius.only(
                     topRight: Radius.circular(24),
                     topLeft: Radius.circular(24)),
@@ -173,118 +138,175 @@ class _ChatbotPageState extends State<ChatbotPage> {
                   BoxShadow(
                       color: Color.fromRGBO(149, 157, 165, 0.1),
                       offset: Offset.zero,
-                      spreadRadius: 4,
-                      blurRadius: 10)
+                      blurRadius: 4)
                 ]),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.center,
-              children: [ChatbotInput(), ChatbotSend()],
+              children: [
+                Container(
+                    padding: const EdgeInsets.only(left: 20),
+                    width: MediaQuery.of(context).size.width * 0.8,
+                    child: Form(
+                        key: _formkey,
+                        child: TextFormField(
+                          textAlign: TextAlign.left,
+                          controller: _messageController,
+                          style: const TextStyle(
+                              fontFamily: 'Inter-Regular',
+                              fontSize: 14,
+                              color: AppColors.text_mes),
+                          decoration: const InputDecoration(
+                            border: InputBorder.none,
+                            hintText: "Ask anything",
+                            hintStyle: TextStyle(
+                              fontFamily: 'Inter-Regular',
+                              fontSize: 14,
+                              color: AppColors.text_sub,
+                            ),
+                          ),
+                        ))),
+                Container(
+                    width: MediaQuery.of(context).size.width * 0.2,
+                    padding: const EdgeInsets.only(right: 10),
+                    alignment: Alignment.centerRight,
+                    child: GestureDetector(
+                        onTap: () {
+                          String message = _messageController.text;
+                          if (message != '') {
+                            _formkey.currentState?.reset();
+                            DialogModel newMessage = DialogModel.createUserText(
+                                DateTime.now(), message);
+                            databaseHelperDialog.insert(newMessage);
+                            listDialog?.add(newMessage);
+                            _chatBox.currentState?.buildList();
+                          }
+                        },
+                        child: const Icon(Icons.cookie_rounded,
+                            color: AppColors.mint, size: 35)))
+              ],
             )));
   }
+}
 
-  Widget ChatbotInput() {
-    String message = '';
-    return Container(
-        padding: EdgeInsets.only(left: 20),
-        width: MediaQuery.of(context).size.width * 0.8,
-        child: Form(
-            key: _formkey,
-            child: TextFormField(
-              style: TextStyle(
-                fontFamily: 'Inter-Regular',
-                fontSize: 14,
-                color: AppColors.text_mes,
-              ),
-              decoration: InputDecoration(
-                border: InputBorder.none,
-                hintText: "Ask anything",
-                hintStyle: TextStyle(
-                  fontFamily: 'Inter-Regular',
-                  fontSize: 14,
-                  color: AppColors.text_sub,
-                ),
-              ),
-              onSaved: (e) {
-                if (e == null) {
-                  message = '';
-                } else {
-                  message = e;
-                }
-              },
-            )));
+class ChatbotBox extends StatefulWidget {
+  const ChatbotBox({super.key});
+
+  @override
+  State<ChatbotBox> createState() => _ChatbotBoxState();
+}
+
+class _ChatbotBoxState extends State<ChatbotBox> {
+  List<Widget> widgetListDialog = [];
+  _ChatbotBoxState() {
+    widgetListDialog = [];
+    for (DialogModel itemDialog in listDialog?.reversed ?? []) {
+      String time =
+          '${itemDialog.displayDate.hour < 10 ? '0${itemDialog.displayDate.hour}' : itemDialog.displayDate.hour}:${itemDialog.displayDate.minute < 10 ? '0${itemDialog.displayDate.minute}' : itemDialog.displayDate.minute}';
+      if (itemDialog.fromWho == 0) {
+        widgetListDialog.add(AIMessage(time, itemDialog.content));
+      } else {
+        widgetListDialog.add(UserMessage(time, itemDialog.content));
+      }
+    }
   }
 
-  Widget ChatbotSend() {
+  void buildList() {
+    setState(() {
+      widgetListDialog = [];
+      for (DialogModel itemDialog in listDialog?.reversed ?? []) {
+        String time =
+            '${itemDialog.displayDate.hour < 10 ? '0${itemDialog.displayDate.hour}' : itemDialog.displayDate.hour}:${itemDialog.displayDate.minute < 10 ? '0${itemDialog.displayDate.minute}' : itemDialog.displayDate.minute}';
+        if (itemDialog.fromWho == 0) {
+          widgetListDialog.add(AIMessage(time, itemDialog.content));
+        } else {
+          widgetListDialog.add(UserMessage(time, itemDialog.content));
+        }
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
-        width: MediaQuery.of(context).size.width * 0.2,
-        child: Icon(Icons.cookie_rounded, color: AppColors.mint, size: 35));
+        color: AppColors.background,
+        constraints: BoxConstraints(
+          minHeight: MediaQuery.of(context).size.height,
+        ),
+        padding: const EdgeInsets.only(bottom: 60, top: 70),
+        child: ListView(
+          semanticChildCount: widgetListDialog.length,
+          dragStartBehavior: DragStartBehavior.down,
+          reverse: true,
+          children: widgetListDialog,
+        ));
   }
 
   Widget AIMessage(String time, String text) {
     return Container(
-        width: MediaQuery.of(context).size.width,
-        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
         alignment: Alignment.centerLeft,
         child: Container(
-            padding: EdgeInsets.only(top: 15, left: 15, right: 15, bottom: 5),
-            width: MediaQuery.of(context).size.width * 0.8,
-            decoration: BoxDecoration(
+            padding:
+                const EdgeInsets.only(top: 10, left: 10, right: 10, bottom: 5),
+            constraints: const BoxConstraints(
+              maxWidth: 300,
+            ),
+            decoration: const BoxDecoration(
               color: AppColors.text_light,
               borderRadius: BorderRadius.only(
-                  topRight: Radius.circular(20),
-                  topLeft: Radius.circular(20),
-                  bottomRight: Radius.circular(20)),
+                  topRight: Radius.circular(12),
+                  topLeft: Radius.circular(12),
+                  bottomLeft: Radius.circular(12)),
             ),
-            child: Column(children: [
+            child:
+                Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
               Text(text,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontFamily: 'Inter-Regular',
                     fontSize: 14,
                     color: AppColors.text_mes,
                   )),
-              Align(
-                alignment: Alignment.bottomRight,
-                child: Text(time,
-                    style: TextStyle(
-                        fontFamily: 'Inter-Regular',
-                        fontSize: 10,
-                        color: AppColors.text_mes)),
-              )
+              Text(time,
+                  style: const TextStyle(
+                    fontFamily: 'Inter-Regular',
+                    fontSize: 10,
+                    color: AppColors.text_mes,
+                  )),
             ])));
   }
 
   Widget UserMessage(String time, String text) {
     return Container(
-        width: MediaQuery.of(context).size.width,
-        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
         alignment: Alignment.centerRight,
         child: Container(
-            padding: EdgeInsets.only(top: 15, left: 15, right: 15, bottom: 5),
-            width: MediaQuery.of(context).size.width * 0.8,
-            decoration: BoxDecoration(
-              color: AppColors.lavender_light_dark,
-              borderRadius: BorderRadius.only(
-                  topRight: Radius.circular(20),
-                  topLeft: Radius.circular(20),
-                  bottomLeft: Radius.circular(20)),
+            padding:
+                const EdgeInsets.only(top: 10, left: 10, right: 10, bottom: 5),
+            constraints: const BoxConstraints(
+              maxWidth: 300,
             ),
-            child: Column(children: [
+            decoration: const BoxDecoration(
+              color: AppColors.lavender,
+              borderRadius: BorderRadius.only(
+                  topRight: Radius.circular(12),
+                  topLeft: Radius.circular(12),
+                  bottomLeft: Radius.circular(12)),
+            ),
+            child:
+                Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
               Text(text,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontFamily: 'Inter-Regular',
                     fontSize: 14,
                     color: Colors.white,
                   )),
-              Align(
-                alignment: Alignment.bottomRight,
-                child: Text(time,
-                    style: TextStyle(
-                      fontFamily: 'Inter-Regular',
-                      fontSize: 10,
-                      color: Colors.white,
-                    )),
-              )
+              Text(time,
+                  style: const TextStyle(
+                    fontFamily: 'Inter-Regular',
+                    fontSize: 10,
+                    color: Colors.white,
+                  )),
             ])));
   }
 }

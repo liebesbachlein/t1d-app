@@ -1,3 +1,5 @@
+// ignore_for_file: non_constant_identifier_names
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_app/view/authentification/login_screen.dart';
@@ -14,7 +16,7 @@ class WelcomeScreen extends StatelessWidget {
         appBar: AppBar(
           foregroundColor: AppColors.lavender_light,
           backgroundColor: AppColors.lavender_light,
-          systemOverlayStyle: SystemUiOverlayStyle(
+          systemOverlayStyle: const SystemUiOverlayStyle(
             statusBarColor: AppColors.lavender_light,
             statusBarIconBrightness: Brightness.dark, // Android dark???
             statusBarBrightness: Brightness.light, // iOS dark???
@@ -25,7 +27,7 @@ class WelcomeScreen extends StatelessWidget {
         body: Container(
             width: MediaQuery.of(context).size.width,
             height: MediaQuery.of(context).size.height,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: AppColors.lavender_light,
             ),
             //border: Border.all(color: Colors.black)),
@@ -41,9 +43,9 @@ class WelcomeScreen extends StatelessWidget {
         //decoration: BoxDecoration(border: Border.all(color: Colors.black)),
         width: MediaQuery.of(context).size.width * 0.92,
         height: MediaQuery.of(context).size.height * 0.58,
-        padding: EdgeInsets.only(left: 12),
+        padding: const EdgeInsets.only(left: 12),
         margin: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.08),
-        child: Column(
+        child: const Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text('Welcome',
@@ -74,7 +76,7 @@ class WelcomeScreen extends StatelessWidget {
         alignment: Alignment.center,
         width: MediaQuery.of(context).size.width * 0.92,
         height: MediaQuery.of(context).size.height * 0.24,
-        padding: EdgeInsets.symmetric(horizontal: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 12),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
@@ -82,23 +84,25 @@ class WelcomeScreen extends StatelessWidget {
                 style: ButtonStyle(
                   fixedSize: MaterialStatePropertyAll<Size>(
                       Size(MediaQuery.of(context).size.width * 0.85, 60)),
-                  elevation: MaterialStatePropertyAll<double>(2),
-                  shadowColor: MaterialStatePropertyAll<Color>(
+                  elevation: const MaterialStatePropertyAll<double>(2),
+                  shadowColor: const MaterialStatePropertyAll<Color>(
                       Color.fromARGB(179, 233, 221, 233)),
                   alignment: AlignmentDirectional.center,
                   backgroundColor:
-                      MaterialStatePropertyAll<Color>(Colors.white),
-                  padding:
-                      MaterialStatePropertyAll<EdgeInsets>(EdgeInsets.all(0)),
-                  shape: MaterialStatePropertyAll<OutlinedBorder>(
+                      const MaterialStatePropertyAll<Color>(Colors.white),
+                  padding: const MaterialStatePropertyAll<EdgeInsets>(
+                      EdgeInsets.all(0)),
+                  shape: const MaterialStatePropertyAll<OutlinedBorder>(
                       RoundedRectangleBorder(
                           borderRadius: BorderRadius.all(Radius.circular(12)))),
                 ),
                 onPressed: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => LoginScreen()));
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const LoginScreen()));
                 },
-                child: Text('Login',
+                child: const Text('Login',
                     style: TextStyle(
                       fontFamily: 'Inter-Medium',
                       fontSize: 16,
@@ -108,17 +112,17 @@ class WelcomeScreen extends StatelessWidget {
                 style: ButtonStyle(
                   fixedSize: MaterialStatePropertyAll<Size>(
                       Size(MediaQuery.of(context).size.width * 0.85, 60)),
-                  elevation: MaterialStatePropertyAll<double>(2),
+                  elevation: const MaterialStatePropertyAll<double>(2),
                   shadowColor:
-                      MaterialStatePropertyAll<Color>(Color(0xFFFFFFFF)),
+                      const MaterialStatePropertyAll<Color>(Color(0xFFFFFFFF)),
                   alignment: AlignmentDirectional.center,
-                  backgroundColor:
-                      MaterialStatePropertyAll<Color>(AppColors.lavender_light),
-                  side: MaterialStatePropertyAll<BorderSide>(
+                  backgroundColor: const MaterialStatePropertyAll<Color>(
+                      AppColors.lavender_light),
+                  side: const MaterialStatePropertyAll<BorderSide>(
                       BorderSide(color: Colors.white, width: 1)),
-                  padding:
-                      MaterialStatePropertyAll<EdgeInsets>(EdgeInsets.all(0)),
-                  shape: MaterialStatePropertyAll<OutlinedBorder>(
+                  padding: const MaterialStatePropertyAll<EdgeInsets>(
+                      EdgeInsets.all(0)),
+                  shape: const MaterialStatePropertyAll<OutlinedBorder>(
                       RoundedRectangleBorder(
                           borderRadius: BorderRadius.all(Radius.circular(12)))),
                 ),
@@ -127,12 +131,12 @@ class WelcomeScreen extends StatelessWidget {
                     context,
                     MaterialPageRoute(
                       builder: (context) {
-                        return SignUpScreen();
+                        return const SignUpScreen();
                       },
                     ),
                   );
                 },
-                child: Text('Sign up',
+                child: const Text('Sign up',
                     style: TextStyle(
                       fontFamily: 'Inter-Medium',
                       fontSize: 16,

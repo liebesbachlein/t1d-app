@@ -1,3 +1,5 @@
+// ignore_for_file: non_constant_identifier_names
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_app/assets/colors.dart';
@@ -20,7 +22,7 @@ class _ProfileSettingsState extends State<ProfileSettings> {
     return Scaffold(
         appBar: AppBar(
           foregroundColor: Colors.white,
-          systemOverlayStyle: SystemUiOverlayStyle(
+          systemOverlayStyle: const SystemUiOverlayStyle(
             statusBarColor: Colors.white,
             statusBarIconBrightness: Brightness.dark, // Android dark???
             statusBarBrightness: Brightness.light, // iOS dark???
@@ -30,13 +32,14 @@ class _ProfileSettingsState extends State<ProfileSettings> {
         ),
         body: Container(
             color: AppColors.background,
-            child: Column(children: [TopSet(), PicName(), SettingsCont()])));
+            child:
+                Column(children: [TopSet(), const PicName(), SettingsCont()])));
   }
 
   Widget TopSet() {
     return Container(
         height: 50,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           color: Colors.white,
           boxShadow: [
             BoxShadow(
@@ -47,39 +50,36 @@ class _ProfileSettingsState extends State<ProfileSettings> {
           ],
         ),
         child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-          Container(
-              child: IconButton(
-                  icon: Icon(Icons.arrow_back_ios),
-                  color: AppColors.lavender,
-                  onPressed: () {
-                    setState(() {
-                      Navigator.pop(context);
-                    });
-                  })),
+          IconButton(
+              icon: const Icon(Icons.arrow_back_ios),
+              color: AppColors.lavender,
+              onPressed: () {
+                setState(() {
+                  Navigator.pop(context);
+                });
+              }),
           Container(
               alignment: Alignment.center,
               width: MediaQuery.of(context).size.width * 0.5,
-              child: Text('Settings',
+              child: const Text('Settings',
                   style: TextStyle(
                       color: Colors.black,
                       fontFamily: 'Inter-Medium',
                       fontSize: 16))),
-          Container(
-              //padding: EdgeInsets.only(left: 8, right: 3),
-              child: IconButton(
-                  icon: Icon(Icons.arrow_forward_ios),
-                  color: AppColors.trans,
-                  onPressed: () {})),
+          IconButton(
+              icon: const Icon(Icons.arrow_forward_ios),
+              color: AppColors.trans,
+              onPressed: () {}),
         ]));
   }
 
   Widget SettingsCont() {
     return Container(
-        margin: EdgeInsets.only(right: 17, left: 17),
-        padding: EdgeInsets.all(10),
+        margin: const EdgeInsets.only(right: 17, left: 17),
+        padding: const EdgeInsets.all(10),
         width: MediaQuery.of(context).size.width,
         height: 260,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.all(Radius.circular(12)),
           boxShadow: [
@@ -101,14 +101,14 @@ class _ProfileSettingsState extends State<ProfileSettings> {
   }
 
   Widget SettingOne(String tx) {
-    return Container(
+    return SizedBox(
         //margin: EdgeInsets.only(left: 25, right: 25),
         height: 48,
         child:
             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
           Text(
             tx,
-            style: TextStyle(
+            style: const TextStyle(
               fontFamily: 'Inter-Regular',
               fontSize: 16,
               color: Colors.black,
@@ -118,7 +118,7 @@ class _ProfileSettingsState extends State<ProfileSettings> {
           Container(
               alignment: Alignment.centerRight,
               child: IconButton(
-                  icon: Icon(Icons.arrow_forward_ios),
+                  icon: const Icon(Icons.arrow_forward_ios),
                   color: AppColors.text_set,
                   onPressed: () {
                     setState(() {
@@ -158,32 +158,32 @@ class _PicNameState extends State<PicName> {
               return Center(
                 child: Text(
                   '${snapshot.error} occurred',
-                  style: TextStyle(fontSize: 18),
+                  style: const TextStyle(fontSize: 18),
                 ),
               );
             } else if (snapshot.hasData) {
               return Container(
-                  margin: EdgeInsets.only(top: 11, bottom: 44),
+                  margin: const EdgeInsets.only(top: 11, bottom: 44),
                   height: 190,
                   child: Center(
                       child: Column(children: [
-                    CircleAvatar(
+                    const CircleAvatar(
                       radius: 75,
                       backgroundColor: AppColors.lavender,
                       backgroundImage:
                           AssetImage('lib/assets/images/profile_default1.png'),
                     ),
                     Container(
-                        margin: EdgeInsets.only(top: 11),
+                        margin: const EdgeInsets.only(top: 11),
                         child: Text(username,
-                            style: TextStyle(
+                            style: const TextStyle(
                                 fontFamily: 'Inter-Medium',
                                 fontSize: 16,
                                 color: AppColors.lavender)))
                   ])));
             }
           }
-          return Center(
+          return const Center(
             child: CircularProgressIndicator(color: AppColors.lavender),
           );
         },

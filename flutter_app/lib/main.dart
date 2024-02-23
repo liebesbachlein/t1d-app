@@ -1,7 +1,9 @@
+// ignore_for_file: avoid_print
+
 import 'package:flutter/material.dart';
 import 'package:flutter_app/view/authentification/welcome_screen.dart';
 import 'package:flutter_app/assets/colors.dart';
-import 'package:flutter_app/server/repository/db_user.dart';
+import 'package:flutter_app/server/repository/db_dg.dart';
 import 'package:flutter_app/server/repository/db_gv.dart';
 import 'package:flutter_app/view/home/home_page.dart';
 import 'dart:async';
@@ -11,13 +13,14 @@ import 'package:flutter_app/server/controllers/firebaseRemoteHelper.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 DatabaseHelperGV databaseHelperGV = DatabaseHelperGV();
+DatabaseHelperDialog databaseHelperDialog = DatabaseHelperDialog();
 FirebaseRemoteHelper firebaseRemoteHelper = FirebaseRemoteHelper();
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   checkAuthToken().then((isToken) {
-    if (isToken.length == 0) {
+    if (isToken.isEmpty) {
       runApp(const MainWelcome());
     } else {
       runApp(MainHome(isToken[0], isToken[1]));
@@ -30,7 +33,7 @@ class MainWelcome extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
         debugShowCheckedModeBanner: false, home: WelcomeScreen());
   }
 }
@@ -56,10 +59,9 @@ Future<List<String>> checkAuthToken() async {
 }
 
 class MainHome extends StatelessWidget {
-  String username;
-  String email;
-
-  MainHome(this.username, this.email);
+  const MainHome(this.username, this.email, {super.key});
+  final String username;
+  final String email;
 
   @override
   Widget build(BuildContext context) {
@@ -70,16 +72,16 @@ class MainHome extends StatelessWidget {
               return Center(
                 child: Text(
                   '${snapshot.error} occurred',
-                  style: TextStyle(fontSize: 18),
+                  style: const TextStyle(fontSize: 18),
                 ),
               );
             } else if (snapshot.hasData) {
               print('DatabaseGLUVAL initialization: Success');
-              return MaterialApp(
+              return const MaterialApp(
                   debugShowCheckedModeBanner: false, home: HomePage());
             }
           }
-          return Center(
+          return const Center(
             child: CircularProgressIndicator(color: AppColors.lavender),
           );
         }, //builder
