@@ -1,4 +1,4 @@
-// ignore_for_file: avoid_print
+// ignore_for_file: avoid_print, non_constant_identifier_names
 
 import 'dart:async';
 import 'package:flutter_app/server/models/TrackTmGV.dart';
@@ -78,6 +78,18 @@ class DatabaseHelperGV {
     List<Map<String, dynamic>> list = await database.rawQuery(
         'SELECT * FROM $trackTmGVTable WHERE $colDateSeconds > ? AND $colDateSeconds < ?',
         [prevDay.millisecondsSinceEpoch, nextDay.millisecondsSinceEpoch]);
+    List<TrackTmGV> res = [];
+    for (Map<String, dynamic> i in list) {
+      res.add(TrackTmGV.fromMap(i));
+    }
+    return res;
+  }
+
+  Future<List<TrackTmGV>> selectPeriod(
+      DateTime fromTime, DateTime toTime) async {
+    List<Map<String, dynamic>> list = await database.rawQuery(
+        'SELECT * FROM $trackTmGVTable WHERE $colDateSeconds >= ? AND $colDateSeconds <= ?',
+        [fromTime.millisecondsSinceEpoch, toTime.millisecondsSinceEpoch]);
     List<TrackTmGV> res = [];
     for (Map<String, dynamic> i in list) {
       res.add(TrackTmGV.fromMap(i));

@@ -245,15 +245,11 @@ class _HomePageState extends State<HomePage> {
                         } else if (relativePos == -1) {
                           dateString = 'Yesterday';
                         } else if (thisDate.year == DateTime.now().year) {
-                          dateString = months[thisDate.month] +
-                              ' ' +
-                              thisDate.day.toString();
+                          dateString =
+                              '${months[thisDate.month]} ${thisDate.day}';
                         } else {
-                          dateString = months[thisDate.month] +
-                              ' ' +
-                              thisDate.day.toString() +
-                              ', ' +
-                              thisDate.year.toString();
+                          dateString =
+                              '${months[thisDate.month]} ${thisDate.day}, ${thisDate.year}';
                         }
                       } else {
                         isPointing = false;

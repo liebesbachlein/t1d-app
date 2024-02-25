@@ -1,19 +1,33 @@
 // ignore_for_file: avoid_print, non_constant_identifier_names, no_leading_underscores_for_local_identifiers
-
+import 'package:flutter_app/server/models/TrackGV.dart';
+import 'package:flutter_app/server/models/TrackTmGV.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'dart:math';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-//import 'package:flutter/services.dart';
 import 'package:flutter_app/assets/colors.dart';
 import 'package:flutter_app/assets/ai_script.dart';
 import 'package:flutter_app/main.dart';
 import 'dart:core';
 
 import 'package:flutter_app/server/models/DialogModel.dart';
+import 'package:quiver/time.dart';
+
+DateTime MORNING_TIME_START = DateTime(2024, 1, 1, 6, 0, 0);
+DateTime MORNING_TIME_END = DateTime(2024, 1, 1, 11, 59, 0);
+DateTime AFTERNOON_TIME_START = DateTime(2024, 1, 1, 12, 0, 0);
+DateTime AFTERNOON_TIME_END = DateTime(2024, 1, 1, 17, 59, 0);
+DateTime EVENING_TIME_START = DateTime(2024, 1, 1, 18, 0, 0);
+DateTime EVENING_TIME_END = DateTime(2024, 1, 1, 23, 59, 0);
+DateTime NIGHT_TIME_START = DateTime(2024, 1, 2, 0, 0, 0);
+DateTime NIGHT_TIME_END = DateTime(2024, 1, 2, 5, 59, 0);
 
 late List<DialogModel> listDialog;
+final _chatBox = GlobalKey<_ChatbotBoxState>();
+final _formkey = GlobalKey<FormState>();
+final TextEditingController _messageController = TextEditingController();
 
 class ChatbotPage extends StatefulWidget {
   const ChatbotPage({super.key});
@@ -23,10 +37,6 @@ class ChatbotPage extends StatefulWidget {
 }
 
 class _ChatbotPageState extends State<ChatbotPage> {
-  final _formkey = GlobalKey<FormState>();
-  final TextEditingController _messageController = TextEditingController();
-  final _chatBox = GlobalKey<_ChatbotBoxState>();
-
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
@@ -57,7 +67,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
                   body: Stack(children: [
                     ChatbotBox(key: _chatBox),
                     TopSet(),
-                    ChatbotBottom()
+                    const ChatbotBottom()
                   ]));
             }
           }
@@ -124,73 +134,6 @@ class _ChatbotPageState extends State<ChatbotPage> {
       ],
     );
   }
-
-  Widget ChatbotBottom() {
-    return Container(
-        height: MediaQuery.of(context).size.height,
-        alignment: Alignment.bottomCenter,
-        width: MediaQuery.of(context).size.width,
-        child: Container(
-            height: 60,
-            decoration: const BoxDecoration(
-                borderRadius: BorderRadius.only(
-                    topRight: Radius.circular(24),
-                    topLeft: Radius.circular(24)),
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                      color: Color.fromRGBO(149, 157, 165, 0.1),
-                      offset: Offset.zero,
-                      blurRadius: 4)
-                ]),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Container(
-                    padding: const EdgeInsets.only(left: 20),
-                    width: MediaQuery.of(context).size.width * 0.8,
-                    child: Form(
-                        key: _formkey,
-                        child: TextFormField(
-                          textAlign: TextAlign.left,
-                          controller: _messageController,
-                          style: const TextStyle(
-                              fontFamily: 'Inter-Regular',
-                              fontSize: 14,
-                              color: AppColors.text_mes),
-                          decoration: const InputDecoration(
-                            border: InputBorder.none,
-                            hintText: "Ask anything",
-                            hintStyle: TextStyle(
-                              fontFamily: 'Inter-Regular',
-                              fontSize: 14,
-                              color: AppColors.text_sub,
-                            ),
-                          ),
-                        ))),
-                Container(
-                    width: MediaQuery.of(context).size.width * 0.2,
-                    padding: const EdgeInsets.only(right: 10),
-                    alignment: Alignment.centerRight,
-                    child: GestureDetector(
-                        onTap: () {
-                          String message = _messageController.text;
-                          if (message != '') {
-                            DialogModel newMessage = DialogModel.createUserText(
-                                DateTime.now(), message);
-                            databaseHelperDialog.insert(newMessage);
-                            listDialog.add(newMessage);
-                            _chatBox.currentState?.buildList();
-                            _chatBox.currentState?.buildAItext();
-                            _formkey.currentState?.reset();
-                          }
-                        },
-                        child: const Icon(Icons.cookie_rounded,
-                            color: AppColors.mint, size: 35)))
-              ],
-            )));
-  }
 }
 
 class ChatbotBox extends StatefulWidget {
@@ -202,6 +145,19 @@ class ChatbotBox extends StatefulWidget {
 
 class _ChatbotBoxState extends State<ChatbotBox> {
   List<Widget> widgetListDialog = [];
+  double bottomPadding = 60;
+
+  void raiseChatbotBox() {
+    setState(() {
+      bottomPadding = 260;
+    });
+  }
+
+  void dropChatbotBox() {
+    setState(() {
+      bottomPadding = 60;
+    });
+  }
 
   _ChatbotBoxState() {
     widgetListDialog = [];
@@ -246,6 +202,80 @@ class _ChatbotBoxState extends State<ChatbotBox> {
     buildList();
   }
 
+  Future<TrackGV> average(DateTime start, DateTime end, int period) async {
+    // 0 -> all day, 1 -> morning, 2 -> afternoon, 3 -> evening, 4 -> night,
+    List<TrackTmGV> res = await databaseHelperGV.selectPeriod(start, end);
+    double gv = 0;
+    int count = 0;
+
+    if (res.isEmpty) {
+      return TrackGV(-1);
+    }
+
+    if (period == 0) {
+      for (TrackTmGV element in res) {
+        count++;
+        gv = gv + element.gluval.GV;
+      }
+
+      return TrackGV(gv / count);
+    }
+
+    late DateTime periodPick_start;
+    late DateTime periodPick_end;
+    if (period == 1) {
+      periodPick_start = MORNING_TIME_START;
+      periodPick_end = MORNING_TIME_END;
+    } else if (period == 2) {
+      periodPick_start = AFTERNOON_TIME_START;
+      periodPick_end = AFTERNOON_TIME_END;
+    } else if (period == 3) {
+      periodPick_start = EVENING_TIME_START;
+      periodPick_end = EVENING_TIME_END;
+    } else if (period == 4) {
+      periodPick_start = NIGHT_TIME_START;
+      periodPick_end = NIGHT_TIME_END;
+    }
+    for (TrackTmGV element in res) {
+      if (element.hour * 60 + element.minute >=
+              periodPick_start.hour * 60 + periodPick_start.minute &&
+          element.hour * 60 + element.minute <=
+              periodPick_end.hour * 60 + periodPick_end.minute) {
+        count++;
+        gv = gv + element.gluval.GV;
+      }
+    }
+
+    return gv == 0 ? TrackGV(-1) : TrackGV(gv / count);
+  }
+
+  void buildAIResponceFromAverage(
+      DateTime start, DateTime end, int period) async {
+    TrackGV num = await average(DateTime(start.year, start.month, start.day),
+        DateTime(end.year, end.month, end.day, 23, 59, 59), period);
+    String text = '';
+    if (num.GV == -1) {
+      text = 'No data over this period';
+    } else {
+      String addText = ' ';
+      if (period == 1) {
+        addText = ' morning ';
+      } else if (period == 2) {
+        addText = ' afternoon ';
+      } else if (period == 3) {
+        addText = ' evening ';
+      } else if (period == 4) {
+        addText = ' night ';
+      }
+      text =
+          'Average${addText}blood sugar over ${start.day}.${start.month}-${end.day}.${end.month} is $num.';
+    }
+    DialogModel newMessage = DialogModel.createAIText(DateTime.now(), text);
+    databaseHelperDialog.insert(newMessage);
+    listDialog.add(newMessage);
+    buildList();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -253,7 +283,7 @@ class _ChatbotBoxState extends State<ChatbotBox> {
         constraints: BoxConstraints(
           minHeight: MediaQuery.of(context).size.height,
         ),
-        padding: const EdgeInsets.only(bottom: 60, top: 70),
+        padding: EdgeInsets.only(bottom: bottomPadding, top: 70),
         child: ListView(
           semanticChildCount: widgetListDialog.length,
           dragStartBehavior: DragStartBehavior.down,
@@ -328,5 +358,256 @@ class _ChatbotBoxState extends State<ChatbotBox> {
                     color: Colors.white,
                   )),
             ])));
+  }
+
+  Widget LoadingAI() {
+    return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+        alignment: Alignment.centerLeft,
+        child: Container(
+            padding:
+                const EdgeInsets.only(top: 10, left: 10, right: 10, bottom: 5),
+            constraints: const BoxConstraints(
+              maxWidth: 300,
+            ),
+            decoration: const BoxDecoration(
+              color: AppColors.text_light,
+              borderRadius: BorderRadius.only(
+                  topRight: Radius.circular(12),
+                  topLeft: Radius.circular(12),
+                  bottomRight: Radius.circular(12)),
+            ),
+            child: LoadingAnimationWidget.staggeredDotsWave(
+                color: AppColors.mint, size: 20)));
+  }
+}
+
+class ChatbotBottom extends StatefulWidget {
+  const ChatbotBottom({super.key});
+
+  @override
+  State<ChatbotBottom> createState() => _ChatbotBottomState();
+}
+
+class _ChatbotBottomState extends State<ChatbotBottom> {
+  int command = 0; // 0 -> average, 1 -> max, 2 -> min
+  int stage = 0; // 0 -> choosing command, 1 -> choosing time
+  int time = 0; // 0 -> 2 weeks, 1 -> 1 month, 2 -> custom
+  List<Widget> listGridCommands = [];
+  List<Widget> listGridTimes = [];
+  bool times = false;
+  double gridHeight = 0;
+
+  @override
+  late BuildContext context;
+
+  _ChatbotBottomState() {
+    listGridCommands = [
+      CommandItem(0),
+      CommandItem(1),
+      CommandItem(2),
+      CommandItem(3),
+      CommandItem(4)
+    ];
+
+    listGridTimes = [BackToCommands(), TimeItem(0), TimeItem(1), TimeItem(2)];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    this.context = context;
+    return Container(
+        height: MediaQuery.of(context).size.height,
+        alignment: Alignment.bottomCenter,
+        width: MediaQuery.of(context).size.width,
+        child: Column(mainAxisAlignment: MainAxisAlignment.end, children: [
+          KeyboardBox(),
+          Container(
+              height: gridHeight,
+              width: MediaQuery.of(context).size.width,
+              decoration: const BoxDecoration(
+                  color: Colors.white,
+                  border: Border(
+                      top: BorderSide(color: AppColors.mint, width: 0.5))),
+              child: Wrap(children: times ? listGridTimes : listGridCommands))
+        ]));
+  }
+
+  Widget KeyboardBox() {
+    return Container(
+        height: 60,
+        decoration: const BoxDecoration(
+            borderRadius: BorderRadius.only(
+                topRight: Radius.circular(24), topLeft: Radius.circular(24)),
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                  color: Color.fromRGBO(149, 157, 165, 0.1),
+                  offset: Offset.zero,
+                  blurRadius: 4)
+            ]),
+        child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Container(
+                  padding: const EdgeInsets.only(left: 20),
+                  width: 300,
+                  child: Form(
+                      key: _formkey,
+                      child: TextFormField(
+                          textAlign: TextAlign.left,
+                          controller: _messageController,
+                          onTap: () {
+                            if (gridHeight > 0) {
+                              setState(() {
+                                gridHeight = 0;
+                              });
+                              _chatBox.currentState?.dropChatbotBox();
+                            }
+                          },
+                          style: const TextStyle(
+                              fontFamily: 'Inter-Regular',
+                              fontSize: 14,
+                              color: AppColors.text_mes),
+                          decoration: const InputDecoration(
+                              border: InputBorder.none,
+                              hintText: "Ask anything",
+                              hintStyle: TextStyle(
+                                fontFamily: 'Inter-Regular',
+                                fontSize: 14,
+                                color: AppColors.text_sub,
+                              ))))),
+              Padding(
+                  padding: const EdgeInsets.only(right: 5),
+                  child: GestureDetector(
+                      onTap: () {
+                        FocusManager.instance.primaryFocus?.unfocus();
+                        if (gridHeight > 0) {
+                          setState(() {
+                            gridHeight = 0;
+                          });
+                          _chatBox.currentState?.dropChatbotBox();
+                        } else if (gridHeight == 0) {
+                          setState(() {
+                            gridHeight = 200;
+                          });
+                          _chatBox.currentState?.raiseChatbotBox();
+                        }
+                      },
+                      child: const Icon(Icons.cake_rounded,
+                          color: AppColors.lavender, size: 35))),
+              Padding(
+                  padding: const EdgeInsets.only(right: 5),
+                  child: GestureDetector(
+                      onTap: () {
+                        String message = _messageController.text;
+                        if (message != '') {
+                          DialogModel newMessage = DialogModel.createUserText(
+                              DateTime.now(), message);
+                          databaseHelperDialog.insert(newMessage);
+                          listDialog.add(newMessage);
+                          _chatBox.currentState?.buildList();
+                          _chatBox.currentState?.buildAItext();
+                          _messageController.clear();
+                        }
+                      },
+                      child: const Icon(Icons.cookie_rounded,
+                          color: AppColors.mint, size: 35)))
+            ]));
+  }
+
+  Widget CommandItem(int localCommand) {
+    String text = '';
+
+    if (localCommand == 0) {
+      text = '24H average';
+    } else if (localCommand == 1) {
+      text = 'Morning average';
+    } else if (localCommand == 2) {
+      text = 'Afternoon average';
+    } else if (localCommand == 3) {
+      text = 'Evening average';
+    } else {
+      text = 'Night average';
+    }
+
+    return GestureDetector(
+        onTap: () {
+          command = localCommand;
+          stage = 1;
+          setState(() {
+            times = true;
+          });
+        },
+        child: Container(
+            margin: const EdgeInsets.all(8),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: const BoxDecoration(
+                color: AppColors.text_light,
+                borderRadius: BorderRadius.all(Radius.circular(10))),
+            child: Text(text,
+                style: const TextStyle(
+                  fontFamily: 'Inter-Regular',
+                  fontSize: 14,
+                  color: AppColors.text_info,
+                ))));
+  }
+
+  Widget TimeItem(int localTime) {
+    String text = '';
+    late DateTime start;
+    late DateTime end;
+
+    if (localTime == 0) {
+      text = '2 weeks';
+      start = DateTime.now().subtract(const Duration(days: 14));
+      end = DateTime.now();
+    } else if (localTime == 1) {
+      text = '1 month';
+      start = DateTime.now().subtract(Duration(
+          days: daysInMonth(DateTime.now().year, DateTime.now().month)));
+      end = DateTime.now();
+    } else {
+      text = 'in development';
+      start = DateTime.now().subtract(Duration(
+          days: daysInMonth(DateTime.now().year, DateTime.now().month)));
+      end = DateTime.now();
+    }
+
+    return GestureDetector(
+        onTap: () {
+          time = localTime;
+          stage = 3;
+          _chatBox.currentState
+              ?.buildAIResponceFromAverage(start, end, command);
+        },
+        child: Container(
+            margin: const EdgeInsets.all(8),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: const BoxDecoration(
+                color: AppColors.text_light,
+                borderRadius: BorderRadius.all(Radius.circular(10))),
+            child: Text(text,
+                style: const TextStyle(
+                  fontFamily: 'Inter-Regular',
+                  fontSize: 14,
+                  color: AppColors.text_info,
+                ))));
+  }
+
+  Widget BackToCommands() {
+    return GestureDetector(
+        onTap: () {
+          stage = 1;
+          setState(() {
+            times = false;
+          });
+        },
+        child: Container(
+            margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+            padding: const EdgeInsets.symmetric(vertical: 1),
+            child: const Icon(Icons.chevron_left,
+                color: AppColors.mint, size: 32)));
   }
 }
