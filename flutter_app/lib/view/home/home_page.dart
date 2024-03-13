@@ -10,6 +10,7 @@ import 'package:flutter_app/view/data_log/data_log.dart';
 import 'dart:core';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter_app/main.dart';
+import 'package:flutter_app/view/data_log/data_logging.dart';
 import 'package:flutter_app/view/profile_settings/profile.dart';
 import 'dart:math';
 import 'package:infinite_listview/infinite_listview.dart';
@@ -48,7 +49,7 @@ class _HomePageState extends State<HomePage> {
   //bool _isThereInfo = false;
 
   _HomePageState() {
-    //gaf, set Date Text at the top
+    //set Date Text at the top
     if (_g_pos != 0) {
       DateTime thisDate = DateTime(
               DateTime.now().year, DateTime.now().month, DateTime.now().day)
@@ -58,7 +59,6 @@ class _HomePageState extends State<HomePage> {
     } else {
       dateString = 'Today';
     }
-    //gaf, set Date Text at the top
   }
 
   @override
@@ -124,13 +124,13 @@ class _HomePageState extends State<HomePage> {
               ],
             )),
         body: <Widget>[
-          Container(
-              color: AppColors.background,
-              child: Column(children: [TopBox(), PlotBox()])),
+          const DataPrototype(),
           const CalendarPage(),
           DataLog(key: lkey),
           const ChatbotPage(),
-          const ProfileSettings(),
+          Container(
+              color: AppColors.background,
+              child: Column(children: [TopBox(), PlotBox()])),
         ][currentPageIndex]);
   }
 

@@ -268,7 +268,7 @@ class _ChatbotBoxState extends State<ChatbotBox> {
         addText = ' night ';
       }
       text =
-          'Average${addText}blood sugar over ${start.day}.${start.month}-${end.day}.${end.month} is $num.';
+          'Average${addText}blood sugar over ${start.day}.${start.month}-${end.day}.${end.month} is ${num.GV1}.${num.GV2}';
     }
     DialogModel newMessage = DialogModel.createAIText(DateTime.now(), text);
     databaseHelperDialog.insert(newMessage);

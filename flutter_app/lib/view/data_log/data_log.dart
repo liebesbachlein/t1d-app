@@ -272,7 +272,7 @@ class _DataFieldState extends State<DataField> {
       lkey.currentState?.setIsChanged(true);
       int index = tmgv.hour * 2;
       if (tmgv.minute > 0) {
-        index = index + 1; //подправь индекс для удаление прошлых записей
+        index = index + 1;
       }
       print(gvCol[index].trackTmGV.toString());
       gvCol[index].trackTmGV.nulled();

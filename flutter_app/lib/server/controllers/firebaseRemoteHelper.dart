@@ -31,6 +31,18 @@ class FirebaseRemoteHelper {
     return user;
   }
 
+  void updateUsername({required String email, required String username}) async {
+    final userCollection = firestore.collection("userPublicData");
+    await userCollection
+        .where('email', isEqualTo: email)
+        .get()
+        .then((querySnapshot) => {
+              querySnapshot.docs.forEach((i) {
+                userCollection.doc(i.id).update({'username': username});
+              })
+            });
+  }
+
   Future<bool> uploadGVdata() async {
     String email = await getEmail();
 

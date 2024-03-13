@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_app/assets/colors.dart';
+import 'package:flutter_app/view/home/home_page.dart';
 import 'package:flutter_app/view/profile_settings/account.dart';
 import 'dart:core';
 import 'package:flutter_app/server/controllers/sharedPreferences.dart';
@@ -33,7 +34,8 @@ class _ProfileSettingsState extends State<ProfileSettings> {
         body: Container(
             color: AppColors.background,
             child:
-                Column(children: [TopSet(), const PicName(), SettingsCont()])));
+                Column(children: [TopSet(), const PicName(), SettingsCont()])),
+        resizeToAvoidBottomInset: false);
   }
 
   Widget TopSet() {
@@ -55,7 +57,9 @@ class _ProfileSettingsState extends State<ProfileSettings> {
               color: AppColors.lavender,
               onPressed: () {
                 setState(() {
-                  Navigator.pop(context);
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return const HomePage();
+                  }));
                 });
               }),
           Container(

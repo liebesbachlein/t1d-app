@@ -1,4 +1,4 @@
-// ignore_for_file: avoid_print, non_constant_identifier_names, unused_local_variable
+// ignore_for_file: avoid_print, non_constant_identifier_names, unused_local_variable, no_leading_underscores_for_local_identifiers
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -9,6 +9,7 @@ import 'package:flutter_app/main.dart';
 import 'package:flutter_app/assets/colors.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -234,7 +235,7 @@ class _LoginScreenState extends State<LoginScreen> {
               padding: const EdgeInsets.only(top: 40),
               child: TextButton(
                   onPressed: () {
-                    popUpNoSuchFeature("the feature will be here soon");
+                    _signInWithGoogle();
                   },
                   child: Column(children: [
                     const Text('or login with',
@@ -275,6 +276,40 @@ class _LoginScreenState extends State<LoginScreen> {
       mainHome(username: resUser.username, email: email);
     } else {
       popUpNoSuchFeature("Incorrect email/password");
+    }
+  }
+
+  void _signInWithGoogle() async {
+    setState(() {
+      _isSignIning = true;
+    });
+    final GoogleSignIn _googleSignIn = GoogleSignIn();
+    final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+
+    try {
+      final GoogleSignInAccount? googleSignInAccount =
+          await _googleSignIn.signIn();
+
+      if (googleSignInAccount != null) {
+        setState(() {
+          _isSignIning = false;
+        });
+        final GoogleSignInAuthentication googleSignInAuthentication =
+            await googleSignInAccount.authentication;
+
+        final AuthCredential credential = GoogleAuthProvider.credential(
+            idToken: googleSignInAuthentication.idToken,
+            accessToken: googleSignInAuthentication.accessToken);
+
+        await _firebaseAuth.signInWithCredential(credential);
+        String email = googleSignInAccount.email;
+        UserModel resUser = await firebaseRemoteHelper.getUsername(email);
+        await setPersonalInfo(username: resUser.username, email: email);
+
+        mainHome(username: resUser.username, email: email);
+      }
+    } catch (e) {
+      popUpNoSuchFeature("Error occured");
     }
   }
 
