@@ -17,6 +17,6 @@ class TrackGV {
 
   @override
   String toString() {
-    return GV.toString();
+    return '$GV1.$GV2';
   }
 }

@@ -14,7 +14,7 @@ class DialogModel {
   String id = '0';
   int fromWho = 1; // ai = 0; user = 1
   String content = "default";
-  int command = 0; // none = 0; average = 1; max = 2; min = 3
+  int command = 0; // none = 0; average = 1;
   DateTime displayDate = DateTime(2024, 1, 1, 0, 0);
   DateTime fromDate = DateTime(2024, 1, 1, 0, 0);
   DateTime toDate = DateTime(2024, 1, 2, 0, 0);

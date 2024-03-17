@@ -1,5 +1,5 @@
 // ignore_for_file: avoid_print, non_constant_identifier_names
-
+/*
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_app/assets/colors.dart';
@@ -11,9 +11,8 @@ import 'package:flutter_app/main.dart';
 GlobalKey<_DataFieldState> dkey = GlobalKey<_DataFieldState>();
 GlobalKey<_DataLogState> lkey = GlobalKey<_DataLogState>();
 
-final AppColors ac = AppColors();
-List<Color> pallete1 = getColArr(ac.hex_arr);
-List<Color> pallete2 = getColArr(ac.hex_arr2);
+List<Color> upperPallete = getColArr(AppColors.hex_colors_upper);
+List<Color> lowerPallete = getColArr(AppColors.hex_colors_lower);
 
 List<Color> getColArr(List<int> arr) {
   final List<Color> col = [];
@@ -71,7 +70,6 @@ List<DataletTm> getTMArr() {
   return col;
 }
 
-GlobalKey tgableKey = GlobalKey();
 GlobalKey draggableKey = GlobalKey();
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -120,7 +118,7 @@ class _DataLogState extends State<DataLog> {
                       blurRadius: 10)
                 ],
               ),
-              child: Column(children: [const TopSetDL(), Scale1()]))
+              child: Column(children: [const TopSetDL(), buildUpperScale()]))
         ]),
         floatingActionButton: FloatingActionButton(
             elevation: 2,
@@ -136,6 +134,24 @@ class _DataLogState extends State<DataLog> {
             child: isChanged
                 ? const Icon(Icons.add_task_outlined)
                 : const Icon(Icons.task_alt)));
+  }
+
+  Widget buildUpperScale() {
+    List<GlucoseUpper> upperScale = [];
+
+    for (int i = 0; i < upperPallete.length; i++) {
+      upperScale.add(GlucoseUpper(upperPallete[i], gvsGlob[i]));
+    }
+    return SizedBox(
+        height: 48,
+        child: ListView(
+          controller: ScrollController(
+            initialScrollOffset: 160.0,
+            keepScrollOffset: false,
+          ),
+          scrollDirection: Axis.horizontal,
+          children: upperScale,
+        ));
   }
 }
 
@@ -387,31 +403,11 @@ class _TopSetDLState extends State<TopSetDL> {
   }
 }
 
-List<Widget> Scale2(List<TrackGV> gvs) {
-  List<Widget> scale2 = [];
-  //List<Widget> scale = [];
-
-  int s = pallete2.length;
-  for (int i = 0; i < s; i++) {
-    scale2.add(buildGV(pallete2[i], gvs[i]));
-  }
-
-  return scale2;
-}
-
-Widget buildGV(Color color, TrackGV item) {
-  return LongPressDraggable<TrackGV>(
-    data: item,
-    dragAnchorStrategy: pointerDragAnchorStrategy,
-    feedback: DraggingGV(draggableKey, '${item.GV1}.${item.GV2}', color),
-    child: GluVal2(color, item),
-  );
-}
-
-class DraggingGV extends StatelessWidget {
-  const DraggingGV(this.dragKey, this.GV, this.color, {super.key});
+class DraggingGlucose extends StatelessWidget {
+  const DraggingGlucose(this.dragKey, this.glucoseValue, this.color,
+      {super.key});
   final GlobalKey dragKey;
-  final String GV;
+  final String glucoseValue;
   final Color color;
 
   @override
@@ -433,7 +429,7 @@ class DraggingGV extends StatelessWidget {
                     color: Colors.black,
                     fontFamily: 'Inter-Thin',
                     fontSize: 14),
-                child: Text(GV))));
+                child: Text(glucoseValue))));
   }
 }
 
@@ -512,9 +508,9 @@ class DataletGV extends StatelessWidget {
                                 controller.open();
                               }
                             },
-                            child: ColoredCircle2(
+                            child: buildOutlinedCircle(
                                 hasItems
-                                    ? pallete2[trackTmGV.gluval.GV2]
+                                    ? lowerPallete[trackTmGV.gluval.GV2]
                                     : AppColors.trans,
                                 hasItems ? trackTmGV.gluval.toString() : ''));
                       },
@@ -558,65 +554,43 @@ class DataletGV extends StatelessWidget {
   }
 }
 
-Widget Scale1() {
-  List<GluVal1> scale1 = [];
-
-  int s = pallete1.length;
-  for (int i = 0; i < s; i++) {
-    scale1.add(GluVal1(pallete1[i], gvsGlob[i]));
-  }
-  return SizedBox(
-      height: 48,
-      child: ListView(
-        controller: ScrollController(
-          initialScrollOffset: 160.0,
-          keepScrollOffset: false,
-        ),
-        scrollDirection: Axis.horizontal,
-        children: scale1,
-      ));
-}
-
-Widget ColoredCircle1(Color col, int t) {
-  return Container(
-      alignment: Alignment.center,
-      width: 30,
-      height: 30,
-      decoration: BoxDecoration(color: col, shape: BoxShape.circle));
-}
-
-Widget ColoredCircle2(Color col, String tx) {
+Widget buildOutlinedCircle(Color color, String value) {
   return Container(
       alignment: Alignment.center,
       width: 35,
       height: 35,
       decoration: BoxDecoration(
-        border: Border.all(color: col, width: 1.5),
+        border: Border.all(color: color, width: 1.5),
         shape: BoxShape.circle,
       ),
-      child: Text(tx,
+      child: Text(value,
           style: const TextStyle(fontFamily: 'Inter-Thin', fontSize: 12)));
 }
 
-class GluVal1 extends StatefulWidget {
-  const GluVal1(this.col, this.gvs, {super.key});
-  final Color col;
-  final List<TrackGV> gvs;
+class GlucoseUpper extends StatefulWidget {
+  final Color color;
+  final List<TrackGV> glucoseValues;
+  const GlucoseUpper(this.color, this.glucoseValues, {super.key});
 
   @override
-  State<GluVal1> createState() => _GluVal1State(col, gvs);
+  State<GlucoseUpper> createState() => _GlucoseUpperState();
 }
 
-class _GluVal1State extends State<GluVal1> {
-  Color col = Colors.black;
-  List<TrackGV> gvs = gvsGlob[0];
-  List<Widget> scale2 = Scale2(gvsGlob[0]);
+class _GlucoseUpperState extends State<GlucoseUpper> {
+  late Color color;
+  late List<TrackGV> glucoseValues;
+  late List<Widget> lowerScale;
+
   BorderSide bs = const BorderSide(width: 1.5, color: AppColors.trans);
 
-  _GluVal1State(this.col, List<TrackGV> Gvs) {
-    gvs = Gvs;
-    scale2 = Scale2(Gvs);
+  @override
+  void initState() {
+    super.initState();
+    color = widget.color;
+    glucoseValues = widget.glucoseValues;
+    lowerScale = buildLowerScale(glucoseValues);
   }
+
   @override
   Widget build(BuildContext context) {
     return MenuAnchor(
@@ -645,8 +619,8 @@ class _GluVal1State extends State<GluVal1> {
                   margin: const EdgeInsets.only(right: 11, left: 11),
                   alignment: Alignment.center,
                   child: Column(children: [
-                    ColoredCircle1(col, gvs[0].GV1),
-                    Text(gvs[0].GV1.toString(),
+                    buildFilledCircle(color, glucoseValues[0].GV1),
+                    Text(glucoseValues[0].GV1.toString(),
                         style: const TextStyle(
                             fontFamily: 'Inter-Thin',
                             fontSize: 12,
@@ -669,7 +643,7 @@ class _GluVal1State extends State<GluVal1> {
                     keepScrollOffset: false,
                   ),
                   scrollDirection: Axis.horizontal,
-                  children: scale2))
+                  children: lowerScale))
         ],
         style: MenuStyle(
             elevation: const MaterialStatePropertyAll<double>(8),
@@ -688,10 +662,35 @@ class _GluVal1State extends State<GluVal1> {
             maximumSize: MaterialStatePropertyAll<Size>(
                 Size(MediaQuery.of(context).size.width * 2, 100))));
   }
-}
 
-Widget GluVal2(Color color, TrackGV trackGV) {
-  return Container(
-      padding: const EdgeInsets.only(left: 8, right: 8),
-      child: ColoredCircle2(color, '${trackGV.GV1}.${trackGV.GV2}'));
+  List<Widget> buildLowerScale(List<TrackGV> gvs) {
+    List<Widget> lowerScale = [];
+
+    for (int i = 0; i < lowerPallete.length; i++) {
+      lowerScale.add(buildGlucoseLower(lowerPallete[i], gvs[i]));
+    }
+
+    return lowerScale;
+  }
+
+  Widget buildGlucoseLower(Color color, TrackGV trackGV) {
+    return LongPressDraggable<TrackGV>(
+      data: trackGV,
+      dragAnchorStrategy: pointerDragAnchorStrategy,
+      feedback:
+          DraggingGlucose(draggableKey, '${trackGV.GV1}.${trackGV.GV2}', color),
+      child: Container(
+          padding: const EdgeInsets.only(left: 8, right: 8),
+          child: buildOutlinedCircle(color, '${trackGV.GV1}.${trackGV.GV2}')),
+    );
+  }
+
+  Widget buildFilledCircle(Color color, int value) {
+    return Container(
+        alignment: Alignment.center,
+        width: 30,
+        height: 30,
+        decoration: BoxDecoration(color: color, shape: BoxShape.circle));
+  }
 }
+*/

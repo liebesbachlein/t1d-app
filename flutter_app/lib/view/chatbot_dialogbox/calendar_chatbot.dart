@@ -1,89 +1,67 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_app/assets/colors.dart';
 import 'package:flutter_app/server/models/TrackTmGV.dart';
 import 'package:flutter_app/main.dart';
 import 'dart:core';
 import 'package:quiver/time.dart';
 
-class CalendarPage extends StatefulWidget {
-  const CalendarPage({super.key});
+List<int> firstTap = [];
+List<int> secondTap = [];
+bool directionUp = false;
+
+class ChatbotCalendar extends StatefulWidget {
+  const ChatbotCalendar({super.key});
 
   @override
-  State<CalendarPage> createState() => _CalendarPageState();
+  State<ChatbotCalendar> createState() => _ChatbotCalendarState();
 }
 
-class _CalendarPageState extends State<CalendarPage> {
-  int month = DateTime.now().month;
-  int year = DateTime.now().year;
+class _ChatbotCalendarState extends State<ChatbotCalendar> {
+  late int year;
+  late int month;
+  late int day;
+
+  @override
+  void initState() {
+    super.initState();
+    year = DateTime.now().year;
+    month = DateTime.now().month;
+    day = DateTime.now().day;
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-            foregroundColor: AppColors.background,
-            surfaceTintColor: AppColors.background,
-            backgroundColor: AppColors.background,
-            systemOverlayStyle: const SystemUiOverlayStyle(
-              systemNavigationBarColor: AppColors.background,
-              systemNavigationBarDividerColor: AppColors.background,
-              statusBarColor: AppColors.background,
-              statusBarIconBrightness: Brightness.dark,
-              statusBarBrightness: Brightness.light,
-            ),
-            toolbarHeight: 0,
-            elevation: 0),
-        body: Container(
-            color: AppColors.background,
-            child: Align(
-                alignment: Alignment.topCenter,
-                child: FittedBox(child: buildCalendarBox()))));
+    return Container(
+        color: AppColors.background,
+        child: Align(
+            alignment: Alignment.topCenter,
+            child: FittedBox(child: buildCalendarBox())));
   }
 
   Widget buildCalendarBox() {
-    late List<List<int>> isTicked;
-    return FutureBuilder(
-        builder: (ctx, snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) {
-            if (snapshot.hasError) {
-              return Center(
-                child: Text(
-                  '${snapshot.error} occurred',
-                  style: const TextStyle(fontSize: 18),
-                ),
-              );
-            } else if (snapshot.hasData) {
-              return Container(
-                  margin:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 36),
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  constraints: BoxConstraints(
-                      minHeight: MediaQuery.of(context).size.height * 0.5),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(24),
-                    boxShadow: const [
-                      BoxShadow(
-                          color: Color.fromRGBO(149, 157, 165, 0.1),
-                          offset: Offset.zero,
-                          spreadRadius: 4,
-                          blurRadius: 10)
-                    ],
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      buildCaledarMonthChange(),
-                      buildCalendarInterface(month, year, isTicked)
-                    ],
-                  ));
-            }
-          }
-          return const Center(
-            child: CircularProgressIndicator(color: AppColors.lavender),
-          );
-        }, //builder
-        future: getTickedDates(month).then((e) => isTicked = e));
+    return Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 36),
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        constraints:
+            BoxConstraints(minHeight: MediaQuery.of(context).size.height * 0.5),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: const [
+            BoxShadow(
+                color: Color.fromRGBO(149, 157, 165, 0.1),
+                offset: Offset.zero,
+                spreadRadius: 4,
+                blurRadius: 10)
+          ],
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            buildCaledarMonthChange(),
+            buildCalendarInterface(month, year, [[], [], []])
+          ],
+        ));
   }
 
   Future<List<List<int>>> getTickedDates(month) async {
@@ -138,6 +116,15 @@ class _CalendarPageState extends State<CalendarPage> {
       [false, false, false, false, false, false, false]
     ];
 
+    List<List<bool>> selectedList = [
+      [false, false, false, false, false, false, false],
+      [false, false, false, false, false, false, false],
+      [false, false, false, false, false, false, false],
+      [false, false, false, false, false, false, false],
+      [false, false, false, false, false, false, false],
+      [false, false, false, false, false, false, false]
+    ];
+
     int dayTemp = 1;
     for (int i = 0; i < 6; i++) {
       for (int j = 0; j < 7; j++) {
@@ -146,6 +133,7 @@ class _CalendarPageState extends State<CalendarPage> {
           allTicks[i][pos - 1] = true;
         }
         allDays[i][pos - 1] = dayTemp;
+
         dayTemp++;
         if (dayTemp > lastDay) {
           break;
@@ -205,13 +193,61 @@ class _CalendarPageState extends State<CalendarPage> {
         }
       }
     }
+    for (int i = 0; i < 6; i++) {
+      for (int j = 0; j < 7; j++) {
+        int newMonth = month;
+        if (allDays[i][j] >= 20 && i <= 1) {
+          // strip of previous month
+          newMonth = month == 1 ? 12 : month - 1;
+        } else if (allDays[i][j] <= 15 && i >= 4) {
+          // strip of next month
+          newMonth = month == 12 ? 1 : month + 1;
+        }
+
+        if (firstTap.isNotEmpty && secondTap.isEmpty) {
+          if (year == firstTap[2] &&
+              newMonth == firstTap[1] &&
+              allDays[i][j] == firstTap[0]) {
+            selectedList[i][j] = true;
+          }
+        } else if (firstTap.isNotEmpty && secondTap.isNotEmpty) {
+          if (directionUp) {
+            if (DateTime(year, newMonth, allDays[i][j])
+                        .millisecondsSinceEpoch <=
+                    DateTime(firstTap[2], firstTap[1], firstTap[0])
+                        .millisecondsSinceEpoch &&
+                DateTime(year, newMonth, allDays[i][j])
+                        .millisecondsSinceEpoch >=
+                    DateTime(secondTap[2], secondTap[1], secondTap[0])
+                        .millisecondsSinceEpoch) {
+              selectedList[i][j] = true;
+            }
+          } else {
+            if (DateTime(year, newMonth, allDays[i][j])
+                        .millisecondsSinceEpoch >=
+                    DateTime(firstTap[2], firstTap[1], firstTap[0])
+                        .millisecondsSinceEpoch &&
+                DateTime(year, newMonth, allDays[i][j])
+                        .millisecondsSinceEpoch <=
+                    DateTime(secondTap[2], secondTap[1], secondTap[0])
+                        .millisecondsSinceEpoch) {
+              selectedList[i][j] = true;
+            }
+          }
+        }
+      }
+    }
 
     List<List<Map<String, dynamic>>> allMap = [];
 
     for (int i = 0; i < 6; i++) {
       List<Map<String, dynamic>> listTemp = [];
       for (int j = 0; j < 7; j++) {
-        listTemp.add({"date": allDays[i][j], "tick": allTicks[i][j]});
+        listTemp.add({
+          "date": allDays[i][j],
+          "tick": allTicks[i][j],
+          "selected": selectedList[i][j]
+        });
       }
       allMap.add(listTemp);
     }
@@ -243,7 +279,6 @@ class _CalendarPageState extends State<CalendarPage> {
         Widget weekName = SizedBox(
             width: 50,
             height: 50,
-            //decoration: dec,
             child:
                 Column(mainAxisAlignment: MainAxisAlignment.center, children: [
               Text(i,
@@ -264,132 +299,90 @@ class _CalendarPageState extends State<CalendarPage> {
   Widget buildWeekDays(List<Map<String, dynamic>> weekMap, int weekNum) {
     List<Widget> getWeekDays() {
       List<Widget> list = [];
-      double rad = 8;
+      bool isPrevMonth = false;
+      bool isNextMonth = false;
       for (int idx = 0; idx < weekMap.length; idx++) {
         Color color = Colors.black;
-        Color backColor = Colors.white;
-        double width = 50;
-        double height = 50;
-        EdgeInsets margin = const EdgeInsets.symmetric(vertical: 0);
 
-        BoxDecoration dec = BoxDecoration(
-          borderRadius: BorderRadius.circular(0),
-          color: backColor,
-        );
         if (weekNum == 1) {
           if (weekMap[idx]["date"] > 20) {
+            isPrevMonth = true;
             color = AppColors.text_sub;
           }
         } else if (weekNum == 6) {
+          isNextMonth = true;
           if (weekMap[idx]["date"] < 15) {
             color = AppColors.text_sub;
           }
         }
 
+        TextStyle textStyle =
+            TextStyle(fontFamily: 'Inter-Regular', fontSize: 12, color: color);
+
         if (weekMap[idx]["tick"] == true) {
-          backColor = AppColors.mint_light;
-
-          if (idx != 0 && idx != weekMap.length - 1) {
-            if (weekMap[idx - 1]["tick"] == false &&
-                weekMap[idx + 1]["tick"] == false) {
-              width = 40;
-              height = 40;
-              margin = EdgeInsets.all(rad);
-              dec = BoxDecoration(
-                borderRadius: BorderRadius.all(Radius.circular(rad)),
-                color: backColor,
-              );
-            } else if (weekMap[idx - 1]["tick"] == false) {
-              width = 45;
-              height = 40;
-              margin = EdgeInsets.only(top: rad, bottom: rad, left: rad);
-              dec = BoxDecoration(
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(rad),
-                  bottomLeft: Radius.circular(rad),
-                ),
-                color: backColor,
-              );
-            } else if (weekMap[idx + 1]["tick"] == false) {
-              width = 45;
-              height = 40;
-              margin = EdgeInsets.only(top: rad, bottom: rad, right: rad);
-
-              dec = BoxDecoration(
-                borderRadius: BorderRadius.only(
-                  topRight: Radius.circular(rad),
-                  bottomRight: Radius.circular(rad),
-                ),
-                color: backColor,
-              );
-            } else {
-              width = 50;
-              height = 40;
-              margin = EdgeInsets.symmetric(vertical: rad);
-              dec = BoxDecoration(
-                borderRadius: const BorderRadius.all(Radius.circular(0)),
-                color: backColor,
-              );
-            }
-          } else {
-            if (idx == 0) {
-              if (weekMap[idx + 1]["tick"] == false) {
-                width = 40;
-                height = 40;
-                margin = EdgeInsets.all(rad);
-                dec = BoxDecoration(
-                  borderRadius: BorderRadius.all(Radius.circular(rad)),
-                  color: backColor,
-                );
-              } else {
-                width = 45;
-                height = 40;
-                margin = EdgeInsets.only(top: rad, bottom: rad, left: rad);
-                dec = BoxDecoration(
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(rad),
-                    bottomLeft: Radius.circular(rad),
-                  ),
-                  color: backColor,
-                );
-              }
-            } else {
-              if (weekMap[idx - 1]["tick"] == false) {
-                width = 40;
-                height = 40;
-                margin = EdgeInsets.all(rad);
-                dec = BoxDecoration(
-                  borderRadius: BorderRadius.all(Radius.circular(rad)),
-                  color: backColor,
-                );
-              } else {
-                width = 45;
-                height = 40;
-                margin = EdgeInsets.only(top: rad, bottom: rad, right: rad);
-
-                dec = BoxDecoration(
-                  borderRadius: BorderRadius.only(
-                    topRight: Radius.circular(rad),
-                    bottomRight: Radius.circular(rad),
-                  ),
-                  color: backColor,
-                );
-              }
-            }
-          }
+          textStyle = TextStyle(
+              fontFamily: 'Inter-Regular',
+              fontSize: 12,
+              color: color,
+              decoration: TextDecoration.underline);
         }
 
-        Widget weekName = Container(
-            width: width,
-            height: height,
-            margin: margin,
-            decoration: dec,
-            child:
-                Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-              Text(weekMap[idx]["date"].toString(),
-                  style: TextStyle(
-                      fontFamily: 'Inter-Regular', fontSize: 12, color: color))
-            ]));
+        if (weekMap[idx]["selected"] == true) {
+          textStyle = const TextStyle(
+              fontFamily: 'Inter-Regular',
+              fontSize: 12,
+              color: AppColors.lavender,
+              decoration: TextDecoration.underline);
+        }
+
+        Widget weekName = GestureDetector(
+            onTap: () {
+              int newMonth = month;
+              int newYear = year;
+              if (isPrevMonth) {
+                newMonth = month == 1 ? 12 : month - 1;
+                newYear = month == 1 ? year - 1 : year;
+              } else if (isNextMonth) {
+                newMonth = month == 12 ? 1 : month + 1;
+                newYear = month == 12 ? year + 1 : year;
+              }
+
+              if (firstTap.isEmpty && secondTap.isEmpty) {
+                setState(() {
+                  firstTap = [weekMap[idx]["date"], newMonth, newYear];
+                });
+                print([firstTap, secondTap, directionUp]);
+              } else if (secondTap.isEmpty) {
+                setState(() {
+                  secondTap = [weekMap[idx]["date"], newMonth, newYear];
+                  if (DateTime(firstTap[2], firstTap[1], firstTap[0])
+                          .millisecondsSinceEpoch >=
+                      DateTime(secondTap[2], secondTap[1], secondTap[0])
+                          .millisecondsSinceEpoch) {
+                    directionUp = true;
+                  } else {
+                    directionUp = false;
+                  }
+                });
+                print([firstTap, secondTap, directionUp]);
+              } else {
+                setState(() {
+                  firstTap = [];
+                  secondTap = [];
+                });
+              }
+            },
+            child: Container(
+                width: 50,
+                height: 50,
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                ),
+                child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(weekMap[idx]["date"].toString(), style: textStyle)
+                    ])));
         list.add(weekName);
       }
       return list;

@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_app/server/models/TrackTmGV.dart';
 import 'package:flutter_app/view/calendar/calendar.dart';
+import 'package:flutter_app/view/chatbot_dialogbox/calendar_chatbot.dart';
 import 'package:flutter_app/view/chatbot_dialogbox/chatbot.dart';
 import 'package:flutter_app/assets/colors.dart';
-import 'package:flutter_app/view/data_log/data_log.dart';
 import 'dart:core';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter_app/main.dart';
@@ -124,13 +124,13 @@ class _HomePageState extends State<HomePage> {
               ],
             )),
         body: <Widget>[
-          const DataPrototype(),
-          const CalendarPage(),
-          DataLog(key: lkey),
-          const ChatbotPage(),
           Container(
               color: AppColors.background,
               child: Column(children: [TopBox(), PlotBox()])),
+          const CalendarPage(),
+          const DataPrototype(),
+          const ChatbotPage(),
+          const ChatbotCalendar(), //const ProfileSettings()
         ][currentPageIndex]);
   }
 

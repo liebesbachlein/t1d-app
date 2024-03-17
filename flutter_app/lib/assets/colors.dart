@@ -18,7 +18,7 @@ class AppColors {
   static const Color text_set = Color(0xFF2F2F2F);
   static const Color text_dark = Color(0xFF282828);
 
-  List<int> hex_arr = [
+  static const List<int> hex_colors_upper = [
     0xFFec6767,
     0xFFdf8d4b,
     0xFFc0b154,
@@ -46,7 +46,7 @@ class AppColors {
     0xFF0070ff,
     0xFF7542f5
   ];
-  List<int> hex_arr2 = [
+  static const List<int> hex_colors_lower = [
     0xFFece01f,
     0xFFffc000,
     0xFFff9b1b,
