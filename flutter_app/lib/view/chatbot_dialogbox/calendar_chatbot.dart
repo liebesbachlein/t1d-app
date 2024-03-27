@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_app/assets/colors.dart';
 import 'package:flutter_app/server/models/TrackTmGV.dart';
 import 'package:flutter_app/main.dart';
 import 'dart:core';
 import 'package:quiver/time.dart';
+import 'package:flutter_app/view/chatbot_dialogbox/chatbot.dart';
 
 List<int> firstTap = [];
 List<int> secondTap = [];
 bool directionUp = false;
 
 class ChatbotCalendar extends StatefulWidget {
-  const ChatbotCalendar({super.key});
+  final int period;
+  const ChatbotCalendar(this.period, {super.key});
 
   @override
   State<ChatbotCalendar> createState() => _ChatbotCalendarState();
@@ -20,6 +23,7 @@ class _ChatbotCalendarState extends State<ChatbotCalendar> {
   late int year;
   late int month;
   late int day;
+  late int period;
 
   @override
   void initState() {
@@ -27,15 +31,54 @@ class _ChatbotCalendarState extends State<ChatbotCalendar> {
     year = DateTime.now().year;
     month = DateTime.now().month;
     day = DateTime.now().day;
+    period = widget.period;
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-        color: AppColors.background,
-        child: Align(
-            alignment: Alignment.topCenter,
-            child: FittedBox(child: buildCalendarBox())));
+    return Scaffold(
+        appBar: AppBar(
+          foregroundColor: Colors.white,
+          systemOverlayStyle: const SystemUiOverlayStyle(
+            statusBarColor: Colors.white,
+            statusBarIconBrightness: Brightness.dark, // Android dark???
+            statusBarBrightness: Brightness.light, // iOS dark???
+          ),
+          toolbarHeight: 0,
+          elevation: 0,
+        ),
+        body: Container(
+            color: AppColors.background,
+            child: Align(
+                alignment: Alignment.topCenter,
+                child: FittedBox(child: buildCalendarBox()))),
+        floatingActionButton: FloatingActionButton(
+            elevation: 2,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(30),
+            ),
+            backgroundColor: AppColors.mint,
+            onPressed: () {
+              ChatbotPage chatbot = const ChatbotPage();
+              DateTime first = DateTime(firstTap[2], firstTap[1], firstTap[0]);
+              DateTime second =
+                  DateTime(secondTap[2], secondTap[1], secondTap[0]);
+
+              if (first.millisecondsSinceEpoch >=
+                  second.millisecondsSinceEpoch) {
+                chatbot
+                    .getKey()
+                    .currentState
+                    ?.buildAIResponceFromAverage(second, first, period);
+              } else {
+                chatbot
+                    .getKey()
+                    .currentState
+                    ?.buildAIResponceFromAverage(first, second, period);
+              }
+              Navigator.pop(context);
+            },
+            child: const Icon(Icons.add_task_outlined)));
   }
 
   Widget buildCalendarBox() {
@@ -351,7 +394,6 @@ class _ChatbotCalendarState extends State<ChatbotCalendar> {
                 setState(() {
                   firstTap = [weekMap[idx]["date"], newMonth, newYear];
                 });
-                print([firstTap, secondTap, directionUp]);
               } else if (secondTap.isEmpty) {
                 setState(() {
                   secondTap = [weekMap[idx]["date"], newMonth, newYear];
@@ -364,7 +406,6 @@ class _ChatbotCalendarState extends State<ChatbotCalendar> {
                     directionUp = false;
                   }
                 });
-                print([firstTap, secondTap, directionUp]);
               } else {
                 setState(() {
                   firstTap = [];

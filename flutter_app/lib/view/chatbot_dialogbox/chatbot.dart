@@ -10,6 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_app/assets/colors.dart';
 import 'package:flutter_app/assets/ai_script.dart';
 import 'package:flutter_app/main.dart';
+import 'package:flutter_app/view/chatbot_dialogbox/calendar_chatbot.dart';
 import 'dart:core';
 
 import 'package:flutter_app/server/models/DialogModel.dart';
@@ -32,6 +33,10 @@ class ChatbotPage extends StatefulWidget {
 
   @override
   State<ChatbotPage> createState() => _ChatbotPageState();
+
+  GlobalKey<_ChatbotBoxState> getKey() {
+    return _chatBox;
+  }
 }
 
 class _ChatbotPageState extends State<ChatbotPage> {
@@ -523,10 +528,7 @@ class _ChatbotBottomState extends State<ChatbotBottom> {
       end = DateTime.now();
     } else {
       custom = true;
-      text = 'in development';
-      start = DateTime.now().subtract(Duration(
-          days: daysInMonth(DateTime.now().year, DateTime.now().month)));
-      end = DateTime.now();
+      text = 'Select period';
     }
 
     return GestureDetector(
@@ -534,6 +536,11 @@ class _ChatbotBottomState extends State<ChatbotBottom> {
           time = localTime;
           stage = 3;
           if (custom) {
+            setState(() {
+              Navigator.push(context, MaterialPageRoute(builder: (context) {
+                return ChatbotCalendar(command);
+              }));
+            });
           } else {
             _chatBox.currentState
                 ?.buildAIResponceFromAverage(start, end, command);
