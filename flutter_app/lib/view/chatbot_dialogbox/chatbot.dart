@@ -26,7 +26,7 @@ final DateTime NIGHT_TIME_START = DateTime(2024, 1, 2, 0, 0, 0);
 final DateTime NIGHT_TIME_END = DateTime(2024, 1, 2, 5, 59, 0);
 
 late List<DialogModel> listDialog;
-final _chatBox = GlobalKey<_ChatbotBoxState>();
+final GlobalKey<_ChatbotBoxState> _chatBox = GlobalKey<_ChatbotBoxState>();
 
 class ChatbotPage extends StatefulWidget {
   const ChatbotPage({super.key});
@@ -60,9 +60,8 @@ class _ChatbotPageState extends State<ChatbotPage> {
                     foregroundColor: Colors.white,
                     systemOverlayStyle: const SystemUiOverlayStyle(
                       statusBarColor: Colors.white,
-                      statusBarIconBrightness:
-                          Brightness.dark, // Android dark???
-                      statusBarBrightness: Brightness.light, // iOS dark???
+                      statusBarIconBrightness: Brightness.dark,
+                      statusBarBrightness: Brightness.light,
                     ),
                     toolbarHeight: 0,
                     elevation: 0,

@@ -168,7 +168,7 @@ class _DataPrototypeState extends State<DataPrototype> {
       upperScale.add(GlucoseUpper(upperPallete[i], fixedGlucoseValues[i]));
     }
     return Container(
-        height: 50,
+        height: 55,
         decoration: const BoxDecoration(color: Colors.white),
         child: ListView(
           controller: ScrollController(
@@ -753,8 +753,8 @@ class TimeBlock extends StatelessWidget {
                                           MaterialStatePropertyAll<Size>(
                                               Size(50, 100))))
                             ]));
-                }, onAccept: (glucoseValue) {
-                  _acceptNewGlucoseValue(glucoseValue);
+                }, onAcceptWithDetails: (glucoseValue) {
+                  _acceptNewGlucoseValue(glucoseValue.data);
                 })),
             GestureDetector(
                 onDoubleTap: () => _collapseTimeBorders(this),
