@@ -69,12 +69,12 @@ class _ChatbotCalendarState extends State<ChatbotCalendar> {
                 chatbot
                     .getKey()
                     .currentState
-                    ?.buildAIResponceFromAverage(second, first, period);
+                    ?.aiResponce(second, first, period);
               } else {
                 chatbot
                     .getKey()
                     .currentState
-                    ?.buildAIResponceFromAverage(first, second, period);
+                    ?.aiResponce(first, second, period);
               }
               Navigator.pop(context);
             },

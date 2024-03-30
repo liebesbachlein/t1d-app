@@ -1,5 +1,6 @@
 // ignore_for_file: non_constant_identifier_names
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_app/server/models/TrackTmGV.dart';
@@ -429,7 +430,26 @@ class _HomePageState extends State<HomePage> {
                       const Text('Log your data to see graph for today',
                           style: TextStyle(
                               fontFamily: 'Inter-Regular', fontSize: 16))
-                    ]))
+                    ])),
+          (dataList.isNotEmpty)
+              ? Padding(
+                  padding: const EdgeInsets.only(left: 20),
+                  child: Row(children: [
+                    const Text('Predicted average:   ',
+                        style: TextStyle(
+                            fontFamily: 'Inter-Regular',
+                            fontSize: 16,
+                            color: Colors.black)),
+                    Text(
+                        predictedList.isNotEmpty
+                            ? '${(predictedList.reduce((a, b) => a + b) / predictedList.length).toStringAsPrecision(2)} mmol/L'
+                            : '',
+                        style: const TextStyle(
+                            fontFamily: 'Inter-Regular',
+                            fontSize: 16,
+                            color: AppColors.text_info))
+                  ]))
+              : Container()
         ]));
   }
 
@@ -446,7 +466,13 @@ class _HomePageState extends State<HomePage> {
     allSpots = [];
     listY = [];
     listX = [];
+    int breakPoint = _g_pos == 0
+        ? DateTime.now().hour * 60 + DateTime.now().minute
+        : 1000000;
     for (int timeKey in timeMap.keys) {
+      if (timeKey >= breakPoint) {
+        break;
+      }
       double timePoint = (timeKey / 60 * 100).round() / 100;
       double gvPoint = (predictedList[timeMap[timeKey] ?? 0] * 10).round() / 10;
       listX.add(timePoint);
@@ -464,7 +490,6 @@ class _HomePageState extends State<HomePage> {
     } else {
       minX = 6;
     }
-
     maxX = 24;
 
     double MaxY = listY.reduce(max);

@@ -251,8 +251,7 @@ class _ChatbotBoxState extends State<ChatbotBox> {
     return gv == 0 ? TrackGV(-1) : TrackGV(gv / count);
   }
 
-  void buildAIResponceFromAverage(
-      DateTime start, DateTime end, int period) async {
+  void aiResponce(DateTime start, DateTime end, int period) async {
     TrackGV num = await average(DateTime(start.year, start.month, start.day),
         DateTime(end.year, end.month, end.day, 23, 59, 59), period);
     String text = '';
@@ -270,11 +269,17 @@ class _ChatbotBoxState extends State<ChatbotBox> {
         addText = ' night ';
       }
       text =
-          'Average${addText}blood sugar over ${start.day}.${start.month}-${end.day}.${end.month} is ${num.GV1}.${num.GV2}';
+          'Average${addText}blood sugar over this period is ${num.GV1}.${num.GV2}';
     }
-    DialogModel newMessage = DialogModel.createAIText(DateTime.now(), text);
-    databaseHelperDialog.insert(newMessage);
-    listDialog.add(newMessage);
+    DialogModel userMessage = DialogModel.createUserText(DateTime.now(),
+        'Tell me an average over ${start.day}/${start.month} — ${end.day}/${end.month}');
+    databaseHelperDialog.insert(userMessage);
+    listDialog.add(userMessage);
+
+    DialogModel aiMessage = DialogModel.createAIText(DateTime.now(), text);
+    databaseHelperDialog.insert(aiMessage);
+    listDialog.add(aiMessage);
+
     buildList();
   }
 
@@ -469,8 +474,11 @@ class _ChatbotBottomState extends State<ChatbotBottom> {
                     _chatBox.currentState?.raiseChatbotBox();
                   }
                 },
-                child: const Icon(Icons.cookie_rounded,
-                    color: AppColors.mint, size: 35))));
+                child: gridHeight == 0
+                    ? const Icon(Icons.arrow_upward,
+                        color: AppColors.mint, size: 35)
+                    : const Icon(Icons.arrow_downward,
+                        color: AppColors.mint, size: 35))));
   }
 
   Widget buildCommandItem(int localCommand) {
@@ -541,8 +549,7 @@ class _ChatbotBottomState extends State<ChatbotBottom> {
               }));
             });
           } else {
-            _chatBox.currentState
-                ?.buildAIResponceFromAverage(start, end, command);
+            _chatBox.currentState?.aiResponce(start, end, command);
           }
         },
         child: Container(
