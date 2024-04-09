@@ -13,7 +13,6 @@ import 'package:flutter_app/view/data_log/data_logging.dart';
 import 'package:flutter_app/view/profile_settings/profile.dart';
 import 'dart:math';
 import 'package:infinite_listview/infinite_listview.dart';
-import 'package:tflite_flutter/tflite_flutter.dart';
 
 const List<String> weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const List<String> months = [
@@ -41,20 +40,14 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  late List<double> listY;
   int currentPageIndex = 0;
   late String dateString;
   int _g_pos = 0;
-  late List<TrackTmGV> dataList;
-  late Interpreter _interpreter;
-  final String model = 'lib/assets/my_model.tflite';
-  late List<int> showingTooltipOnSpots;
-  late List<double> predictedList;
 
   @override
   void initState() {
     super.initState();
-    showingTooltipOnSpots = [];
-    predictedList = [];
     if (_g_pos != 0) {
       DateTime thisDate = DateTime(
               DateTime.now().year, DateTime.now().month, DateTime.now().day)
@@ -64,94 +57,31 @@ class _HomePageState extends State<HomePage> {
     } else {
       dateString = 'Today';
     }
-    dataList = [];
-    loadData().then((res) => loadModel());
-  }
-
-  Future<int> loadData() async {
-    DateTime thisDate =
-        DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day)
-            .add(Duration(days: _g_pos));
-    dataList = await databaseHelperGV.selectDay(thisDate);
-    setState(() {});
-    return 1;
-  }
-
-  void loadModel() async {
-    _interpreter = await Interpreter.fromAsset(model);
-    predict();
-  }
-
-  Map<int, int> getTimeMap() {
-    List<int> hours = [
-      6,
-      7,
-      8,
-      9,
-      10,
-      11,
-      12,
-      13,
-      14,
-      15,
-      16,
-      17,
-      18,
-      19,
-      20,
-      21,
-      22,
-      23
-    ];
-    List<int> minutes = [0, 10, 20, 30, 40, 50];
-    Map<int, int> map = {};
-    int index = 0;
-    for (int i = 0; i < hours.length; i++) {
-      for (int j = 0; j < minutes.length; j++) {
-        map.putIfAbsent(hours[i] * 60 + minutes[j], () => index);
-        index++;
-      }
-    }
-
-    return map;
-  }
-
-  void predict() {
-    Map<int, int> timeMap = getTimeMap();
-    List<double> input = List.filled(108, 0);
-    showingTooltipOnSpots = [];
-    for (TrackTmGV i in dataList) {
-      int reading = i.hour * 60 + (i.minute / 10).floor() * 10;
-      if (timeMap.containsKey(reading)) {
-        input[timeMap[reading] ?? 0] = i.gluval.GV;
-        showingTooltipOnSpots.add(timeMap[reading] ?? 0);
-      }
-    }
-    List<dynamic> output = input.reshape<double>([1, 108]);
-    _interpreter.run(input.reshape<double>([1, 108, 1]), output);
-    List<double> result = [];
-    output.reshape([108]).forEach((element) => result.add(element));
-    for (int i in showingTooltipOnSpots) {
-      result[i] = input[i];
-    }
-    predictedList = result;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        //resizeToAvoidBottomInset: false,
         appBar: AppBar(
           foregroundColor: Colors.white,
           systemOverlayStyle: const SystemUiOverlayStyle(
             statusBarColor: Colors.white,
-            statusBarIconBrightness: Brightness.dark,
-            statusBarBrightness: Brightness.light,
+            statusBarIconBrightness: Brightness.dark, // Android dark???
+            statusBarBrightness: Brightness.light, // iOS dark???
           ),
           toolbarHeight: 0,
           elevation: 0,
         ),
         bottomNavigationBar: SizedBox(
             height: 60,
+            /*decoration: BoxDecoration(boxShadow: [
+              BoxShadow(
+                  color: Color.fromRGBO(149, 157, 165, 0.1),
+                  offset: Offset.zero,
+                  spreadRadius: 4,
+                  blurRadius: 10)
+            ]),*/
             child: BottomNavigationBar(
               onTap: (int index) {
                 setState(() {
@@ -261,10 +191,9 @@ class _HomePageState extends State<HomePage> {
     Color dateTextColor = Colors.black;
     Color dateTextColorPointing = Colors.white;
     BoxDecoration dec = const BoxDecoration();
-    BoxDecoration decPointing = BoxDecoration(
+    BoxDecoration decPointing = const BoxDecoration(
         color: AppColors.lavender,
-        border: Border.all(color: AppColors.lavender, width: 1.0),
-        borderRadius: const BorderRadius.all(Radius.circular(14)));
+        borderRadius: BorderRadius.all(Radius.circular(14)));
     BoxDecoration decToday = BoxDecoration(
         border: Border.all(color: AppColors.mint, width: 1.0),
         borderRadius: const BorderRadius.all(Radius.circular(14)));
@@ -305,7 +234,6 @@ class _HomePageState extends State<HomePage> {
                       pointTo = DateTime(
                           thisDate.year, thisDate.month, thisDate.day, 0, 0, 0);
                       _g_pos = relativePos;
-                      loadData().then((res) => loadModel());
                       if (thisDate.year == pointTo.year &&
                           thisDate.month == pointTo.month &&
                           thisDate.day == pointTo.day) {
@@ -337,7 +265,7 @@ class _HomePageState extends State<HomePage> {
                                     tick ? AppColors.mint : AppColors.trans)),
                         Container(
                             width: 50,
-                            height: 52,
+                            height: 50,
                             decoration: isPointing
                                 ? decPointing
                                 : isToday
@@ -379,6 +307,8 @@ class _HomePageState extends State<HomePage> {
   Widget buildTopBox() {
     return Container(
         height: 200,
+        //constraints: BoxConstraints(
+        //  minHeight: MediaQuery.of(context).size.height * 0.22),
         decoration: const BoxDecoration(
             boxShadow: [
               BoxShadow(
@@ -396,63 +326,84 @@ class _HomePageState extends State<HomePage> {
             children: [buildDateAndProfilePic(), buildCalendarScroll()]));
   }
 
-  Widget buildPlotBox() {
-    return Container(
-        width: MediaQuery.of(context).size.width,
-        margin: const EdgeInsets.only(left: 17, right: 17, top: 37),
-        constraints: BoxConstraints(
-            minHeight: MediaQuery.of(context).size.height * 0.45),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(24),
-          boxShadow: const [
-            BoxShadow(
-                color: Color.fromRGBO(149, 157, 165, 0.1),
-                offset: Offset.zero,
-                spreadRadius: 4,
-                blurRadius: 10)
-          ],
-        ),
-        child: Column(children: [
-          Container(
-              padding: const EdgeInsets.only(
-                  left: 10, right: 10, top: 26, bottom: 26),
-              alignment: Alignment.topLeft,
-              child: (dataList.isNotEmpty)
-                  ? buildLineChartBox()
-                  : Row(children: [
-                      Container(
-                          padding: const EdgeInsets.only(
-                              left: 0, right: 10, top: 0, bottom: 0),
-                          child: const Icon(Icons.info_outline,
-                              color: AppColors.lavender)),
-                      const Text('Log your data to see graph for today',
-                          style: TextStyle(
-                              fontFamily: 'Inter-Regular', fontSize: 16))
-                    ])),
-          (dataList.isNotEmpty)
-              ? Padding(
-                  padding: const EdgeInsets.only(left: 20),
-                  child: Row(children: [
-                    const Text('Predicted average:   ',
-                        style: TextStyle(
-                            fontFamily: 'Inter-Regular',
-                            fontSize: 16,
-                            color: Colors.black)),
-                    Text(
-                        predictedList.isNotEmpty
-                            ? '${(predictedList.reduce((a, b) => a + b) / predictedList.length).toStringAsPrecision(2)} mmol/L'
-                            : '',
-                        style: const TextStyle(
-                            fontFamily: 'Inter-Regular',
-                            fontSize: 16,
-                            color: AppColors.text_info))
-                  ]))
-              : Container()
-        ]));
+  Future<List<TrackTmGV>> doPlot() async {
+    DateTime thisDate =
+        DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day)
+            .add(Duration(days: _g_pos));
+    List<TrackTmGV> d = await databaseHelperGV.selectDay(thisDate);
+    await databaseHelperGV.queryAllRowsMap();
+
+    return d;
   }
 
-  Widget buildLineChartBox() {
+  Widget buildPlotBox() {
+    late List<TrackTmGV> dayData;
+
+    return FutureBuilder(
+        builder: (ctx, snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            if (snapshot.hasError) {
+              return Center(
+                child: Text(
+                  '${snapshot.error} occurred',
+                  style: const TextStyle(fontSize: 18),
+                ),
+              );
+            } else if (snapshot.hasData) {
+              return Container(
+                  width: MediaQuery.of(context).size.width,
+                  margin: const EdgeInsets.only(left: 17, right: 17, top: 37),
+                  constraints: BoxConstraints(
+                      minHeight: MediaQuery.of(context).size.height * 0.45),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: const [
+                      BoxShadow(
+                          color: Color.fromRGBO(149, 157, 165, 0.1),
+                          offset: Offset.zero,
+                          spreadRadius: 4,
+                          blurRadius: 10)
+                    ],
+                  ),
+                  child: Column(children: [
+                    Container(
+                        padding: const EdgeInsets.only(
+                            left: 10, right: 10, top: 26, bottom: 26),
+                        alignment: Alignment.topLeft,
+                        child: (dayData.isNotEmpty)
+                            ? buildLineChartBox(
+                                dayData) /*Container(
+                                padding: EdgeInsets.only(
+                                    left: 0, right: 10, top: 0, bottom: 0),
+                                child: Text(tx,
+                                    style: TextStyle(
+                                        fontFamily: 'Inter-Regular',
+                                        fontSize: 16)))*/
+                            : Row(children: [
+                                Container(
+                                    padding: const EdgeInsets.only(
+                                        left: 0, right: 10, top: 0, bottom: 0),
+                                    child: const Icon(Icons.info_outline,
+                                        color: AppColors.lavender)),
+                                const Text(
+                                    'Log your data to see graph for today',
+                                    style: TextStyle(
+                                        fontFamily: 'Inter-Regular',
+                                        fontSize: 16))
+                              ]))
+                  ]));
+            }
+          }
+          return const Center(
+            child: CircularProgressIndicator(color: AppColors.trans),
+          );
+        },
+        future: doPlot().then((e) => dayData = e));
+  }
+
+  Widget buildLineChartBox(List<TrackTmGV> listofmaps) {
+    late List<int> showingTooltipOnSpots;
     late List<FlSpot> allSpots;
     late List<double> listY;
     late List<double> listX;
@@ -460,23 +411,26 @@ class _HomePageState extends State<HomePage> {
     double maxX = 0;
     double minY = 0;
     double maxY = 0;
-    Map<int, int> timeMap = getTimeMap();
 
+    int j = 0;
+    showingTooltipOnSpots = [];
     allSpots = [];
     listY = [];
     listX = [];
-    int breakPoint = _g_pos == 0
-        ? DateTime.now().hour * 60 + DateTime.now().minute
-        : 1000000;
-    for (int timeKey in timeMap.keys) {
-      if (timeKey >= breakPoint) {
-        break;
+    for (TrackTmGV i in listofmaps) {
+      double tt = 0;
+      if (i.minute == 0) {
+        tt = i.hour.toDouble();
+      } else {
+        tt = i.hour.toDouble();
+        tt = tt + 0.5;
       }
-      double timePoint = (timeKey / 60 * 100).round() / 100;
-      double gvPoint = (predictedList[timeMap[timeKey] ?? 0] * 10).round() / 10;
-      listX.add(timePoint);
-      listY.add(gvPoint);
-      allSpots.add(FlSpot(timePoint, gvPoint));
+
+      listX.add(tt);
+      listY.add(i.gluval.GV);
+      allSpots.add(FlSpot(tt, i.gluval.GV));
+      showingTooltipOnSpots.add(j);
+      j++;
     }
 
     double MinX = listX.reduce(min);
@@ -489,6 +443,7 @@ class _HomePageState extends State<HomePage> {
     } else {
       minX = 6;
     }
+
     maxX = 24;
 
     double MaxY = listY.reduce(max);
@@ -505,8 +460,8 @@ class _HomePageState extends State<HomePage> {
       LineChartBarData(
         showingIndicators: showingTooltipOnSpots,
         spots: allSpots,
-        isCurved: false,
-        barWidth: 1,
+        isCurved: true,
+        barWidth: 2,
         belowBarData: BarAreaData(
           show: true,
           gradient: LinearGradient(
@@ -535,6 +490,13 @@ class _HomePageState extends State<HomePage> {
             ),
             child: LayoutBuilder(builder: (context, constraints) {
               return LineChart(LineChartData(
+                  extraLinesData: ExtraLinesData(horizontalLines: [
+                    HorizontalLine(
+                      y: listY.reduce((a, b) => a + b) / listY.length,
+                      color: AppColors.mint,
+                      strokeWidth: 3,
+                    )
+                  ]),
                   minX: minX,
                   maxX: maxX,
                   minY: minY,
@@ -549,8 +511,8 @@ class _HomePageState extends State<HomePage> {
                     ]);
                   }).toList(),
                   lineTouchData: LineTouchData(
-                      enabled: false,
-                      handleBuiltInTouches: true,
+                      enabled: true,
+                      handleBuiltInTouches: false,
                       getTouchedSpotIndicator:
                           (LineChartBarData barData, List<int> spotIndexes) {
                         return spotIndexes.map((index) {
@@ -573,6 +535,7 @@ class _HomePageState extends State<HomePage> {
                       touchTooltipData: LineTouchTooltipData(
                           tooltipBgColor: AppColors.lavender_light,
                           tooltipRoundedRadius: 12,
+                          //tooltipMargin: 12,
                           tooltipPadding: const EdgeInsets.symmetric(
                               horizontal: 8, vertical: 8),
                           getTooltipItems: (List<LineBarSpot> lineBarsSpot) {
@@ -636,7 +599,10 @@ class _HomePageState extends State<HomePage> {
                       topTitles: const AxisTitles()),
                   gridData: const FlGridData(show: true),
                   borderData: FlBorderData(
-                      show: true, border: Border.all(color: AppColors.trans))));
+                      show: true,
+                      border: Border.all(
+                        color: AppColors.trans,
+                      ))));
             })));
   }
 

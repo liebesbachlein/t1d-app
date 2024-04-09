@@ -182,11 +182,11 @@ class _HomePageState extends State<HomePage> {
                   label: '',
                 ),
                 BottomNavigationBarItem(
-                  icon: Icon(Icons.recent_actors_outlined),
+                  icon: Icon(Icons.area_chart_outlined),
                   label: '',
                 ),
                 BottomNavigationBarItem(
-                  icon: Icon(Icons.area_chart_outlined),
+                  icon: Icon(Icons.recent_actors_outlined),
                   label: '',
                 ),
               ],
@@ -479,7 +479,7 @@ class _HomePageState extends State<HomePage> {
       allSpots.add(FlSpot(timePoint, gvPoint));
     }
 
-    double MinX = listX.reduce(min);
+    double MinX = listX.isEmpty ? 6 : listX.reduce(min);
     if (MinX < 6) {
       if (MinX % 2 == 0) {
         minX = MinX;
@@ -491,7 +491,7 @@ class _HomePageState extends State<HomePage> {
     }
     maxX = 24;
 
-    double MaxY = listY.reduce(max);
+    double MaxY = listY.isEmpty ? 14 : listY.reduce(max);
     if (MaxY > 14) {
       if (MaxY % 2 == 0) {
         maxY = MaxY;
