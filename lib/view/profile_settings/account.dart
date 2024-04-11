@@ -110,10 +110,8 @@ class _AccountSettingState extends State<AccountSetting> {
                 shadowColor: const MaterialStatePropertyAll<Color>(
                     Color.fromARGB(179, 233, 221, 233)),
                 alignment: AlignmentDirectional.center,
-                backgroundColor: _label
-                    ? const MaterialStatePropertyAll<Color>(
-                        AppColors.mint_light)
-                    : const MaterialStatePropertyAll<Color>(AppColors.lavender),
+                backgroundColor:
+                    const MaterialStatePropertyAll<Color>(AppColors.lavender),
                 padding: const MaterialStatePropertyAll<EdgeInsets>(
                     EdgeInsets.all(0)),
                 shape: const MaterialStatePropertyAll<OutlinedBorder>(

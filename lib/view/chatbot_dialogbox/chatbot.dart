@@ -1,4 +1,9 @@
 // ignore_for_file: avoid_print, non_constant_identifier_names, no_leading_underscores_for_local_identifiers
+import 'dart:ffi';
+
+import 'package:flutter/painting.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_app/server/models/TrackGV.dart';
 import 'package:flutter_app/server/models/TrackTmGV.dart';
 import 'package:flutter_app/view/profile_settings/assistant.dart';
@@ -9,7 +14,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_app/assets/colors.dart';
-import 'package:flutter_app/assets/ai_script.dart';
 import 'package:flutter_app/main.dart';
 import 'package:flutter_app/view/chatbot_dialogbox/calendar_chatbot.dart';
 import 'dart:core';
@@ -25,6 +29,38 @@ final DateTime EVENING_TIME_START = DateTime(2024, 1, 1, 18, 0, 0);
 final DateTime EVENING_TIME_END = DateTime(2024, 1, 1, 23, 59, 0);
 final DateTime NIGHT_TIME_START = DateTime(2024, 1, 2, 0, 0, 0);
 final DateTime NIGHT_TIME_END = DateTime(2024, 1, 2, 5, 59, 0);
+
+const List<Color> randomColors = [
+  Color(0xFFF8B195),
+  Color(0xFFF67280),
+  Color(0xFFffa800),
+  Color(0xFF75e3be),
+  Color(0xFF00c3ff),
+  Color(0xFF0087ff),
+  Color(0xFF4a1fec),
+  Color(0xFF8919ed),
+  Color(0xFFb517ed),
+  Color(0xFFdb1fec),
+  Color.fromARGB(255, 187, 0, 255),
+  Color.fromARGB(255, 107, 161, 120),
+  Color.fromARGB(255, 105, 226, 216),
+  Color.fromARGB(255, 98, 156, 154),
+];
+
+const List<String> months = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December'
+];
 
 late List<DialogModel> listDialog;
 final GlobalKey<_ChatbotBoxState> _chatBox = GlobalKey<_ChatbotBoxState>();
@@ -60,7 +96,6 @@ class _ChatbotPageState extends State<ChatbotPage> {
 
   @override
   Widget build(BuildContext context) {
-    print('build');
     return FutureBuilder(
         builder: (ctx, snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
@@ -197,45 +232,82 @@ class _ChatbotBoxState extends State<ChatbotBox> {
 
   _ChatbotBoxState() {
     widgetListDialog = [];
+    int currentDate = -1;
+    int prevDate = -1;
+    DateTime prevDay = DateTime.now();
+
     for (DialogModel itemDialog in listDialog.reversed) {
+      currentDate = itemDialog.displayDate.day;
+      if (prevDate != -1 && currentDate != prevDate) {
+        widgetListDialog.add(getDayBox(prevDay));
+      }
       String time =
           '${itemDialog.displayDate.hour < 10 ? '0${itemDialog.displayDate.hour}' : itemDialog.displayDate.hour}:${itemDialog.displayDate.minute < 10 ? '0${itemDialog.displayDate.minute}' : itemDialog.displayDate.minute}';
+
       if (itemDialog.fromWho == 0) {
         widgetListDialog.add(buildAIMessage(time, itemDialog.content));
       } else {
-        widgetListDialog.add(buildUserMessage(time, itemDialog.content));
+        widgetListDialog.add(buildUserMessage(itemDialog));
       }
+      prevDate = currentDate;
+      prevDay = itemDialog.displayDate;
     }
+    widgetListDialog.add(getDayBox(prevDay));
+  }
+
+  Widget getDayBox(DateTime date) {
+    String toShow = '${date.day} ${months[date.month - 1]}';
+    return Container(
+        height: 40,
+        alignment: Alignment.center,
+        margin: const EdgeInsets.symmetric(vertical: 8),
+        child: FittedBox(
+            child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.all(Radius.circular(8)),
+                    border: Border.fromBorderSide(BorderSide(
+                        color: Color.fromARGB(255, 237, 235, 247), width: 1))),
+                alignment: Alignment.center,
+                child: Text(
+                    date.month == DateTime.now().month &&
+                            date.day == DateTime.now().day &&
+                            date.year == DateTime.now().year
+                        ? 'Today'
+                        : toShow,
+                    style: const TextStyle(
+                        color: Colors.black,
+                        fontFamily: 'Inter-Thin',
+                        fontSize: 14)))));
   }
 
   void buildList() {
     setState(() {
       //    ALTER IT SO THAT IT APPENDS NEW MESSAGE TO widgetListDialog DIRECTLY
       widgetListDialog = [];
+      int currentDate = -1;
+      int prevDate = -1;
+      DateTime prevDay = DateTime.now();
+
       for (DialogModel itemDialog in listDialog.reversed) {
+        currentDate = itemDialog.displayDate.day;
+        if (prevDate != -1 && currentDate != prevDate) {
+          widgetListDialog.add(getDayBox(prevDay));
+        }
         String time =
             '${itemDialog.displayDate.hour < 10 ? '0${itemDialog.displayDate.hour}' : itemDialog.displayDate.hour}:${itemDialog.displayDate.minute < 10 ? '0${itemDialog.displayDate.minute}' : itemDialog.displayDate.minute}';
+
         if (itemDialog.fromWho == 0) {
           widgetListDialog.add(buildAIMessage(time, itemDialog.content));
         } else {
-          widgetListDialog.add(buildUserMessage(time, itemDialog.content));
+          widgetListDialog.add(buildUserMessage(itemDialog));
         }
+        prevDate = currentDate;
+        prevDay = itemDialog.displayDate;
       }
+      widgetListDialog.add(getDayBox(prevDay));
     });
-  }
-
-  void buildAItext() {
-    Random rand = Random();
-    Map<String, String> mapResponse =
-        aiResponces[rand.nextInt(aiResponces.length)];
-    String quote = mapResponse['quote'] ?? '';
-    String movie = mapResponse['movie'] ?? '';
-    String year = mapResponse['year'] ?? '';
-    String text = '$quote\n$movie, $year';
-    DialogModel newMessage = DialogModel.createAIText(DateTime.now(), text);
-    databaseHelperDialog.insert(newMessage);
-    listDialog.add(newMessage);
-    buildList();
   }
 
   Future<TrackGV> average(DateTime start, DateTime end, int period) async {
@@ -292,25 +364,16 @@ class _ChatbotBoxState extends State<ChatbotBox> {
     if (num.GV == -1) {
       text = 'No data over this period';
     } else {
-      String addText = ' ';
-      if (period == 1) {
-        addText = ' morning ';
-      } else if (period == 2) {
-        addText = ' afternoon ';
-      } else if (period == 3) {
-        addText = ' evening ';
-      } else if (period == 4) {
-        addText = ' night ';
-      }
-      text =
-          'Average${addText}blood sugar over this period is ${num.GV1}.${num.GV2}';
+      text = '${num.GV1}.${num.GV2}';
     }
-    DialogModel userMessage = DialogModel.createUserText(DateTime.now(),
-        'Tell me an average over ${start.day}/${start.month} — ${end.day}/${end.month}');
+
+    DialogModel userMessage =
+        DialogModel.createUserCommand(DateTime.now(), period, start, end);
     databaseHelperDialog.insert(userMessage);
     listDialog.add(userMessage);
 
-    DialogModel aiMessage = DialogModel.createAIText(DateTime.now(), text);
+    DialogModel aiMessage =
+        DialogModel.createAICommand(DateTime.now(), text, period);
     databaseHelperDialog.insert(aiMessage);
     listDialog.add(aiMessage);
 
@@ -334,6 +397,44 @@ class _ChatbotBoxState extends State<ChatbotBox> {
   }
 
   Widget buildAIMessage(String time, String text) {
+    if (text.length > 10) {
+      return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+          alignment: Alignment.centerLeft,
+          child: Container(
+              padding: const EdgeInsets.only(
+                  top: 10, left: 10, right: 10, bottom: 5),
+              constraints: const BoxConstraints(
+                maxWidth: 300,
+              ),
+              decoration: const BoxDecoration(
+                color: Color.fromARGB(255, 179, 186, 192),
+                borderRadius: BorderRadius.only(
+                    topRight: Radius.circular(12),
+                    topLeft: Radius.circular(12),
+                    bottomRight: Radius.circular(12)),
+              ),
+              child:
+                  Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+                Text(text,
+                    style: const TextStyle(
+                      fontFamily: 'Inter-Regular',
+                      fontSize: 14,
+                      color: Colors.white,
+                    )),
+                Text(time,
+                    style: const TextStyle(
+                      fontFamily: 'Inter-Regular',
+                      fontSize: 10,
+                      color: Colors.white,
+                    )),
+              ])));
+    }
+
+    double gv = double.parse(text);
+    int position = (gv.floor() + (gv * 10 - gv.floor()).floor() * 13) %
+        randomColors.length;
+
     return Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
         alignment: Alignment.centerLeft,
@@ -343,62 +444,289 @@ class _ChatbotBoxState extends State<ChatbotBox> {
             constraints: const BoxConstraints(
               maxWidth: 300,
             ),
-            decoration: const BoxDecoration(
-              color: AppColors.text_light,
-              borderRadius: BorderRadius.only(
+            decoration: BoxDecoration(
+              color: randomColors[position],
+              borderRadius: const BorderRadius.only(
                   topRight: Radius.circular(12),
                   topLeft: Radius.circular(12),
                   bottomRight: Radius.circular(12)),
             ),
             child:
                 Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-              Text(text,
+              Text('$text mmol/L',
                   style: const TextStyle(
                     fontFamily: 'Inter-Regular',
                     fontSize: 14,
-                    color: AppColors.text_mes,
+                    color: Colors.white,
                   )),
               Text(time,
                   style: const TextStyle(
                     fontFamily: 'Inter-Regular',
                     fontSize: 10,
-                    color: AppColors.text_mes,
+                    color: Colors.white,
                   )),
             ])));
   }
 
-  Widget buildUserMessage(String time, String text) {
+  Widget buildUserMessage(DialogModel itemDialog) {
+    List<String> periods = [
+      '24 hour',
+      'Morning',
+      'Afternoon',
+      'Evening',
+      'Night'
+    ];
+    const List<Color> colors = [
+      Color.fromARGB(255, 248, 242, 195),
+      Color.fromARGB(255, 217, 236, 240),
+      Color.fromARGB(255, 183, 231, 197),
+      Color.fromARGB(255, 212, 181, 235),
+      Color.fromARGB(255, 136, 142, 198),
+    ];
+
+    const List<Color> textColors = [
+      Color.fromARGB(255, 185, 163, 0),
+      Color.fromARGB(255, 41, 128, 146),
+      Color.fromARGB(255, 21, 141, 57),
+      Color.fromARGB(255, 86, 17, 140),
+      Color.fromARGB(255, 15, 29, 150),
+    ];
+
+    final String time =
+        '${itemDialog.displayDate.hour < 10 ? '0${itemDialog.displayDate.hour}' : itemDialog.displayDate.hour}:${itemDialog.displayDate.minute < 10 ? '0${itemDialog.displayDate.minute}' : itemDialog.displayDate.minute}';
+
+    final List<String> start = [
+      itemDialog.fromDate.day.toString(),
+      months[itemDialog.fromDate.month - 1]
+    ];
+    final List<String> end = [
+      itemDialog.toDate.day.toString(),
+      months[itemDialog.toDate.month - 1]
+    ];
+    if (start[0] == end[0] && end[1] == end[1]) {
+      return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+          alignment: Alignment.centerRight,
+          child: Container(
+              padding:
+                  const EdgeInsets.only(top: 6, left: 10, right: 10, bottom: 5),
+              constraints: BoxConstraints(
+                maxWidth: itemDialog.command == 4 ? 250 : 270,
+              ),
+              decoration: const BoxDecoration(
+                color: AppColors.text_light,
+                borderRadius: BorderRadius.only(
+                    topRight: Radius.circular(12),
+                    topLeft: Radius.circular(12),
+                    bottomLeft: Radius.circular(12)),
+              ),
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Wrap(crossAxisAlignment: WrapCrossAlignment.end, children: [
+                      const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 4 + 2),
+                          child: Text('Show ',
+                              style: TextStyle(
+                                fontFamily: 'Inter-Regular',
+                                fontSize: 14,
+                                color: AppColors.text_mes,
+                              ))),
+                      FittedBox(
+                          child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 4),
+                              margin: const EdgeInsets.only(bottom: 2),
+                              decoration: BoxDecoration(
+                                  color: colors[itemDialog.command],
+                                  borderRadius: const BorderRadius.all(
+                                      Radius.circular(16))),
+                              alignment: Alignment.center,
+                              child: Text(periods[itemDialog.command],
+                                  style: TextStyle(
+                                    fontFamily: 'Inter-Regular',
+                                    fontSize: 14,
+                                    color: textColors[itemDialog.command],
+                                  )))),
+                      const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 4 + 2),
+                          child: Text(' average over ',
+                              style: TextStyle(
+                                fontFamily: 'Inter-Regular',
+                                fontSize: 14,
+                                color: AppColors.text_mes,
+                              ))),
+                      Container(
+                          width: 24,
+                          padding: const EdgeInsets.only(top: 4),
+                          margin: const EdgeInsets.only(bottom: 2 + 2),
+                          decoration: const BoxDecoration(
+                              color: Colors.red,
+                              borderRadius: BorderRadius.only(
+                                  topLeft: Radius.circular(4),
+                                  topRight: Radius.circular(4),
+                                  bottomLeft: Radius.circular(8),
+                                  bottomRight: Radius.circular(8))),
+                          alignment: Alignment.bottomCenter,
+                          child: Container(
+                              width: 24,
+                              height: 24,
+                              decoration: const BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(2))),
+                              alignment: Alignment.center,
+                              child: Text(end[0],
+                                  style: const TextStyle(
+                                    fontFamily: 'Inter-Regular',
+                                    fontSize: 14,
+                                    color: AppColors.text_mes,
+                                  )))),
+                      Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4 + 2),
+                          child: Text(' ${end[1]}',
+                              style: const TextStyle(
+                                fontFamily: 'Inter-Regular',
+                                fontSize: 14,
+                                color: AppColors.text_mes,
+                              ))),
+                    ]),
+                    Text(time,
+                        style: const TextStyle(
+                          fontFamily: 'Inter-Regular',
+                          fontSize: 10,
+                          color: AppColors.text_mes,
+                        )),
+                  ])));
+    }
     return Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
         alignment: Alignment.centerRight,
         child: Container(
             padding:
-                const EdgeInsets.only(top: 10, left: 10, right: 10, bottom: 5),
-            constraints: const BoxConstraints(
-              maxWidth: 300,
+                const EdgeInsets.only(top: 6, left: 10, right: 10, bottom: 5),
+            constraints: BoxConstraints(
+              maxWidth: itemDialog.command == 4 ? 250 : 270,
             ),
             decoration: const BoxDecoration(
-              color: AppColors.lavender,
+              color: AppColors.text_light,
               borderRadius: BorderRadius.only(
                   topRight: Radius.circular(12),
                   topLeft: Radius.circular(12),
                   bottomLeft: Radius.circular(12)),
             ),
-            child:
-                Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-              Text(text,
-                  style: const TextStyle(
-                    fontFamily: 'Inter-Regular',
-                    fontSize: 14,
-                    color: Colors.white,
-                  )),
-              Text(time,
-                  style: const TextStyle(
-                    fontFamily: 'Inter-Regular',
-                    fontSize: 10,
-                    color: Colors.white,
-                  )),
-            ])));
+            child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Wrap(crossAxisAlignment: WrapCrossAlignment.end, children: [
+                    const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 4 + 2),
+                        child: Text('Show ',
+                            style: TextStyle(
+                              fontFamily: 'Inter-Regular',
+                              fontSize: 14,
+                              color: AppColors.text_mes,
+                            ))),
+                    FittedBox(
+                        child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 4),
+                            margin: const EdgeInsets.only(bottom: 2),
+                            decoration: BoxDecoration(
+                                color: colors[itemDialog.command],
+                                borderRadius: const BorderRadius.all(
+                                    Radius.circular(16))),
+                            alignment: Alignment.center,
+                            child: Text(periods[itemDialog.command],
+                                style: TextStyle(
+                                  fontFamily: 'Inter-Regular',
+                                  fontSize: 14,
+                                  color: textColors[itemDialog.command],
+                                )))),
+                    const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 4 + 2),
+                        child: Text(' average over ',
+                            style: TextStyle(
+                              fontFamily: 'Inter-Regular',
+                              fontSize: 14,
+                              color: AppColors.text_mes,
+                            ))),
+                    Container(
+                        width: 24,
+                        padding: const EdgeInsets.only(top: 4),
+                        margin: const EdgeInsets.only(bottom: 2 + 2),
+                        decoration: const BoxDecoration(
+                            color: Colors.red,
+                            borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(4),
+                                topRight: Radius.circular(4),
+                                bottomLeft: Radius.circular(8),
+                                bottomRight: Radius.circular(8))),
+                        alignment: Alignment.bottomCenter,
+                        child: Container(
+                            width: 24,
+                            height: 24,
+                            decoration: const BoxDecoration(
+                                color: Colors.white,
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(2))),
+                            alignment: Alignment.center,
+                            child: Text(start[0],
+                                style: const TextStyle(
+                                  fontFamily: 'Inter-Regular',
+                                  fontSize: 14,
+                                  color: AppColors.text_mes,
+                                )))),
+                    Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4 + 2),
+                        child: Text(' ${start[1]} — ',
+                            style: const TextStyle(
+                              fontFamily: 'Inter-Regular',
+                              fontSize: 14,
+                              color: AppColors.text_mes,
+                            ))),
+                    Container(
+                        width: 24,
+                        padding: const EdgeInsets.only(top: 4),
+                        margin: const EdgeInsets.only(bottom: 2 + 2),
+                        decoration: const BoxDecoration(
+                            color: Colors.red,
+                            borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(4),
+                                topRight: Radius.circular(4),
+                                bottomLeft: Radius.circular(8),
+                                bottomRight: Radius.circular(8))),
+                        alignment: Alignment.bottomCenter,
+                        child: Container(
+                            width: 24,
+                            height: 24,
+                            decoration: const BoxDecoration(
+                                color: Colors.white,
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(2))),
+                            alignment: Alignment.center,
+                            child: Text(end[0],
+                                style: const TextStyle(
+                                  fontFamily: 'Inter-Regular',
+                                  fontSize: 14,
+                                  color: AppColors.text_mes,
+                                )))),
+                    Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4 + 2),
+                        child: Text(' ${end[1]}',
+                            style: const TextStyle(
+                              fontFamily: 'Inter-Regular',
+                              fontSize: 14,
+                              color: AppColors.text_mes,
+                            ))),
+                  ]),
+                  Text(time,
+                      style: const TextStyle(
+                        fontFamily: 'Inter-Regular',
+                        fontSize: 10,
+                        color: AppColors.text_mes,
+                      )),
+                ])));
   }
 
   Widget LoadingAI() {
@@ -478,36 +806,37 @@ class _ChatbotBottomState extends State<ChatbotBottom> {
   }
 
   Widget buildCommandBox() {
-    return Container(
-        height: 60,
-        decoration: const BoxDecoration(
-            borderRadius: BorderRadius.only(
-                topRight: Radius.circular(24), topLeft: Radius.circular(24)),
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                  color: Color.fromRGBO(149, 157, 165, 0.1),
-                  offset: Offset.zero,
-                  blurRadius: 4)
-            ]),
-        alignment: Alignment.centerRight,
-        child: Padding(
-            padding: const EdgeInsets.only(right: 5),
-            child: GestureDetector(
-                onTap: () {
-                  FocusManager.instance.primaryFocus?.unfocus();
-                  if (gridHeight > 0) {
-                    setState(() {
-                      gridHeight = 0;
-                    });
-                    _chatBox.currentState?.dropChatbotBox();
-                  } else if (gridHeight == 0) {
-                    setState(() {
-                      gridHeight = 200;
-                    });
-                    _chatBox.currentState?.raiseChatbotBox();
-                  }
-                },
+    return GestureDetector(
+        onTap: () {
+          FocusManager.instance.primaryFocus?.unfocus();
+          if (gridHeight > 0) {
+            setState(() {
+              gridHeight = 0;
+            });
+            _chatBox.currentState?.dropChatbotBox();
+          } else if (gridHeight == 0) {
+            setState(() {
+              gridHeight = 200;
+            });
+            _chatBox.currentState?.raiseChatbotBox();
+          }
+        },
+        child: Container(
+            height: 60,
+            decoration: const BoxDecoration(
+                borderRadius: BorderRadius.only(
+                    topRight: Radius.circular(24),
+                    topLeft: Radius.circular(24)),
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                      color: Color.fromRGBO(149, 157, 165, 0.1),
+                      offset: Offset.zero,
+                      blurRadius: 4)
+                ]),
+            alignment: Alignment.centerRight,
+            child: Padding(
+                padding: const EdgeInsets.only(right: 5),
                 child: gridHeight == 0
                     ? const Icon(Icons.arrow_upward,
                         color: AppColors.mint, size: 35)
@@ -579,6 +908,9 @@ class _ChatbotBottomState extends State<ChatbotBottom> {
           if (custom) {
             setState(() {
               Navigator.push(context, MaterialPageRoute(builder: (context) {
+                firstTap = [];
+                secondTap = [];
+                directionUp = false;
                 return ChatbotCalendar(command);
               }));
             });

@@ -60,25 +60,30 @@ class _ChatbotCalendarState extends State<ChatbotCalendar> {
             backgroundColor: AppColors.mint,
             onPressed: () {
               ChatbotPage chatbot = const ChatbotPage();
-              DateTime first = DateTime(firstTap[2], firstTap[1], firstTap[0]);
-              DateTime second =
-                  DateTime(secondTap[2], secondTap[1], secondTap[0]);
-
-              if (first.millisecondsSinceEpoch >=
-                  second.millisecondsSinceEpoch) {
-                chatbot
-                    .getKey()
-                    .currentState
-                    ?.aiResponce(second, first, period);
+              if (firstTap.isEmpty || secondTap.isEmpty) {
+                Navigator.pop(context);
               } else {
-                chatbot
-                    .getKey()
-                    .currentState
-                    ?.aiResponce(first, second, period);
+                DateTime first =
+                    DateTime(firstTap[2], firstTap[1], firstTap[0]);
+                DateTime second =
+                    DateTime(secondTap[2], secondTap[1], secondTap[0]);
+
+                if (first.millisecondsSinceEpoch >=
+                    second.millisecondsSinceEpoch) {
+                  chatbot
+                      .getKey()
+                      .currentState
+                      ?.aiResponce(second, first, period);
+                } else {
+                  chatbot
+                      .getKey()
+                      .currentState
+                      ?.aiResponce(first, second, period);
+                }
+                Navigator.pop(context);
               }
-              Navigator.pop(context);
             },
-            child: const Icon(Icons.add_task_outlined)));
+            child: const Icon(Icons.add_task_outlined, color: Colors.white)));
   }
 
   Widget buildCalendarBox() {

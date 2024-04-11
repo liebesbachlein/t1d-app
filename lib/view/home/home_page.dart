@@ -73,7 +73,6 @@ class _HomePageState extends State<HomePage> {
         DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day)
             .add(Duration(days: _g_pos));
     dataList = await databaseHelperGV.selectDay(thisDate);
-    setState(() {});
     return 1;
   }
 
@@ -397,59 +396,83 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget buildPlotBox() {
-    return Container(
-        width: MediaQuery.of(context).size.width,
-        margin: const EdgeInsets.only(left: 17, right: 17, top: 37),
-        constraints: BoxConstraints(
-            minHeight: MediaQuery.of(context).size.height * 0.45),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(24),
-          boxShadow: const [
-            BoxShadow(
-                color: Color.fromRGBO(149, 157, 165, 0.1),
-                offset: Offset.zero,
-                spreadRadius: 4,
-                blurRadius: 10)
-          ],
-        ),
-        child: Column(children: [
-          Container(
-              padding: const EdgeInsets.only(
-                  left: 10, right: 10, top: 26, bottom: 26),
-              alignment: Alignment.topLeft,
-              child: (dataList.isNotEmpty)
-                  ? buildLineChartBox()
-                  : Row(children: [
-                      Container(
-                          padding: const EdgeInsets.only(
-                              left: 0, right: 10, top: 0, bottom: 0),
-                          child: const Icon(Icons.info_outline,
-                              color: AppColors.lavender)),
-                      const Text('Log your data to see graph for today',
-                          style: TextStyle(
-                              fontFamily: 'Inter-Regular', fontSize: 16))
-                    ])),
-          (dataList.isNotEmpty)
-              ? Padding(
-                  padding: const EdgeInsets.only(left: 20),
-                  child: Row(children: [
-                    const Text('Predicted average:   ',
-                        style: TextStyle(
-                            fontFamily: 'Inter-Regular',
-                            fontSize: 16,
-                            color: Colors.black)),
-                    Text(
-                        predictedList.isNotEmpty
-                            ? '${(predictedList.reduce((a, b) => a + b) / predictedList.length).toStringAsPrecision(2)} mmol/L'
-                            : '',
-                        style: const TextStyle(
-                            fontFamily: 'Inter-Regular',
-                            fontSize: 16,
-                            color: AppColors.text_info))
-                  ]))
-              : Container()
-        ]));
+    //loadData().then((res) => loadModel());
+    return FutureBuilder(
+        builder: (ctx, snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            if (snapshot.hasError) {
+              return Center(
+                child: Text(
+                  '${snapshot.error} occurred',
+                  style: const TextStyle(fontSize: 18),
+                ),
+              );
+            } else if (snapshot.hasData) {
+              return Container(
+                  width: MediaQuery.of(context).size.width,
+                  margin: const EdgeInsets.only(left: 17, right: 17, top: 37),
+                  constraints: BoxConstraints(
+                      minHeight: MediaQuery.of(context).size.height * 0.45),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: const [
+                      BoxShadow(
+                          color: Color.fromRGBO(149, 157, 165, 0.1),
+                          offset: Offset.zero,
+                          spreadRadius: 4,
+                          blurRadius: 10)
+                    ],
+                  ),
+                  child: Column(children: [
+                    Container(
+                        padding: const EdgeInsets.only(
+                            left: 10, right: 10, top: 26, bottom: 26),
+                        alignment: Alignment.topLeft,
+                        child: (dataList.isNotEmpty)
+                            ? buildLineChartBox()
+                            : Row(children: [
+                                Container(
+                                    padding: const EdgeInsets.only(
+                                        left: 0, right: 10, top: 0, bottom: 0),
+                                    child: const Icon(Icons.info_outline,
+                                        color: AppColors.lavender)),
+                                const Text(
+                                    'Log your data to see graph for today',
+                                    style: TextStyle(
+                                        fontFamily: 'Inter-Regular',
+                                        fontSize: 16))
+                              ])),
+                    (dataList.isNotEmpty)
+                        ? Padding(
+                            padding: const EdgeInsets.only(left: 20),
+                            child: Row(children: [
+                              const Text('Predicted average:   ',
+                                  style: TextStyle(
+                                      fontFamily: 'Inter-Regular',
+                                      fontSize: 16,
+                                      color: Colors.black)),
+                              Text(
+                                  predictedList.isNotEmpty
+                                      ? '${(predictedList.reduce((a, b) => a + b) / predictedList.length).toStringAsPrecision(2)} mmol/L'
+                                      : '',
+                                  style: const TextStyle(
+                                      fontFamily: 'Inter-Regular',
+                                      fontSize: 16,
+                                      color: AppColors.text_info))
+                            ]))
+                        : Container()
+                  ]));
+            }
+          }
+          return const Center(
+            child: CircularProgressIndicator(color: AppColors.trans),
+          );
+        },
+        future: loadData().then((res) {
+          loadModel();
+          return 1;
+        }));
   }
 
   Widget buildLineChartBox() {

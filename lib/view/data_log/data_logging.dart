@@ -168,8 +168,9 @@ class _DataPrototypeState extends State<DataPrototype> {
       upperScale.add(GlucoseUpper(upperPallete[i], fixedGlucoseValues[i]));
     }
     return Container(
-        height: 55,
+        height: 70,
         decoration: const BoxDecoration(color: Colors.white),
+        padding: const EdgeInsets.only(top: 16),
         child: ListView(
           controller: ScrollController(
             initialScrollOffset: 160.0,
@@ -187,6 +188,7 @@ Widget buildOutlinedCircle(Color color, String value) {
       width: 35,
       height: 35,
       decoration: BoxDecoration(
+        color: const Color.fromARGB(255, 254, 251, 255),
         border: Border.all(color: color, width: 1.5),
         shape: BoxShape.circle,
       ),
@@ -259,7 +261,7 @@ class _GlucoseUpperState extends State<GlucoseUpper> {
                             color: Colors.black))
                   ])));
         },
-        alignmentOffset: const Offset(0, 55),
+        alignmentOffset: const Offset(0, 32),
         menuChildren: [
           Container(
               height: 50,
@@ -409,14 +411,17 @@ class _DataViewState extends State<DataView> {
   }
 
   void deleteGlucoseValue(String id, int hours, int minutes) {
-    String id = timeToIdMap[hours * 60 + minutes] ?? '';
-    if (id != '') {
+    /*String newId = timeToIdMap[hours * 60 + minutes] ?? '';
+    if (newId != '') {
+      
       databaseHelperGV.deleteTmGV(id);
-    }
-    setState(() {
-      timeToGlucoseMap.remove(hours * 60 + minutes);
-      timeToIdMap.remove(hours * 60 + minutes);
-    });
+    }*/
+
+    databaseHelperGV.deleteTmGV(id);
+    timeToGlucoseMap.remove(hours * 60 + minutes);
+    timeToIdMap.remove(hours * 60 + minutes);
+    loadData();
+    setState(() {});
   }
 
   Widget buildRow(BuildContext context, int index) {
@@ -574,8 +579,9 @@ class TimeBlock extends StatelessWidget {
   final int position;
   final TrackGV glucoseValue;
   final String glucoseId;
+  final List<Color> pallete = [];
 
-  const TimeBlock(
+  TimeBlock(
       {Key? key,
       required this.timeBorders,
       required this.isNow,
@@ -583,7 +589,12 @@ class TimeBlock extends StatelessWidget {
       required this.position,
       required this.glucoseValue,
       required this.glucoseId})
-      : super(key: key);
+      : super(key: key) {
+    pallete.clear();
+    for (int i in AppColors.hex_colors_lower) {
+      pallete.add(Color(i));
+    }
+  }
 
   List<String> getBorders() {
     return [timeBorders.getStartString(), timeBorders.getEndString()];
@@ -705,7 +716,8 @@ class TimeBlock extends StatelessWidget {
                                             height: 35,
                                             decoration: BoxDecoration(
                                               border: Border.all(
-                                                  color: Colors.pink,
+                                                  color:
+                                                      pallete[glucoseValue.GV2],
                                                   width: 1.5),
                                               shape: BoxShape.circle,
                                             ),
