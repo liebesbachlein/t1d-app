@@ -173,7 +173,7 @@ class _HomePageState extends State<HomePage> {
                   label: '',
                 ),
                 BottomNavigationBarItem(
-                  icon: Icon(Icons.access_time_outlined),
+                  icon: Icon(Icons.calendar_month_outlined),
                   label: '',
                 ),
                 BottomNavigationBarItem(
@@ -181,11 +181,11 @@ class _HomePageState extends State<HomePage> {
                   label: '',
                 ),
                 BottomNavigationBarItem(
-                  icon: Icon(Icons.area_chart_outlined),
+                  icon: Icon(Icons.connect_without_contact_rounded),
                   label: '',
                 ),
                 BottomNavigationBarItem(
-                  icon: Icon(Icons.recent_actors_outlined),
+                  icon: Icon(Icons.account_box_outlined),
                   label: '',
                 ),
               ],
@@ -315,10 +315,10 @@ class _HomePageState extends State<HomePage> {
                           dateString = 'Yesterday';
                         } else if (thisDate.year == DateTime.now().year) {
                           dateString =
-                              '${months[thisDate.month]} ${thisDate.day}';
+                              '${months[thisDate.month - 1]} ${thisDate.day}';
                         } else {
                           dateString =
-                              '${months[thisDate.month]} ${thisDate.day}, ${thisDate.year}';
+                              '${months[thisDate.month - 1]} ${thisDate.day}, ${thisDate.year}';
                         }
                       } else {
                         isPointing = false;

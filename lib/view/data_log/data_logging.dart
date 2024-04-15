@@ -380,6 +380,8 @@ class _DataViewState extends State<DataView> {
     LIST_HOURS = [];
     LIST_GLUCOSE = [];
     LIST_ID = [];
+    timeToIdMap = {};
+    timeToGlucoseMap = {};
     position = widget.position;
     dateNow = DateTime.now().subtract(Duration(days: position));
     loadData();
@@ -420,6 +422,33 @@ class _DataViewState extends State<DataView> {
     databaseHelperGV.deleteTmGV(id);
     timeToGlucoseMap.remove(hours * 60 + minutes);
     timeToIdMap.remove(hours * 60 + minutes);
+    loadData();
+    setState(() {});
+  }
+
+  void updateGlucoseValueIfPresent(
+      String id, int hours, int minutes, TrackGV newValue) {
+    /*String newId = timeToIdMap[hours * 60 + minutes] ?? '';
+    if (newId != '') {
+      
+      databaseHelperGV.deleteTmGV(id);
+    }*/
+
+    databaseHelperGV.deleteTmGV(id);
+    timeToGlucoseMap.remove(hours * 60 + minutes);
+    timeToIdMap.remove(hours * 60 + minutes);
+
+    TrackTmGV newData = TrackTmGV.create(
+        DateTime(dateNow.year, dateNow.month, dateNow.day, hours, minutes),
+        newValue);
+    databaseHelperGV.insert(newData);
+    setState(() {
+      timeToGlucoseMap.update(hours * 60 + minutes, (value) => newValue,
+          ifAbsent: () => newValue);
+      timeToIdMap.update(hours * 60 + minutes, (value) => newData.id,
+          ifAbsent: () => newData.id);
+    });
+
     loadData();
     setState(() {});
   }
@@ -535,12 +564,11 @@ class _DataViewState extends State<DataView> {
         int counter = 0;
         String putId = '';
         for (int item in list) {
-          putId = '';
           if (item >= LIST_HOURS[i][0] * 60 + LIST_HOURS[i][1] &&
               item < LIST_HOURS[i - 1][0] * 60 + LIST_HOURS[i - 1][1]) {
             sumGlucose = sumGlucose + (timeToGlucoseMap[item]?.GV ?? 0);
             counter++;
-            putId = timeToIdMap[item] ?? '';
+            putId = putId == '' ? timeToIdMap[item] ?? '' : putId;
           }
         }
         newList.add(sumGlucose == 0 ? -1 : sumGlucose / counter);
@@ -633,8 +661,13 @@ class TimeBlock extends StatelessWidget {
   }
 
   void _acceptNewGlucoseValue(TrackGV glucoseValue) {
-    dataLogKey[position].currentState?.acceptNewGlucoseValue(
-        glucoseValue, getBordersInt()[0][0], getBordersInt()[0][1]);
+    if (this.glucoseValue.GV == -1) {
+      dataLogKey[position].currentState?.acceptNewGlucoseValue(
+          glucoseValue, getBordersInt()[0][0], getBordersInt()[0][1]);
+    } else {
+      dataLogKey[position].currentState?.updateGlucoseValueIfPresent(glucoseId,
+          getBordersInt()[0][0], getBordersInt()[0][1], glucoseValue);
+    }
   }
 
   void _deleteGlucoseValue() {
@@ -877,154 +910,3 @@ class TimeBorders {
     return '${getStartString()} | ${getEndString()}';
   }
 }
-
-
-
-/*
-class NumericKeypad extends StatefulWidget {
-  final int position;
-  final TextEditingController controller;
-  //final TimeBlock timeBlock;
-  const NumericKeypad(
-      {super.key, required this.position, required this.controller});
-
-  @override
-  State<NumericKeypad> createState() => _NumericKeypadState();
-}
-
-class _NumericKeypadState extends State<NumericKeypad> {
-  late TextEditingController controller;
-  //late TimeBlock timeBlock;
-  @override
-  initState() {
-    // TODO: implement initState
-    controller = widget.controller;
-    //timeBlock = widget.timeBlock;
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    // TODO: implement dispose
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    const double height = 80;
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-            height: height,
-            //margin: const EdgeInsets.only(top: 16, bottom: 16),
-            /*decoration: BoxDecoration(
-                border: Border.all(color: Colors.black, width: 1)),*/
-            child: Row(
-              children: [
-                buildNumButton('1'),
-                buildNumButton('2'),
-                buildNumButton('3'),
-                buildNumButton('X')
-              ],
-            )),
-        Container(
-            height: height,
-            //margin: const EdgeInsets.only(bottom: 16),
-            /*decoration: BoxDecoration(
-                border: Border.all(color: Colors.black, width: 1)),*/
-            child: Row(
-              children: [
-                buildNumButton('4'),
-                buildNumButton('5'),
-                buildNumButton('6'),
-                buildNumButton(' ')
-              ],
-            )),
-        Container(
-            height: height,
-            //margin: const EdgeInsets.only(bottom: 16),
-            child: Row(
-              children: [
-                buildNumButton('7'),
-                buildNumButton('8'),
-                buildNumButton('9'),
-                buildNumButton(' ')
-              ],
-            )),
-        Container(
-            height: height,
-            //margin: const EdgeInsets.only(bottom: 16),
-            child: Row(
-              children: [
-                buildSepButton(),
-                buildNumButton('0'),
-                buildEraseButton(),
-                buildNumButton('A')
-              ],
-            ))
-      ],
-    );
-  }
-
-  Widget buildNumButton(String text) {
-    final MaterialStatesController statesController =
-        MaterialStatesController();
-    return Expanded(
-        child: ElevatedButton(
-            onPressed: () => inputNum(text),
-            statesController: statesController,
-            style: const ButtonStyle(
-              backgroundColor: MaterialStatePropertyAll<Color>(Colors.white),
-              shadowColor: MaterialStatePropertyAll<Color>(
-                  Color.fromARGB(99, 190, 179, 225)),
-              elevation: MaterialStatePropertyAll<double>(2),
-              shape: MaterialStatePropertyAll<OutlinedBorder>(
-                  RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(8)))),
-            ),
-            child: Text(text,
-                style: const TextStyle(
-                    color: Colors.black,
-                    fontFamily: 'Inter-Thin',
-                    fontSize: 20))));
-  }
-
-  Widget buildEmpty() {
-    return Expanded(child: Container());
-  }
-
-  Widget buildSepButton() {
-    return Expanded(
-        child: OutlinedButton(
-            onPressed: () => inputSep(), child: const Text('.')));
-  }
-
-  Widget buildEraseButton() {
-    return Expanded(
-        child:
-            OutlinedButton(onPressed: () => erase(), child: const Text('<-')));
-  }
-
-  void inputNum(String text) {
-    final String value = controller.text + text;
-    if (RegExp(r'^[1-3]([0-9]|[0-9]\.|[0-9]\.[0-9])?$').hasMatch(value)) {
-      controller.text = value;
-    }
-  }
-
-  void inputSep() {
-    final String value = '${controller.text}.';
-    if (RegExp(r'^[0-9]+\.$').hasMatch(value)) {
-      controller.text = value;
-    }
-  }
-
-  void erase() {
-    final String value = controller.text;
-    if (value.isNotEmpty) {
-      controller.text = value.substring(0, value.length - 1);
-    }
-  }
-}
-*/

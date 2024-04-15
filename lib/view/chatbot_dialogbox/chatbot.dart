@@ -1,14 +1,8 @@
-// ignore_for_file: avoid_print, non_constant_identifier_names, no_leading_underscores_for_local_identifiers
-import 'dart:ffi';
-
-import 'package:flutter/painting.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
+// ignore_for_file: avoid_print, non_constant_identifier_names, no_leading_underscores_for_local_identifier
 import 'package:flutter_app/server/models/TrackGV.dart';
 import 'package:flutter_app/server/models/TrackTmGV.dart';
 import 'package:flutter_app/view/profile_settings/assistant.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-import 'dart:math';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -591,12 +585,15 @@ class _ChatbotBoxState extends State<ChatbotBox> {
                                 color: AppColors.text_mes,
                               ))),
                     ]),
-                    Text(time,
-                        style: const TextStyle(
-                          fontFamily: 'Inter-Regular',
-                          fontSize: 10,
-                          color: AppColors.text_mes,
-                        )),
+                    Container(
+                      alignment: Alignment.bottomRight,
+                      child: Text(time,
+                          style: const TextStyle(
+                            fontFamily: 'Inter-Regular',
+                            fontSize: 10,
+                            color: AppColors.text_mes,
+                          )),
+                    )
                   ])));
     }
     return Container(
@@ -615,118 +612,118 @@ class _ChatbotBoxState extends State<ChatbotBox> {
                   topLeft: Radius.circular(12),
                   bottomLeft: Radius.circular(12)),
             ),
-            child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Wrap(crossAxisAlignment: WrapCrossAlignment.end, children: [
-                    const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 4 + 2),
-                        child: Text('Show ',
+            child:
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Wrap(crossAxisAlignment: WrapCrossAlignment.end, children: [
+                const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 4 + 2),
+                    child: Text('Show ',
+                        style: TextStyle(
+                          fontFamily: 'Inter-Regular',
+                          fontSize: 14,
+                          color: AppColors.text_mes,
+                        ))),
+                FittedBox(
+                    child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 4),
+                        margin: const EdgeInsets.only(bottom: 2),
+                        decoration: BoxDecoration(
+                            color: colors[itemDialog.command],
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(16))),
+                        alignment: Alignment.center,
+                        child: Text(periods[itemDialog.command],
                             style: TextStyle(
                               fontFamily: 'Inter-Regular',
                               fontSize: 14,
-                              color: AppColors.text_mes,
-                            ))),
-                    FittedBox(
-                        child: Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 4),
-                            margin: const EdgeInsets.only(bottom: 2),
-                            decoration: BoxDecoration(
-                                color: colors[itemDialog.command],
-                                borderRadius: const BorderRadius.all(
-                                    Radius.circular(16))),
-                            alignment: Alignment.center,
-                            child: Text(periods[itemDialog.command],
-                                style: TextStyle(
-                                  fontFamily: 'Inter-Regular',
-                                  fontSize: 14,
-                                  color: textColors[itemDialog.command],
-                                )))),
-                    const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 4 + 2),
-                        child: Text(' average over ',
-                            style: TextStyle(
-                              fontFamily: 'Inter-Regular',
-                              fontSize: 14,
-                              color: AppColors.text_mes,
-                            ))),
-                    Container(
+                              color: textColors[itemDialog.command],
+                            )))),
+                const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 4 + 2),
+                    child: Text(' average over ',
+                        style: TextStyle(
+                          fontFamily: 'Inter-Regular',
+                          fontSize: 14,
+                          color: AppColors.text_mes,
+                        ))),
+                Container(
+                    width: 24,
+                    padding: const EdgeInsets.only(top: 4),
+                    margin: const EdgeInsets.only(bottom: 2 + 2),
+                    decoration: const BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(4),
+                            topRight: Radius.circular(4),
+                            bottomLeft: Radius.circular(8),
+                            bottomRight: Radius.circular(8))),
+                    alignment: Alignment.bottomCenter,
+                    child: Container(
                         width: 24,
-                        padding: const EdgeInsets.only(top: 4),
-                        margin: const EdgeInsets.only(bottom: 2 + 2),
+                        height: 24,
                         decoration: const BoxDecoration(
-                            color: Colors.red,
-                            borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(4),
-                                topRight: Radius.circular(4),
-                                bottomLeft: Radius.circular(8),
-                                bottomRight: Radius.circular(8))),
-                        alignment: Alignment.bottomCenter,
-                        child: Container(
-                            width: 24,
-                            height: 24,
-                            decoration: const BoxDecoration(
-                                color: Colors.white,
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(2))),
-                            alignment: Alignment.center,
-                            child: Text(start[0],
-                                style: const TextStyle(
-                                  fontFamily: 'Inter-Regular',
-                                  fontSize: 14,
-                                  color: AppColors.text_mes,
-                                )))),
-                    Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 4 + 2),
-                        child: Text(' ${start[1]} — ',
+                            color: Colors.white,
+                            borderRadius: BorderRadius.all(Radius.circular(2))),
+                        alignment: Alignment.center,
+                        child: Text(start[0],
                             style: const TextStyle(
                               fontFamily: 'Inter-Regular',
                               fontSize: 14,
                               color: AppColors.text_mes,
-                            ))),
-                    Container(
+                            )))),
+                Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4 + 2),
+                    child: Text(' ${start[1]} — ',
+                        style: const TextStyle(
+                          fontFamily: 'Inter-Regular',
+                          fontSize: 14,
+                          color: AppColors.text_mes,
+                        ))),
+                Container(
+                    width: 24,
+                    padding: const EdgeInsets.only(top: 4),
+                    margin: const EdgeInsets.only(bottom: 2 + 2),
+                    decoration: const BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(4),
+                            topRight: Radius.circular(4),
+                            bottomLeft: Radius.circular(8),
+                            bottomRight: Radius.circular(8))),
+                    alignment: Alignment.bottomCenter,
+                    child: Container(
                         width: 24,
-                        padding: const EdgeInsets.only(top: 4),
-                        margin: const EdgeInsets.only(bottom: 2 + 2),
+                        height: 24,
                         decoration: const BoxDecoration(
-                            color: Colors.red,
-                            borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(4),
-                                topRight: Radius.circular(4),
-                                bottomLeft: Radius.circular(8),
-                                bottomRight: Radius.circular(8))),
-                        alignment: Alignment.bottomCenter,
-                        child: Container(
-                            width: 24,
-                            height: 24,
-                            decoration: const BoxDecoration(
-                                color: Colors.white,
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(2))),
-                            alignment: Alignment.center,
-                            child: Text(end[0],
-                                style: const TextStyle(
-                                  fontFamily: 'Inter-Regular',
-                                  fontSize: 14,
-                                  color: AppColors.text_mes,
-                                )))),
-                    Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 4 + 2),
-                        child: Text(' ${end[1]}',
+                            color: Colors.white,
+                            borderRadius: BorderRadius.all(Radius.circular(2))),
+                        alignment: Alignment.center,
+                        child: Text(end[0],
                             style: const TextStyle(
                               fontFamily: 'Inter-Regular',
                               fontSize: 14,
                               color: AppColors.text_mes,
-                            ))),
-                  ]),
-                  Text(time,
-                      style: const TextStyle(
-                        fontFamily: 'Inter-Regular',
-                        fontSize: 10,
-                        color: AppColors.text_mes,
-                      )),
-                ])));
+                            )))),
+                Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4 + 2),
+                    child: Text(' ${end[1]}',
+                        style: const TextStyle(
+                          fontFamily: 'Inter-Regular',
+                          fontSize: 14,
+                          color: AppColors.text_mes,
+                        ))),
+              ]),
+              Container(
+                alignment: Alignment.bottomRight,
+                child: Text(time,
+                    style: const TextStyle(
+                      fontFamily: 'Inter-Regular',
+                      fontSize: 10,
+                      color: AppColors.text_mes,
+                    )),
+              )
+            ])));
   }
 
   Widget LoadingAI() {

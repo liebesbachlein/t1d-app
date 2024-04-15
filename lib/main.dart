@@ -78,12 +78,18 @@ class MainHome extends StatelessWidget {
             } else if (snapshot.hasData) {
               print('DatabaseGLUVAL initialization: Success');
               return const MaterialApp(
-                  debugShowCheckedModeBanner: false, home: HomePage());
+                  color: Colors.white,
+                  debugShowCheckedModeBanner: false,
+                  home: HomePage());
             }
           }
-          return const Center(
-            child: CircularProgressIndicator(color: AppColors.lavender),
-          );
+          return Container(
+              color: Colors.white,
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height,
+              child: const Center(
+                child: CircularProgressIndicator(color: AppColors.lavender),
+              ));
         }, //builder
         future: databaseHelperGV.init(dbName: email));
   }

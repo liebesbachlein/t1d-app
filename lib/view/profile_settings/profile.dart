@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_app/assets/colors.dart';
-import 'package:flutter_app/view/home/home_bu.dart';
+import 'package:flutter_app/view/home/home_page.dart';
 import 'package:flutter_app/view/profile_settings/account.dart';
 import 'dart:core';
 import 'package:flutter_app/server/controllers/sharedPreferences.dart';
@@ -97,7 +97,7 @@ class _ProfileSettingsState extends State<ProfileSettings> {
         margin: const EdgeInsets.only(right: 17, left: 17),
         padding: const EdgeInsets.all(10),
         width: MediaQuery.of(context).size.width,
-        height: 260,
+        height: 200,
         decoration: const BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.all(Radius.circular(12)),
@@ -114,7 +114,6 @@ class _ProfileSettingsState extends State<ProfileSettings> {
             children: [
               buildSettingBox('Account'),
               buildSettingBox('Assistant'),
-              buildSettingBox('Data logging'),
               buildSettingBox('Backup & sync')
             ]));
   }
@@ -144,11 +143,11 @@ class _ProfileSettingsState extends State<ProfileSettings> {
                       Navigator.push(context,
                           MaterialPageRoute(builder: (context) {
                         if (tx == 'Account') {
-                          return const AccountSetting();
+                          const AccountSetting ins = AccountSetting();
+                          return ins;
                         } else if (tx == 'Assistant') {
-                          return const AssitantSetting();
-                        } else if (tx == 'Data logging') {
-                          return const BackUpSetting();
+                          const AssitantSetting ins = AssitantSetting();
+                          return ins;
                         } else {
                           return const BackUpSetting();
                         }
