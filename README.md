@@ -1,14 +1,6 @@
-<<<<<<< HEAD
-# flutter_app
+# Mobile app for people with Type 1 Diabetes
 
-A new Flutter project.
-=======
-<img src="https://github.com/liebesbachlein/t1d-app/assets/94073320/56476f5a-902d-499c-b6da-9372529130e0" height="700px" >
-<img src="https://github.com/liebesbachlein/t1d-app/assets/94073320/2975da44-ccae-4c85-a678-07088816fae1"  height="700px" >
-<img src="https://github.com/liebesbachlein/t1d-app/assets/94073320/a2a860cd-e747-48af-a9a4-455786c71243"  height="700px" >
-<img src="https://github.com/liebesbachlein/t1d-app/assets/94073320/f596769d-ed8b-4f87-8225-7e69185c8a6d"  height="700px">
-<img src="https://github.com/liebesbachlein/t1d-app/assets/94073320/759d274d-60da-426e-987a-8bd8aa69d5de"  height="700px">
-<img src="https://github.com/liebesbachlein/t1d-app/assets/94073320/e4e98c77-51e6-426d-8692-08a99c4a8c97"  height="700px">
-<img src="https://github.com/liebesbachlein/t1d-app/assets/94073320/a4d4ea6f-83e5-4964-9a50-cc1414c22a02"  height="700px">
+Our project aimed at improving functionalities of mobile apps dedicated to people with diabetes to help users with their diabetes management and decrease attrition rate. Ultimately, we developed a cross-platform mobile app with three completely novel features: drag & drop data logging, incorporated an ML model for visualization of diabetes data and a rule-based chatbot for monitoring the diabetes progress. 
 
->>>>>>> 96a88298ce1a2b835806ee0afcf1ccfbfe923bd9
+
+![flutter-app](images/1.jps)
