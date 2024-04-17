@@ -4,3 +4,8 @@ Our project aimed at improving functionalities of mobile apps dedicated to peopl
 
 
 ![flutter-app](images/1.png)
+![flutter-app](images/2.png)
+![flutter-app](images/3.png)
+![flutter-app](images/4.png)
+![flutter-app](images/5.png)
+![flutter-app](images/6.png)
